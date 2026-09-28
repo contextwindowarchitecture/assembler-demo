@@ -96,3 +96,4 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .sendrow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .sendrow select { max-width: 100%; }
 .answer .body ul { padding-left: 18px; margin: 4px 0; }
+.snippet-code { max-height: 460px; overflow: auto; font-size: 12px; }

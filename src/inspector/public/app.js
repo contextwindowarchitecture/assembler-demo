@@ -10,6 +10,7 @@ const state = {
   scenarios: [], assemblers: [], providers: [], contract: null,
   scenario: null, variant: 'fixture', assembler: 'all', budget: null, provider: null,
   response: null, answers: {}, sending: null, busy: false, error: null,
+  snippets: null, snippetLang: 'typescript', snippetTab: 'anthropic',
 };
 
 async function api(path, options) {
@@ -44,7 +45,16 @@ async function assemble() {
     state.response = null; state.error = error.message;
   }
   state.busy = false;
+  state.snippets = null;
   render();
+  const result = shown();
+  if (state.variant === 'messages' && result?.outcome === 'assembled') {
+    try {
+      state.snippets = await api('/api/snippets', { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ payload: result.payload, reserved_output: state.response.snapshot.budget.reserved_output }) });
+    } catch (error) { state.snippets = { error: error.message }; }
+    renderRequest(result);
+  }
 }
 
 function selectScenario(id) {
@@ -207,10 +217,41 @@ function renderRequest(result) {
       ${ir.tools.map(e => `<div class="entry"><div class="id">${esc(e.id)}</div><pre>${esc(e.text)}</pre></div>`).join('') || '<p class="hint">none: the basic stage grants no capabilities</p>'}
       <div class="section-label">messages (${ir.messages.length})</div>
       ${ir.messages.map(m => `<div class="entry"><div class="id">role: ${esc(m.role)}</div><pre>${esc(m.content)}</pre></div>`).join('')}
-      <p class="hint">Prior turns stay inside the one user message as a transcript; only the query is the live turn (R-7). The bytes above are the RFC 8785 form the hash covers.</p>`;
+      <p class="hint">Prior turns stay inside the one user message as a transcript; only the query is the live turn (R-7). The bytes above are the RFC 8785 form the hash covers.</p>
+      ${renderSnippets()}`;
+    bindSnippets(result);
   } else {
     body.innerHTML = `<pre>${esc(result.payload)}</pre><p class="hint">The exact bytes the hash covers. Switch the rendering to cwa-messages/v1 to see the same items as a message request.</p>`;
   }
+}
+
+const SNIPPET_TABS = [['assemble', 'Assemble (CWA)'], ['local', 'OpenAI SDK · local server'], ['openai', 'OpenAI SDK'], ['anthropic', 'Anthropic SDK']];
+
+/** The assembled request as the SDK call an application writes, from the same request objects the providers send. */
+function renderSnippets() {
+  const snippets = state.snippets;
+  if (!snippets) return '<div class="section-label">Use it in your code</div><p class="spinner">building snippets…</p>';
+  if (snippets.error) return `<div class="section-label">Use it in your code</div><p class="hint">${esc(snippets.error)}</p>`;
+  const tabs = SNIPPET_TABS.filter(([id]) => snippets[id]);
+  if (!tabs.some(([id]) => id === state.snippetTab)) state.snippetTab = tabs[0][0];
+  const code = snippets[state.snippetTab]?.[state.snippetLang] ?? '';
+  return `<div class="section-label">Use it in your code</div>
+    <div class="sendrow">
+      <select id="snippet-tab">${tabs.map(([id, label]) => `<option value="${id}"${id === state.snippetTab ? ' selected' : ''}>${esc(label)}</option>`).join('')}</select>
+      <select id="snippet-lang"><option value="typescript"${state.snippetLang === 'typescript' ? ' selected' : ''}>TypeScript</option><option value="python"${state.snippetLang === 'python' ? ' selected' : ''}>Python</option></select>
+      <button id="snippet-copy" type="button">copy</button>
+    </div>
+    <pre class="snippet-code" id="snippet-code">${esc(code)}</pre>
+    <p class="hint">The object in the call is the request the provider sends, built by the same code. Copy it into your application: the assembler's payload is all it takes.</p>`;
+}
+
+function bindSnippets(result) {
+  $('#snippet-tab')?.addEventListener('change', event => { state.snippetTab = event.target.value; renderRequest(result); });
+  $('#snippet-lang')?.addEventListener('change', event => { state.snippetLang = event.target.value; renderRequest(result); });
+  $('#snippet-copy')?.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('#snippet-code').textContent); $('#snippet-copy').textContent = 'copied'; }
+    catch { $('#snippet-copy').textContent = 'select and copy'; }
+  });
 }
 
 function renderAnswer(result) {

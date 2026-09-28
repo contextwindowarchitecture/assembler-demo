@@ -10,8 +10,7 @@ import { loadScenarios, VARIANTS } from '../harness/cases.mjs';
 import { agreement, compareResult } from '../harness/compare.mjs';
 import { loadDotEnv } from '../env.mjs';
 import { answer, describeProviders } from '../provider/index.mjs';
-
-loadDotEnv();
+import { snippets } from '../provider/snippets.mjs';
 
 const PORT = Number(process.env.PORT ?? (process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 8787));
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
@@ -99,6 +98,20 @@ async function handle(req, res) {
     if (typeof body.provider !== 'string') throw new HttpError(400, 'name the provider: local, anthropic or openai');
     return json(res, 200, await answer(body.payload, { provider: body.provider, maxTokens: Number.isInteger(body.reserved_output) ? body.reserved_output : undefined }));
   }
+  if (req.method === 'POST' && url.pathname === '/api/snippets') {
+    const body = await readJsonBody(req);
+    if (typeof body.payload !== 'string') throw new HttpError(400, 'snippets need the payload of a successful cwa-messages/v1 assembly');
+    const providers = Object.fromEntries((await describeProviders()).map(p => [p.id, p]));
+    const anthropicCustom = providers.anthropic.base_url !== 'https://api.anthropic.com';
+    try {
+      return json(res, 200, snippets(body.payload, {
+        maxTokens: Number.isInteger(body.reserved_output) ? body.reserved_output : undefined,
+        anthropic: { model: providers.anthropic.model, base_url: anthropicCustom ? providers.anthropic.base_url : null, thinking: providers.anthropic.thinking },
+        openai: { model: providers.openai.model, base_url: providers.openai.base_url === 'https://api.openai.com/v1' ? null : providers.openai.base_url, maxTokensField: 'max_completion_tokens', reasoning_effort: providers.openai.reasoning_effort },
+        local: providers.local.configured ? { model: providers.local.model, base_url: providers.local.base_url, maxTokensField: 'max_tokens', reasoning_effort: providers.local.reasoning_effort } : undefined,
+      }));
+    } catch (error) { throw new HttpError(400, error.message); }
+  }
   if (req.method === 'GET') {
     const file = path.normalize(url.pathname === '/' ? '/index.html' : url.pathname);
     const target = path.join(PUBLIC, file);
@@ -117,5 +130,6 @@ export function createInspector() {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  createInspector().listen(PORT, '127.0.0.1', () => console.log(`CWA demo inspector: http://localhost:${PORT}`));
+  const loaded = loadDotEnv();
+  createInspector().listen(PORT, '127.0.0.1', () => console.log(`CWA demo inspector: http://localhost:${PORT}${loaded ? ' (providers from .env)' : ' (no .env: copy .env.example to configure a provider)'}`));
 }

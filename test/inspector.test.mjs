@@ -1,7 +1,9 @@
 // The inspector's API, on an ephemeral port: state, contract, a frozen assembly with its expectation, a derived one
 // without, the frozen snapshot bytes, and the refusal of a live answer with nothing to send.
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import { after, before, test } from 'node:test';
+import { ROOT } from '../src/harness/adapters.mjs';
 import { createInspector } from '../src/inspector/server.mjs';
 import { createMockChatServer } from './helpers/mock-chat-server.mjs';
 
@@ -9,10 +11,11 @@ let server, base, mock;
 before(async () => {
   mock = createMockChatServer({ model: 'mock-llama' });
   await new Promise(resolve => mock.listen(0, '127.0.0.1', resolve));
-  // The inspector reads its environment per request, so the local provider sees the mock as its server.
+  // The inspector reads its environment per request. Nothing from the developer's shell or .env may leak in: the
+  // local provider sees the mock as its server, and the other two are unconfigured.
+  for (const key of Object.keys(process.env)) if (/^(CWA_DEMO_|OPENAI_|ANTHROPIC_)/.test(key)) delete process.env[key];
+  process.env.HOME = path.join(ROOT, 'test', 'no-such-home');
   process.env.CWA_DEMO_LOCAL_BASE_URL = `http://127.0.0.1:${mock.address().port}/v1`;
-  delete process.env.CWA_DEMO_LOCAL_MODEL;
-  delete process.env.OPENAI_API_KEY;
   server = createInspector();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}`;
@@ -32,6 +35,7 @@ test('GET /api/state lists the assemblers, the three providers and the scenarios
   assert.deepEqual(body.providers.map(p => p.id), ['local', 'anthropic', 'openai']);
   const local = body.providers[0];
   assert.deepEqual([local.configured, local.model, local.source], [true, 'mock-llama', 'first of 1 models the server lists']);
+  assert.equal(body.providers[1].configured, false, 'no Anthropic credentials in the test environment');
   assert.equal(body.providers[2].configured, false, 'no OPENAI_API_KEY in the test environment');
   assert.ok(body.scenarios.some(s => s.id === 'basic/01-clean'));
   assert.deepEqual(body.scenarios[0].variants, ['fixture', 'messages']);
@@ -99,6 +103,20 @@ test('GET the frozen snapshot bytes for a rendering', async () => {
   const snapshot = await res.json();
   assert.equal(snapshot.renderer, 'cwa-messages/v1');
   assert.equal(snapshot.profile.id, 'support-chat-messages');
+});
+
+test('POST /api/snippets renders the assembled request as SDK calls for every configured endpoint', async () => {
+  const assembled = await post('/api/assemble', { scenario: 'basic/03-authority', variant: 'messages', assemblers: ['python'] });
+  const { status, body } = await post('/api/snippets', { payload: assembled.body.results[0].payload, reserved_output: assembled.body.snapshot.budget.reserved_output });
+  assert.equal(status, 200, body.error);
+  assert.deepEqual(Object.keys(body).sort(), ['anthropic', 'assemble', 'local', 'openai']);
+  assert.match(body.local.typescript, new RegExp(`new OpenAI\\(\\{ baseURL: "${process.env.CWA_DEMO_LOCAL_BASE_URL}"`));
+  assert.match(body.local.python, /model="mock-llama",/);
+  assert.equal(body.local.python.includes('reasoning_effort'), false, 'nothing from a developer .env leaks into the test');
+  assert.match(body.anthropic.typescript, /new Anthropic\(\)/, 'the real API, since ANTHROPIC_BASE_URL is unset here');
+  assert.match(body.openai.typescript, /max_completion_tokens/);
+  assert.match(body.anthropic.python, /client\.messages\.create\(/);
+  assert.equal((await post('/api/snippets', { payload: '<query/>' })).status, 400);
 });
 
 test('POST /api/answer needs a payload and a provider, and refuses an unconfigured provider', async () => {

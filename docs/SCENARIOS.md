@@ -86,6 +86,58 @@ The screen, left to right: **Candidate context** (what the producers sent, color
 
 **Say:** Three implementations, three languages, same frozen input, same bytes out. The expectation they are compared with is generated from one of them and reviewed by a person, because three matching assemblers can share a mistake. What the model then does with those bytes is evaluated separately, and that is the next stage: competing sources under a constrained budget, then a tool loop.
 
+# The intermediate stage, as a script
+
+Six steps, one question, about fifteen minutes. The page is `/intermediate/`. Start in **replay**; switch to **live** once, on step 1, to show that running the producers now gives the same digest.
+
+**Say, before step 1:** The basic stage used fixtures. This stage's inputs are produced: a LlamaIndex pipeline over thirty-one support documents, an account database, a memory store, and the conversation. Each hands the assembler a batch. The producers strip shows how each ran. The question is *Given my account and our previous conversation, what support am I entitled to?*
+
+## Step 1: retrieve current, outdated, and a copy
+
+**Point at:** the kb-search card: the pipeline (nodes, BM25, near-duplicate postprocessor, CWA batch) and the four retrieved chunks with their scores. The retrieval query is the application's, phrased in the corpus vocabulary, not the user's sentence.
+
+**Point at:** the candidates. The Pro paragraph is included. Its word-for-word copy in the onboarding guide is excluded by the assembler as `duplicate_content`, because the route asks for exact deduplication. Its near-copy on the support-hours page never reached the assembler: the retriever dropped it and reported it with the chunk it kept. The 2025 edition is `expired`.
+
+**Say:** Near-duplicates are the retriever's job; exact duplicates the assembler's. Both leave a row.
+
+**Click:** Producers → *run live now*. Wait for the badge: **live = replay**. **Say:** the producers ran just now, and the snapshot they built has the digest of the frozen one. Switch back to replay.
+
+## Step 2: widen retrieval
+
+**Point at:** ten hits now. Three chunks of the same document; the route keeps two per source, so the Free chunk is `source_diversity_cap`. A Globex document came out of the shared index and is `out_of_scope`.
+
+**Ask:** would you rather have written this as a retriever heuristic, or as one line of versioned route policy?
+
+## Step 3: memory
+
+**Point at:** the memory-svc card: one item reported excluded. The producer suppressed an expired memory and sent its id and reason, never its body. It also filters by tenant only, so another user's memory reached the assembler, which excluded it as `out_of_scope`.
+
+**Say:** the producer did half its job; admission did the rest. Both are in the trace.
+
+## Step 4: conflict
+
+**Point at:** the plan memory, now `conflict_lost`. The account says Pro; the memory from August says Free. The application declared a fact group on `plan`; the route's precedence puts the state service first. Nobody read the prose.
+
+**Point at:** the conflicts table: `g-plan` resolved by policy, winner the account row; `g-cite` escalated and surfaced. Switch the rendering to messages: both citation instructions are in the system channel marked with the group id.
+
+**Say:** an unresolved conflict is never dropped silently; the route says surface, request context or refuse.
+
+## Step 5: summaries
+
+**Point at:** the compressed table: four prior turns and three evidence chunks, each with the variant id that replaced it. Nothing omitted; the plan is protected by the route this time.
+
+**Say:** the summaries were written before the snapshot froze. Assembly never calls a model.
+
+**Click:** *Send to all* with the messages rendering, if the room has a model. The answer should cite the Pro paragraph and mention the Sydney engineer's night-time question from the summarised history.
+
+## Step 6: evidence required
+
+**Point at:** the refusal: `evidence_required`, recovery `request_context`. Every retrieved chunk is `below_threshold`. No request. **Say:** never answer from nothing; the route decided that, and the application gets told what to do next.
+
+## Closing
+
+`npm run compare` shows both stages: twenty-two rows, three assemblers, all passed, all agree.
+
 ## If something goes wrong
 
 | Symptom | Do |
@@ -95,3 +147,5 @@ The screen, left to right: **Candidate context** (what the producers sent, color
 | An assembler shows *not built* | `npm run setup` |
 | The badge says *DISAGREE* | that is a finding, not a demo bug: hover the badge for the first difference, and run `node src/harness/cli.mjs run <snapshot> --json` |
 | The page is empty | the server prints the URL it listens on; check `PORT` |
+| Live mode says the producers are not present, or errors | `producers/pyproject.toml` must exist and `uv` must be on the path; the first live run installs the environment, which takes a moment |
+| Live ≠ replay | the corpus or a store changed since the step was frozen: `npm run producers:write`, then `npm run expect -- --from python scenarios/intermediate` |

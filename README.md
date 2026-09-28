@@ -50,6 +50,24 @@ Five steps, each adding to the last, so the audience watches one snapshot grow a
 
 Every step has two frozen renderings: `snapshot.json` (`fixture-xml/v1`, for the byte-exact comparison) and `snapshot.messages.json` (`cwa-messages/v1`, instructions in the system channel, for the model). Both are generated from `scenarios/basic/source/` and committed; expectations come from the Python reference and are marked unreviewed until a person has read them against the spec.
 
+## The intermediate stage
+
+*Given my account and our previous conversation, what support am I entitled to?* Several sources compete for a limited budget, and the producers are real: a **LlamaIndex** pipeline over 31 support documents in a shared index (`nodes → BM25Retriever → NearDuplicatePostprocessor → CWA batch`), an account database, a memory store, and the conversation with a supplied summary per turn. They live in `producers/`, a `uv` project, and run before assembly; `producers.freeze` composes their batches, the declared conflict groups, the route policy and the profile into each step's frozen snapshots. The page at `/intermediate/` shows how each producer ran and can run them **live** or **replay** the frozen batches; a live run reproduces the frozen digest, and the badge says so. [docs/SCENARIOS.md](docs/SCENARIOS.md) has the script.
+
+| Step | What happens | Reason codes the trace shows |
+| --- | --- | --- |
+| 1 retrieval | The current Pro paragraph, its word-for-word copy in the onboarding guide, its near-copy on the support-hours page, and the expired 2025 edition | `duplicate_content` (producer stage for the near-copy, assembler stage for the copy), `expired` |
+| 2 overlap | Ten hits: three chunks of the same document, a Globex document from the shared index | `source_diversity_cap`, `out_of_scope` |
+| 3 memory | An expired memory suppressed and reported by the producer; another user's memory leaked by it | `expired`, `out_of_scope` |
+| 4 conflict | Account state says Pro, a memory says Free: a declared fact group the route's precedence decides; two citation instructions surfaced as conflicting | `conflict_lost`; `g-cite` surfaced in the payload |
+| 5 summary | `budget.input` at 330: every prior turn and three evidence chunks take their supplied summaries; state.user is protected by the route | `compressed` rows |
+| 6 evidence required | An off-topic question: nothing scores above the threshold, the route requires evidence | `below_threshold`, `evidence_required` with recovery `request_context` |
+
+```sh
+npm run producers:write      # run the producers and freeze every intermediate step
+npm run producers:check      # fail when a committed snapshot differs from what the producers build now
+```
+
 ## The harness
 
 ```sh
@@ -70,8 +88,10 @@ Comparison follows `conformance/README.md`: payloads byte for byte; traces field
 | `assemblers.json` | Adapter commands, requirements and environment overrides |
 | `scenarios/basic/source/` | The route policy, the two profiles, the clean fixture's batches, and each step's additions |
 | `scenarios/basic/NN-step/` | Generated snapshots, `scenario.json`, and the expected payloads and traces |
-| `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `cli.mjs` |
-| `src/inspector/` | The server and the static page |
+| `scenarios/intermediate/source/` | The corpus (markdown with front matter), the account, memory and history stores, the summaries, the route policy, the profiles and the step specs |
+| `producers/` | The intermediate stage's producers, a `uv` project: the LlamaIndex retrieval pipeline, the other producers, and `freeze` |
+| `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `producers.mjs` (run the producers live), `cli.mjs` |
+| `src/inspector/` | The server; `public/` holds the landing page, a page per stage and the shared columns |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
 | `vendor/cwa/` | The published contract, pinned by `vendor/cwa.lock.json` |
 | `docs/` | [PLAN.md](docs/PLAN.md), [DESIGN.md](docs/DESIGN.md), [SCENARIOS.md](docs/SCENARIOS.md) |

@@ -17,7 +17,7 @@ That view separates a producer error from an assembler error from an adapter err
 | M3 Inspector | The four-column screen in a browser, with a budget control and assembler switch | done |
 | M4 Live model | Three providers through the official Anthropic and OpenAI SDKs (the local server through the OpenAI SDK's `baseURL`); captured outbound request; answer column; the request as SDK code in TypeScript and Python | done; verified against a local gpt-oss-20b through both API styles |
 | M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | done |
-| Intermediate | Competing sources under a constrained budget (retrieval, state, memory, history, conflicts, variants) | after basic |
+| Intermediate | Competing sources under a constrained budget: LlamaIndex retrieval, an account database, a memory store, history with summaries, declared conflicts, dedupe, diversity, required evidence; live or replayed producers | done; expectations await review |
 | Advanced | A bounded tool loop with authorization, checkpoints and replay | after intermediate |
 
 ## Decisions
@@ -112,9 +112,13 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 
 - `docs/SCENARIOS.md`: the five steps as a script: click, say, point at. Include the two questions to ask the audience at each step (what would have happened without this check; where is that decision recorded).
 
+## The intermediate stage
+
+**Question:** *Given my account and our previous conversation, what support am I entitled to?* **Route:** `support-entitlement/v1`: requires evidence (one chunk at least), exact deduplication and two chunks per source on evidence, a fact policy for `plan` (state service before memory store), instruction conflicts surfaced, history compressed before evidence, `state.user` protected. **Producers:** `producers/` (see DESIGN.md), run live or replayed. **Steps:** retrieval with copies and an expired edition; a wider retrieval with the diversity cap and a foreign tenant; an expired and a leaked memory; the plan conflict and the surfaced citation conflict; summaries under budget; and an off-topic question refused for lack of evidence. The scenario tests, the producer tests and `compare` cover all six in both renderings.
+
 ## Reuse in the later stages
 
-The harness, the scenario generator, the inspector and the provider adapter do not change. The intermediate stage adds producers (a retrieval adapter over about thirty documents with supplied summaries, an account database, a memory store, history with a summary variant), declared conflict groups, `requires_evidence`, `dedupe`, `max_per_source` and `supersede` on the route, and a replay switch between live production and the captured batches. The advanced stage adds a controller around the same inspector: a capability policy, tool producers whose results enter as `evidence.tool_results`, bounded turns, and a replay store that feeds every recorded snapshot back through the harness.
+The harness, the inspector's shared columns and the provider adapters did not change for the intermediate stage, and will not for the advanced one. The advanced stage adds a controller around a third page: a capability policy, MCP tool producers whose results enter as `evidence.tool_results` with `supersede: source` on the route, bounded turns with authorization outside the model, and a replay store that feeds every recorded snapshot back through the harness.
 
 ## Open questions for the maintainer
 

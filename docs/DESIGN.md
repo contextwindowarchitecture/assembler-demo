@@ -73,9 +73,33 @@ The scenario tests check each expectation against itself and its snapshot: the p
 
 The tokenizer is `fixture-whitespace/v1` in both renderings, on purpose: it makes the comparison portable and keeps the fitting decisions identical between the two renderings. A production route names the model's tokenizer, or `estimate-utf8/v1` with a `budget.margin_percent`.
 
+### Producers (intermediate stage)
+
+The intermediate stage's inputs are produced, not hand-written. `producers/` is a `uv` project whose `freeze` command runs every producer for a step and composes the snapshot:
+
+```mermaid
+flowchart LR
+    C["corpus/*.md<br/>31 documents, 2 tenants"] --> N["LlamaIndex nodes<br/>one per paragraph, document metadata"]
+    N --> B["BM25Retriever<br/>similarity_top_k"]
+    B --> D["NearDuplicatePostprocessor<br/>Jaccard ≥ 0.85, exact copies left alone"]
+    D --> K["CWA batch<br/>relevance = score / scale, source = document, summaries as variants, drops reported"]
+    A["accounts.json"] --> S["state-svc batch"]
+    M["memories.json"] --> Y["memory-svc batch<br/>expired suppressed and reported"]
+    H["history.json"] --> V["conversation batch<br/>a summary variant per turn"]
+    P["policy.json"] --> G["policy-registry batch"]
+    K & S & Y & V & G --> F["freeze<br/>+ route policy, profile, budget, declared conflicts, clock"]
+    F --> SN["snapshot.json · snapshot.messages.json · scenario.json"]
+```
+
+- **Where LlamaIndex sits.** Its postprocessor interface is the seam between retrieval and response synthesis, so that is where the retriever's own duties live (R-13): a near-duplicate is dropped and reported with the chunk kept in its place. Exact copies are left alone on purpose, since the route asks the assembler for exact deduplication (R-24), and the trace then shows which stage did what. Ties in score are ordered newest first, the tie-break the route's default order uses, so the order does not depend on how the index was built.
+- **The score scale is the producer's, the threshold the route's.** Relevance is the BM25 score divided by a declared scale (6.0), capped at 1, and the item's `eligibility` says so. The route's `min_relevance` is 0.3. An off-topic question scores under a quarter of the scale and is refused for lack of evidence.
+- **Chunk ids carry the tenant** (`kb:acme:support-plans:v7#0`), so a shared index across tenants cannot collide; `source` is the document, so the route's `max_per_source` counts chunks per document.
+- **Frozen means frozen.** The snapshot carries the clock, so a live run and a replay give the same digest; a test checks it, and the inspector's live mode shows it as a badge. The frozen `scenario.json` keeps the producers' report without timings, so `freeze --check` is stable.
+- **The route protects state.user** (`tier_upgrades`), after the basic stage showed it being shed.
+
 ### The inspector
 
-`server.mjs` is `node:http`, static files and five JSON routes. Run as a program it loads `.env` first (values in the file replace ambient ones); imported by a test it does not, so a developer's `.env` cannot leak into the suite. It reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart.
+`server.mjs` is `node:http`, static files and six JSON routes. `/` is a landing page; each stage has its own page under `public/<stage>/` with its own state, steps and controls, and the four columns are shared functions in `public/shared/panels.js`. Run as a program it loads `.env` first (values in the file replace ambient ones); imported by a test it does not, so a developer's `.env` cannot leak into the suite. It reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart.
 
 | Route | Does |
 | --- | --- |
@@ -85,6 +109,7 @@ The tokenizer is `fixture-whitespace/v1` in both renderings, on purpose: it make
 | `POST /api/assemble` | `{scenario, variant, assemblers?, budget?}` → the snapshot used, each result (payload as text), agreement, and the expectation judgement; a budget override derives a new snapshot, marked `derived`, with no expectation applied |
 | `POST /api/answer` | `{provider, payload, reserved_output}` → the answer with the exact request that produced it |
 | `POST /api/snippets` | `{payload, reserved_output}` → the request as SDK code, TypeScript and Python, per configured endpoint |
+| `POST /api/produce` | `{scenario, variant, assemblers?}` → runs the stage's producers now, assembles what they built, reports how each ran, and whether the live digest equals the frozen one |
 
 The page (`public/app.js`) formats; it never decides. Each candidate's status comes from the shown assembler's trace: an assembler-stage `excluded` row, else a `compressed` row, else an `included` row, else, on a refusal, "admitted; assembly refused". Reason codes carry the registry text as a tooltip and are listed with it under the decisions, since a projector cannot hover.
 
@@ -115,6 +140,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 - `conformance.test.mjs`: the 74 vendored snapshots through every available assembler, judged as the reference runner judges them, and three-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.
 - `scenarios.test.mjs`: schema validity, generated files current, expectations consistent (hash, digest, reason codes).
 - `inspector.test.mjs`: the API on an ephemeral port, with a mock OpenAI-compatible server so the local-model path runs end to end over HTTP.
+- `producers.test.mjs`: the committed intermediate snapshots are current (`freeze --check`), every step records its producers' report with LlamaIndex named, and a live run reproduces the frozen digest.
 - `provider.test.mjs`, `provider-chat.test.mjs`: request mapping, status from the environment, dispatch, and error reporting, with the SDK client and `fetch` injected.
 - `live.test.mjs` (`npm run test:live`, off by default): the step 3 request to every provider `.env` configures, against the real model. It asserts what the demo needs: text, not cut off, and the Pro citation. Model output varies, so this is a readiness check for the talk, not part of the commit gate.
 

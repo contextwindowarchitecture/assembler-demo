@@ -32,13 +32,17 @@ npm install                      # installs ajv and links ../cwa-assembler-ts
 npm run setup                    # builds the Go adapter into bin/, checks the Python and TypeScript adapters
 npm test                         # unit tests, scenario checks, and the harness against every available assembler
 npm run conformance              # the vendored conformance cases through every adapter: the harness's self-check
-npm run scenarios:build          # regenerate scenarios/*/snapshot*.json from scenarios/*/source
+npm run scenarios:build          # regenerate every stage's snapshots: the basic generator, then the intermediate producers
+npm run producers:write          # run the intermediate producers (LlamaIndex etc., a uv project under producers/) and freeze the steps
+npm run producers:check          # fail when a committed intermediate snapshot differs from what the producers build now
 npm run expect -- --from python  # regenerate expected payloads and traces from the reference assembler
 npm run compare                  # every scenario through every assembler, against expectations and each other
 npm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
 npm run live                     # step 3 through the assemblers, then to every configured provider: real model answers on the terminal
 npm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
 ```
+
+The intermediate stage's producers are Python under `producers/`, run with `uv run --directory producers`; their data is under `scenarios/intermediate/source/`. A change to the corpus, a store or a producer means `npm run producers:write`, then `npm run expect -- --from python scenarios/intermediate`, and the tests will say so.
 
 The sibling checkouts are expected at `../cwa-assembler` (Python, with its `.venv` or `uv`), `../cwa-assembler-ts` (built: `dist/` present) and `../cwa-assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
 

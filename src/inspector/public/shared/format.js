@@ -25,7 +25,7 @@ export function reasonTextFor(contract) {
 
 /** The header's stage switcher: every stage, the current one marked. */
 export function stageNav(current) {
-  const stages = [['basic', '/basic/', 'Basic'], ['intermediate', '/intermediate/', 'Intermediate'], ['advanced', null, 'Advanced']];
+  const stages = [['basic', '/basic/', 'Basic'], ['intermediate', '/intermediate/', 'Intermediate'], ['advanced', '/advanced/', 'Advanced']];
   return `<nav class="stages" aria-label="Stages">${stages.map(([id, href, label]) =>
     href ? `<a href="${href}" class="${id === current ? 'active' : ''}">${label}</a>` : `<span class="planned" title="not built yet">${label}</span>`).join('')}</nav>`;
 }

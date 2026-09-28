@@ -123,3 +123,9 @@ a.brand-name { color: var(--text); text-decoration: none; }
 .scenario .meta { max-width: min(48ch, 42%); }
 .scenario .meta .mono { word-break: break-word; }
 @media (max-width: 900px) { .scenario { grid-template-columns: 1fr; } .scenario .meta { max-width: none; text-align: left; } }
+.timeline { padding: 4px 20px 0; }
+.turns { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+button.turn { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: block; }
+button.turn.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+button.turn .turn-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+button.turn .tags { margin: 3px 0; }

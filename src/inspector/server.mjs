@@ -9,6 +9,9 @@ import { loadAssemblers, ROOT, runAll, select } from '../harness/adapters.mjs';
 import { loadScenarios, VARIANTS } from '../harness/cases.mjs';
 import { agreement, compareResult } from '../harness/compare.mjs';
 import { produce, producersAvailable } from '../harness/producers.mjs';
+import { runAgent } from '../agent/controller.mjs';
+import { listRuns, loadRun, saveRun } from '../agent/store.mjs';
+import { loadSource } from '../agent/capabilities.mjs';
 import { loadDotEnv } from '../env.mjs';
 import { answer, describeProviders } from '../provider/index.mjs';
 import { snippets } from '../provider/snippets.mjs';
@@ -100,6 +103,22 @@ async function produceAndAssemble(body, assemblers) {
   };
 }
 
+/** POST /api/agent/replay: {run, assemblers?}. Every recorded inference through the assemblers, judged against the
+ * trace recorded at the time, with three-way agreement. */
+async function replayRun(body, assemblers) {
+  const run = await loadRun(String(body.run ?? ''));
+  if (!run) throw new HttpError(404, `no recorded run ${body.run}`);
+  let chosen;
+  try { chosen = select(assemblers, body.assemblers); } catch (error) { throw new HttpError(400, error.message); }
+  const turns = [];
+  for (const turn of run.turns) {
+    const results = await runAll(chosen, Buffer.from(JSON.stringify(turn.snapshot, null, 2) + '\n', 'utf8'));
+    const expected = turn.trace ? { payload: turn.payload === null ? null : Buffer.from(turn.payload, 'utf8'), trace: turn.trace } : null;
+    turns.push({ n: turn.n, results: results.map(r => ({ assembler: r.assembler, outcome: r.outcome, durationMs: r.durationMs, ...(expected ? compareResult(r, expected) : { judged: 'no recorded trace' }) })), agreement: agreement(results) });
+  }
+  return { run: run.id, turns };
+}
+
 async function handle(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const assemblers = await loadAssemblers();
@@ -123,6 +142,24 @@ async function handle(req, res) {
   }
   if (req.method === 'POST' && url.pathname === '/api/assemble') return json(res, 200, await assemble(await readJsonBody(req), assemblers));
   if (req.method === 'POST' && url.pathname === '/api/produce') return json(res, 200, await produceAndAssemble(await readJsonBody(req), assemblers));
+  if (req.method === 'GET' && url.pathname === '/api/agent/scenarios') return json(res, 200, loadSource('scenarios.json').map(s => ({ ...s, faults: s.faults })));
+  if (req.method === 'GET' && url.pathname === '/api/agent/runs') return json(res, 200, await listRuns());
+  const runFile = url.pathname.match(/^\/api\/agent\/runs\/([^/]+)$/);
+  if (req.method === 'GET' && runFile) {
+    const run = await loadRun(decodeURIComponent(runFile[1]));
+    if (!run) throw new HttpError(404, 'no such run');
+    return json(res, 200, run);
+  }
+  if (req.method === 'POST' && url.pathname === '/api/agent/run') {
+    const body = await readJsonBody(req);
+    if (typeof body.scenario !== 'string') throw new HttpError(400, 'name the scenario');
+    let run;
+    try { run = await runAgent({ scenarioId: body.scenario, providerId: body.provider ?? 'local', assemblerId: body.assembler ?? 'python', faults: body.faults }); }
+    catch (error) { throw new HttpError(502, error.message); }
+    await saveRun(run);
+    return json(res, 200, run);
+  }
+  if (req.method === 'POST' && url.pathname === '/api/agent/replay') return json(res, 200, await replayRun(await readJsonBody(req), assemblers));
   if (req.method === 'POST' && url.pathname === '/api/answer') {
     const body = await readJsonBody(req);
     if (typeof body.payload !== 'string') throw new HttpError(400, 'a live answer needs the payload of a successful cwa-messages/v1 assembly');

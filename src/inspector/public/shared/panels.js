@@ -160,6 +160,18 @@ export function renderAnswer(page, result) {
     body.innerHTML = '<p class="hint">Switch the rendering to cwa-messages/v1 to send this assembly to a model. The fixture rendering exists for the byte-exact comparison.</p>';
     return;
   }
+  if (page.recordedAnswer) {
+    // A recorded run: the model's response for this turn, as it was captured, and nothing to send.
+    const a = page.recordedAnswer(result);
+    body.innerHTML = a ? `<div class="entry">
+      <div class="id">${esc(a.label ?? 'recorded')} · ${esc(a.model ?? '')}${a.usage ? ` · ${a.usage.input_tokens} in / ${a.usage.output_tokens} out` : ''}${a.durationMs ? ` · ${a.durationMs} ms` : ''}${a.stop_reason ? ` · stop: ${esc(a.stop_reason)}` : ''}</div>
+      ${(a.tool_calls ?? []).length ? `<h3>Tool requests</h3>${a.tool_calls.map(c => `<div class="tags"><span class="tag slot">${esc(c.name)}</span><span class="mono">${esc(JSON.stringify(c.arguments))}</span></div>`).join('')}` : ''}
+      ${a.text ? `<div class="answer-text">${esc(a.text)}</div>` : '<p class="hint">no answer text this turn</p>'}
+      ${a.reasoning ? `<details><summary>reasoning (${a.reasoning.length} characters)</summary><div class="snippet">${esc(a.reasoning)}</div></details>` : ''}
+      ${a.request ? `<details><summary>outbound request (exact)</summary><pre>${esc(JSON.stringify(a.request, null, 2))}</pre></details>` : ''}
+    </div>` : '<p class="hint">no model call this turn</p>';
+    return;
+  }
   const providers = state.providers;
   const configured = providers.filter(p => p.configured);
   if (!configured.some(p => p.id === state.provider)) state.provider = configured[0]?.id ?? null;

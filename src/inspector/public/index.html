@@ -28,12 +28,12 @@
         <p>Several sources compete for a limited budget. LlamaIndex retrieval and postprocessing over a corpus of support documents, an account database, a memory store and the conversation, run live or replayed from the captured batches.</p>
         <p class="hint">Proves declared conflicts, deduplication, source diversity, supplied summaries, and the route's required-evidence behaviour.</p>
       </a>
-      <div class="stage-card planned">
+      <a class="stage-card" href="/advanced/">
         <h2>Advanced</h2>
         <p class="question">“Check my entitlement, investigate this incident, and draft the next action.”</p>
-        <p>Context evolves through a bounded tool loop: authorization, checkpoints, failures, recovery and replay.</p>
-        <p class="hint">Planned.</p>
-      </div>
+        <p>Context evolves through a bounded tool loop. Three MCP servers propose tools, the capability policy grants some, the guard authorizes every request before a call, and each observation enters the next inference through the context boundary. Recorded runs replay through all three assemblers.</p>
+        <p class="hint">Proves that every inference has a replayable snapshot, tool results are evidence, unauthorized calls never execute, and recovery terminates.</p>
+      </a>
     </div>
   </main>
   <footer class="foot">Arrow keys switch steps on a stage page. Providers come from <span class="mono">.env</span>.</footer>

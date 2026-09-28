@@ -110,7 +110,7 @@ select, input { font-family: var(--mono); font-size: var(--fs-mono); color: var(
 .field { display: inline-flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 input#budget { width: 7em; }
 
-/* Masthead and step band: one sticky block. */
+/* Masthead, step band and instruments: one sticky block. The column headers pin under its measured height. */
 .top { position: sticky; top: 0; z-index: 50; background: color-mix(in oklab, var(--bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
 .masthead { height: var(--mast-h); display: flex; align-items: center; gap: 28px; padding: 0 32px; }
 .brandrow { display: flex; align-items: center; gap: 12px; }
@@ -137,8 +137,8 @@ input#budget { width: 7em; }
 .steps button.active { background: var(--fg); border-color: var(--fg); color: var(--bg); }
 .badges { margin-left: auto; display: inline-flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
-/* The instruments: one quiet row; folded behind one line in talk mode. */
-.instruments { padding: 10px 32px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+/* The instruments: one quiet row in the pinned block under the step band; folded behind one line in talk mode. */
+.instruments { padding: 10px 32px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .instruments-toggle { display: none; gap: 8px; align-items: center; }
 .instruments-toggle .mono { color: var(--fg); letter-spacing: 0; }
 .instruments .controls { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; flex: 1 1 auto; }

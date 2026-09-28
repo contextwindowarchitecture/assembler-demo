@@ -216,11 +216,11 @@ The stage pages are full width: four columns need it. The landing page uses the 
 | Side gutter | `32px`, tightened to `20px` below 900px |
 | Masthead | `var(--mast-h)` (68px), sticky, `z-index: 50`, blurred `--bg` at 88% |
 | Step band | `min-height: var(--band-h)`, `--surface`, sticky under the masthead in the same block |
-| Instruments row | `padding: 10px 32px`, 1px `--line` bottom border |
+| Instruments row | `padding: 10px 32px`, 1px `--line` top border, sticky under the step band in the same block |
 | Step header | `padding: 32px 32px 24px`, grid `minmax(0, 1fr) minmax(320px, 400px)`, `gap: 40px` |
 | Strips (producers, routes, turns) | `padding: 0 32px 24px` |
 | Delta strip | `margin: 0 32px 24px`, a hairline grid |
-| Columns | `margin: 0 32px 32px`, a hairline grid of four, headers sticky at `--top-h`, the measured height of the pinned block |
+| Columns | `margin: 0 32px 32px`, a hairline grid of four, headers sticky at `--top-h`, the measured height of the pinned block (masthead, step band, instruments) |
 | Column body | `padding: 18px`, a column of cards with `gap: 12px` |
 | Footer | `padding: 24px 32px`, 1px `--line` top border |
 | Landing hero | `padding: 96px 32px 72px` |
@@ -230,7 +230,7 @@ The stage pages are full width: four columns need it. The landing page uses the 
 flowchart TB
   M["Masthead · 68px · logo, stage rail, talk mode, theme · sticky"]
   B["Step band · surface · step pills, agreement badges · sticky with the masthead"]
-  I["Instruments · assembler, rendering, budget · folded in talk mode"]
+  I["Instruments · assembler, rendering, budget · sticky with the band · folded in talk mode"]
   S["Step header · kicker, h1, the question, description · snapshot factsheet"]
   X["Stage strips · producers (2), routes and turns (3)"]
   D["Delta strip · hairline grid · what changed since the step you came from"]
@@ -436,7 +436,7 @@ Selection is `--accent` on `--bg`. Interactive elements set `cursor: pointer`. F
 
 The pages are static files served by `src/inspector/server.mjs`; the markup is produced at run time by template strings in the page modules.
 
-- **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the masthead, the step band, the instruments, the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
+- **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the pinned header (the masthead, the step band and the instruments), the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
 - **Classes, one stylesheet.** Every rule lives in `public/style.css` and selects by class; the shells carry no `style` attribute, and a test checks it. Class names are shared by every page, so a new class must not collide with an existing one.
 - **Three inline values only.** A candidate row sets `--plane` from its slot (`style="--plane: var(--p-evid)"`), a meter segment sets its `flex-basis` and its plane, and `chrome.js` keeps `--top-h` on `<html>` at the measured height of the pinned top block, so the column headers pin under it however the badges wrap. The first two are computed from the snapshot or the trace at run time; nothing else is styled inline.
 - **Theme** is `data-theme` on `<html>`, `cwa-theme` in `localStorage`. A one-line script in each shell's head applies the stored choice before the first paint; `chrome.js` owns the masthead button `#theme` and its label. **Talk mode** is `data-talk`, `cwa-demo-talk`, the button `#talk`. The landing page runs `public/landing.js`, which only initialises this chrome.

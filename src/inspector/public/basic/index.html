@@ -24,27 +24,27 @@
       <nav class="steps" id="steps" aria-label="Scenario steps"></nav>
       <span id="agreement" class="badges"></span>
     </div>
+    <div class="instruments" id="instruments">
+      <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
+      <div class="controls" id="controls">
+        <label class="field">Assembler
+          <span class="select"><select id="assembler"></select></span>
+        </label>
+        <label class="field">Rendering
+          <span class="select"><select id="variant">
+            <option value="fixture">fixture-xml/v1 (compare)</option>
+            <option value="messages">cwa-messages/v1 (model)</option>
+          </select></span>
+        </label>
+        <label class="field">budget.input
+          <span class="number"><input id="budget" type="number" min="0" step="10" inputmode="numeric"></span>
+        </label>
+        <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>
+        <span class="hint">← → switch steps</span>
+      </div>
+    </div>
   </header>
 
-  <div class="instruments" id="instruments">
-    <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
-    <div class="controls" id="controls">
-      <label class="field">Assembler
-        <span class="select"><select id="assembler"></select></span>
-      </label>
-      <label class="field">Rendering
-        <span class="select"><select id="variant">
-          <option value="fixture">fixture-xml/v1 (compare)</option>
-          <option value="messages">cwa-messages/v1 (model)</option>
-        </select></span>
-      </label>
-      <label class="field">budget.input
-        <span class="number"><input id="budget" type="number" min="0" step="10" inputmode="numeric"></span>
-      </label>
-      <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>
-      <span class="hint">← → switch steps</span>
-    </div>
-  </div>
 
   <section class="scenario" id="scenario"></section>
   <section class="delta" id="delta" aria-label="What changed since the previous step"></section>

@@ -20,7 +20,9 @@ test('every stage page carries the elements the scripts and the shared chrome re
     }
     assert.equal((html.match(/class="column"/g) ?? []).length, 4, `${stage}: four columns`);
     assert.equal((html.match(/class="col-sub"/g) ?? []).length, 4, `${stage}: a summary line per column header`);
-    assert.match(html, /class="stepband"/, `${stage}: the step band under the masthead`);
+    const top = html.match(/<header class="top">([\s\S]*?)<\/header>/)?.[1] ?? '';
+    assert.match(top, /class="stepband"/, `${stage}: the step band is in the pinned block`);
+    assert.match(top, /id="instruments"/, `${stage}: the instruments are in the pinned block, so they stay while the page scrolls`);
   }
 });
 

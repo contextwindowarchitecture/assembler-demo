@@ -36,6 +36,8 @@ npm run scenarios:build          # regenerate scenarios/*/snapshot*.json from sc
 npm run expect -- --from python  # regenerate expected payloads and traces from the reference assembler
 npm run compare                  # every scenario through every assembler, against expectations and each other
 npm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
+npm run live                     # step 3 through the assemblers, then to every configured provider: real model answers on the terminal
+npm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
 ```
 
 The sibling checkouts are expected at `../cwa-assembler` (Python, with its `.venv` or `uv`), `../cwa-assembler-ts` (built: `dist/` present) and `../cwa-assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.

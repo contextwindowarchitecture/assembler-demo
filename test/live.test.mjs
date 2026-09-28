@@ -28,7 +28,8 @@ for (const provider of configured) {
     const reply = await answer(result.payload.toString('utf8'), { provider: provider.id, maxTokens: JSON.parse(bytes.toString('utf8')).budget.reserved_output });
     assert.ok(reply.text.trim().length > 0, `no answer text (stop ${reply.stop_reason}${reply.reasoning ? `; reasoning: ${reply.reasoning.slice(0, 120)}` : ''})`);
     assert.ok(!['length', 'max_tokens'].includes(reply.stop_reason), `the answer was cut off by the reserved output (stop ${reply.stop_reason})`);
-    assert.match(reply.text, /kb:support-plans:v7#pro/, 'the instructions ask for the evidence id in brackets');
+    // Models sometimes typeset the id with a Unicode hyphen (U+2010 to U+2015); the citation still names the chunk.
+    assert.match(reply.text.replace(/[\u2010-\u2015]/g, '-'), /kb:support-plans:v7#pro/, `the instructions ask for the evidence id in brackets; got: ${reply.text.slice(0, 200)}`);
     console.log(`  ${provider.label}: ${reply.model}, ${reply.durationMs} ms, ${reply.usage?.output_tokens ?? '?'} output tokens`);
   });
 }

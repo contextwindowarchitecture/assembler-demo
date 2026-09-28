@@ -25,7 +25,14 @@ CWA_DEMO_LOCAL_MODEL=gpt-oss-20b-MXFP4-Q8
 CWA_DEMO_LOCAL_REASONING_EFFORT=low      # a reasoning model otherwise spends the route's reserved output thinking
 ```
 
-The inspector loads `.env` at startup, and what the file says is what runs.
+The inspector loads `.env` at startup, and what the file says is what runs. Two commands prove the live path from a terminal, against the real model:
+
+```sh
+npm run live         # assemble step 3, send the payload to every configured provider, print each answer
+npm run test:live    # the same as a test: an answer with text, not cut off, citing the Pro chunk
+```
+
+The test suite's only model is a mock under `test/helpers/`, used by one API test so `npm test` runs without a model; nothing in `src/` refers to it.
 
 ## The basic stage
 
@@ -48,6 +55,7 @@ npm run compare                     # every step, both renderings, every assembl
 npm run conformance                 # the vendored 52 cases and 22 rejections through every adapter: 52/52 and 22/22 for all three
 npm run expect -- --from python     # regenerate expectations from one assembler
 node src/harness/cli.mjs run scenarios/basic/04-budget/snapshot.json   # one snapshot, all assemblers, the payload printed
+node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider local   # assemble, then ask a real model
 ```
 
 Comparison follows `conformance/README.md`: payloads byte for byte; traces field for field without `trace_id` and `timings`; the JSON pointer of the first difference; an unsupported tokenizer or renderer is skipped, never passed. Three matching assemblers can share a mistake, so the committed expectation is the independent check.

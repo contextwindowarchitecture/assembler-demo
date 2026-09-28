@@ -24,6 +24,7 @@
     "inspector": "node src/inspector/server.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.128.0",
     "@contextwindowarchitecture/assembler": "file:../cwa-assembler-ts",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1"

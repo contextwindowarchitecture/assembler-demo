@@ -26,18 +26,16 @@
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%23B9B4A7' stroke-width='1.5'/%3E%3C/svg%3E");
   --arrow-bad: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%23A3271B' stroke-width='1.5' stroke-dasharray='2 2'/%3E%3C/svg%3E");
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #171613; --surface: #1F1E1A; --sunken: #26251F; --line: #3A3830; --line-2: #2E2C26; --line-strong: #5A574D;
-    --ink: #ECE9E1; --ink-2: #C4C0B5; --muted: #9C978A; --on-ink: #171613;
-    --ok: #6FCB94; --ok-bg: rgba(111, 203, 148, .16); --ok-track: rgba(111, 203, 148, .28);
-    --info: #8FB3F0; --info-bg: rgba(143, 179, 240, .16);
-    --bad: #F08C7E; --bad-bg: rgba(240, 140, 126, .16); --on-bad: #171613;
-    --warn: #E7B85A; --warn-bg: rgba(231, 184, 90, .16);
-    --gray: #A19C90; --gray-bg: rgba(161, 156, 144, .16);
-    --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%235A574D' stroke-width='1.5'/%3E%3C/svg%3E");
-    --arrow-bad: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%23F08C7E' stroke-width='1.5' stroke-dasharray='2 2'/%3E%3C/svg%3E");
-  }
+html[data-theme="dark"] {
+  --paper: #171613; --surface: #1F1E1A; --sunken: #26251F; --line: #3A3830; --line-2: #2E2C26; --line-strong: #5A574D;
+  --ink: #ECE9E1; --ink-2: #C4C0B5; --muted: #9C978A; --on-ink: #171613;
+  --ok: #6FCB94; --ok-bg: rgba(111, 203, 148, .16); --ok-track: rgba(111, 203, 148, .28);
+  --info: #8FB3F0; --info-bg: rgba(143, 179, 240, .16);
+  --bad: #F08C7E; --bad-bg: rgba(240, 140, 126, .16); --on-bad: #171613;
+  --warn: #E7B85A; --warn-bg: rgba(231, 184, 90, .16);
+  --gray: #A19C90; --gray-bg: rgba(161, 156, 144, .16);
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%235A574D' stroke-width='1.5'/%3E%3C/svg%3E");
+  --arrow-bad: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%23F08C7E' stroke-width='1.5' stroke-dasharray='2 2'/%3E%3C/svg%3E");
 }
 :root[data-talk="1"] {
   --fs: 17px; --fs-sm: 15px; --fs-xs: 13.5px; --fs-mono: 15px; --fs-chip: 14px; --fs-col: 17px; --fs-title: 38px; --fs-q: 24px; --fs-lead: 19px;

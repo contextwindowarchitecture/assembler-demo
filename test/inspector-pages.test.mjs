@@ -7,6 +7,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../src/harness/adapters.mjs';
 import { columnHeads, meterFor, statusOf } from '../src/inspector/public/shared/panels.js';
+import { resolveTheme, themeLabel } from '../src/inspector/public/shared/chrome.js';
 
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
 const read = file => fs.readFileSync(path.join(PUBLIC, file), 'utf8');
@@ -14,7 +15,7 @@ const read = file => fs.readFileSync(path.join(PUBLIC, file), 'utf8');
 test('every stage page carries the elements the scripts and the shared chrome render into', () => {
   for (const stage of ['basic', 'intermediate', 'advanced']) {
     const html = read(`${stage}/index.html`);
-    for (const id of ['stages', 'agreement', 'talk', 'instruments', 'instruments-toggle', 'instruments-summary', 'candidates', 'decisions', 'request', 'answer', 'foot']) {
+    for (const id of ['stages', 'agreement', 'talk', 'theme', 'instruments', 'instruments-toggle', 'instruments-summary', 'candidates', 'decisions', 'request', 'answer', 'foot']) {
       assert.match(html, new RegExp(`id="${id}"`), `${stage}: #${id}`);
     }
     assert.equal((html.match(/class="column"/g) ?? []).length, 4, `${stage}: four columns`);
@@ -26,6 +27,7 @@ test('every stage page carries the elements the scripts and the shared chrome re
 test('the landing links every stage and names the four columns once', () => {
   const html = read('index.html');
   for (const href of ['/basic/', '/intermediate/', '/advanced/']) assert.match(html, new RegExp(`href="${href}"`));
+  for (const id of ['talk', 'theme']) assert.match(html, new RegExp(`id="${id}"`), `the landing carries the same masthead buttons: #${id}`);
   for (const column of ['Candidate context', 'CWA decisions', 'Outbound request', 'Model answer']) {
     assert.equal((html.match(new RegExp(column, 'g')) ?? []).length, 1, `${column} appears once, in the pipeline`);
   }
@@ -51,6 +53,20 @@ test('the fonts are vendored: the two faces the guide names, each a file under p
   for (const license of ['LICENSE-IBM-Plex.txt', 'LICENSE-Space-Grotesk.txt']) assert.match(read(`fonts/${license}`), /SIL OPEN FONT LICENSE/);
   assert.match(fs.readFileSync(path.join(ROOT, 'NOTICE'), 'utf8'), /Space Grotesk/, 'NOTICE lists the face');
   assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'NOTICE'), 'utf8'), /Newsreader|Plex Sans/, 'NOTICE no longer lists faces that are gone');
+});
+
+test('the theme is the website\'s: an attribute on <html> the masthead toggles, remembered under the site\'s key, light unless chosen', () => {
+  const css = read('style.css');
+  assert.match(css, /html\[data-theme="dark"\]\s*{/, 'the dark tokens override on the attribute');
+  assert.doesNotMatch(css, /prefers-color-scheme/, 'the OS preference is not consulted');
+  const chrome = read('shared/chrome.js');
+  assert.match(chrome, /THEME_KEY = 'cwa-theme'/, 'the storage key is the website\'s, so a choice made on the site carries over');
+  assert.equal(resolveTheme(null), 'light', 'no choice stored: light, which a projector reads better');
+  assert.equal(resolveTheme('dark'), 'dark');
+  assert.equal(resolveTheme('light'), 'light');
+  assert.equal(resolveTheme('sepia'), 'light', 'an unknown value falls back to light');
+  assert.equal(themeLabel('light'), 'dark', 'the toggle names the theme you would switch to');
+  assert.equal(themeLabel('dark'), 'light');
 });
 
 const trace = {

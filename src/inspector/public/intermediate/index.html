@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CWA demo · intermediate</title>
   <link rel="stylesheet" href="/style.css">
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('cwa-theme') === 'dark' ? 'dark' : 'light'; } catch { document.documentElement.dataset.theme = 'light'; }</script>
 </head>
 <body>
   <header class="top">
@@ -14,6 +15,7 @@
       <div id="stages"></div>
       <div class="masthead-right">
         <button id="talk" type="button" aria-pressed="false" title="larger type for a projector; folds the instruments behind one line">Talk mode</button>
+        <button id="theme" type="button" aria-label="Toggle color theme" title="light or dark; remembered per browser">dark</button>
       </div>
     </div>
     <div class="stepband">

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CWA demo</title>
   <link rel="stylesheet" href="/style.css">
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('cwa-theme') === 'dark' ? 'dark' : 'light'; } catch { document.documentElement.dataset.theme = 'light'; }</script>
 </head>
 <body>
   <header class="top">
@@ -16,6 +17,10 @@
         <a href="/intermediate/" class="stage"><span class="num">2</span>Intermediate</a>
         <a href="/advanced/" class="stage"><span class="num">3</span>Advanced</a>
       </nav>
+      <div class="masthead-right">
+        <button id="talk" type="button" aria-pressed="false" title="larger type for a projector">Talk mode</button>
+        <button id="theme" type="button" aria-label="Toggle color theme" title="light or dark; remembered per browser">dark</button>
+      </div>
     </div>
   </header>
 
@@ -78,5 +83,6 @@
     <span>Providers come from <span class="mono">.env</span>.</span>
     <span class="right"><span class="mono">npm run compare</span> for the closing: every step, every assembler, passed and agreeing.</span>
   </footer>
+  <script type="module" src="/landing.js"></script>
 </body>
 </html>

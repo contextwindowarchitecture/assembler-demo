@@ -1,0 +1,31 @@
+{
+  "name": "cwa-demo-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Support-assistant demo for the Context Window Architecture: frozen scenarios, a three-assembler comparison harness, and an inspector for candidates, decisions and the outbound request",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "cwa-demo": "src/harness/cli.mjs"
+  },
+  "scripts": {
+    "setup": "sh scripts/setup.sh",
+    "test": "node --test test/*.test.mjs",
+    "vendor": "python3 scripts/vendor_contract.py --website",
+    "vendor:verify": "python3 scripts/vendor_contract.py --verify",
+    "scenarios:build": "node scripts/build-scenarios.mjs",
+    "scenarios:check": "node scripts/build-scenarios.mjs --check",
+    "expect": "node src/harness/cli.mjs expect",
+    "compare": "node src/harness/cli.mjs compare",
+    "conformance": "node src/harness/cli.mjs conformance",
+    "inspector": "node src/inspector/server.mjs"
+  },
+  "dependencies": {
+    "@contextwindowarchitecture/assembler": "file:../cwa-assembler-ts",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}

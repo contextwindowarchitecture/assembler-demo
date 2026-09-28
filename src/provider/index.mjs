@@ -21,7 +21,7 @@ export const OPENAI_MODEL = 'gpt-5';
 async function localStatus(env, options) {
   const base = { id: 'local', label: 'Local model', provider: 'openai-compatible', base_url: env.CWA_DEMO_LOCAL_BASE_URL || LOCAL_BASE_URL, model: env.CWA_DEMO_LOCAL_MODEL || null, fallbacks: false, reasoning_effort: env.CWA_DEMO_LOCAL_REASONING_EFFORT || null };
   if (base.model) return { ...base, configured: true, source: 'CWA_DEMO_LOCAL_MODEL' };
-  const listed = await chat.listModels({ baseUrl: base.base_url, apiKey: env.CWA_DEMO_LOCAL_API_KEY, fetch: options.fetch });
+  const listed = await chat.listModels({ baseUrl: base.base_url, apiKey: env.CWA_DEMO_LOCAL_API_KEY, client: options.createClient?.({ baseUrl: base.base_url, apiKey: env.CWA_DEMO_LOCAL_API_KEY, timeoutMs: 1500 }) });
   if (listed.models.length) return { ...base, model: listed.models[0], configured: true, source: `first of ${listed.models.length} models the server lists`, models: listed.models };
   return { ...base, configured: false, reason: listed.reason ?? `${base.base_url}/models lists no model: set CWA_DEMO_LOCAL_MODEL` };
 }
@@ -47,20 +47,21 @@ export async function describeProvider(id, env = process.env, options = {}) {
   return DESCRIBE[id](env, options);
 }
 
-/** Every provider, in display order. */
+/** Every provider, in display order. `options.createClient` replaces the OpenAI SDK client, for tests. */
 export function describeProviders(env = process.env, options = {}) {
   return Promise.all(PROVIDERS.map(id => describeProvider(id, env, options)));
 }
 
 /** Send a cwa-messages/v1 payload to one provider. Resolves to {request, text, model, usage, ...}. */
-export async function answer(payloadText, { provider, maxTokens, env = process.env, fetch: doFetch, client } = {}) {
-  const status = await describeProvider(provider, env, { fetch: doFetch });
+export async function answer(payloadText, { provider, maxTokens, env = process.env, createClient, client } = {}) {
+  const status = await describeProvider(provider, env, { createClient });
   if (!status.configured) { const error = new Error(`${status.label} is not configured: ${status.reason}`); error.status = 409; throw error; }
   const answered = status.id === 'anthropic'
     ? await anthropic.answer(payloadText, { maxTokens, model: status.model, client, env })
     : await chat.answer(payloadText, {
-      baseUrl: status.base_url, model: status.model, maxTokens, fetch: doFetch,
+      baseUrl: status.base_url, model: status.model, maxTokens,
       apiKey: status.id === 'openai' ? env.OPENAI_API_KEY : env.CWA_DEMO_LOCAL_API_KEY,
+      client: createClient?.({ baseUrl: status.base_url, apiKey: status.id === 'openai' ? env.OPENAI_API_KEY : env.CWA_DEMO_LOCAL_API_KEY }),
       maxTokensField: status.id === 'openai' ? 'max_completion_tokens' : 'max_tokens',
       extra: status.reasoning_effort ? { reasoning_effort: status.reasoning_effort } : {},
     });

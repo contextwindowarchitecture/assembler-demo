@@ -1,9 +1,17 @@
-// The adapter for any OpenAI-compatible chat completions endpoint: OpenAI itself, or a local model served by
-// Ollama, LM Studio, vLLM or llama.cpp. A cwa-messages/v1 payload in, the model's answer out, with the exact
-// outbound request captured before it is sent. Plain HTTP: the request is one POST, and no SDK is needed.
+// The adapter for any OpenAI-compatible chat completions endpoint through the official OpenAI SDK: OpenAI itself, or
+// a local model served by Ollama, LM Studio, vLLM or llama.cpp, which is the same client with a baseURL. A
+// cwa-messages/v1 payload in, the model's answer out, with the exact outbound request captured before it is sent.
 // Every `system` entry becomes part of the one system message (some local servers honor only the first), every
 // `tools` entry a function definition, and the single user message is sent as is.
 import { performance } from 'node:perf_hooks';
+import OpenAI from 'openai';
+
+const trim = url => String(url).replace(/\/+$/, '');
+
+/** The SDK client for an endpoint. A local server that checks no key still needs a non-empty one for the SDK. */
+export function createClient({ baseUrl, apiKey, timeoutMs = 120_000 }) {
+  return new OpenAI({ baseURL: trim(baseUrl), apiKey: apiKey || 'local', timeout: timeoutMs, maxRetries: 0 });
+}
 
 function toTool(entry) {
   let spec;
@@ -43,54 +51,54 @@ export function toRequest(payloadText, { model, maxTokens = 4096, maxTokensField
   return request;
 }
 
-const trim = url => url.replace(/\/+$/, '');
-const headers = apiKey => ({ 'content-type': 'application/json', ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}) });
-
-function fail(message) {
-  const error = new Error(message);
-  error.status = 502;
-  return error;
+/** The SDK's typed errors in words, most specific first. APIConnectionError extends APIError in this SDK, so it is
+ * tested before the general case. The result carries status 502 for the inspector. */
+function describe(error, url) {
+  const message = error instanceof OpenAI.AuthenticationError ? `authentication failed at ${url}: ${error.message}`
+    : error instanceof OpenAI.NotFoundError ? `${url} answered 404: ${error.message}`
+    : error instanceof OpenAI.RateLimitError ? `rate limited at ${url}: ${error.message}`
+    : error instanceof OpenAI.APIConnectionError ? `cannot reach ${url}: ${error.message}`
+    : error instanceof OpenAI.APIError ? `${url} answered ${error.status}: ${error.message}`
+    : error.message;
+  const wrapped = new Error(message);
+  wrapped.status = 502;
+  return wrapped;
 }
 
-/** The model ids `<base_url>/models` lists, or a reason it could not be asked. Used to discover a local model. */
-export async function listModels({ baseUrl, apiKey, fetch: doFetch = globalThis.fetch, timeoutMs = 1500 } = {}) {
-  const url = `${trim(baseUrl)}/models`;
+/** The model ids the endpoint lists, or a reason it could not be asked. Used to discover a local model. */
+export async function listModels({ baseUrl, apiKey, client, timeoutMs = 1500 } = {}) {
+  const api = client ?? createClient({ baseUrl, apiKey, timeoutMs });
   try {
-    const response = await doFetch(url, { headers: headers(apiKey), signal: AbortSignal.timeout(timeoutMs) });
-    if (!response.ok) return { models: [], reason: `${url} answered ${response.status}` };
-    const body = await response.json();
-    return { models: (body.data ?? []).map(entry => entry.id).filter(id => typeof id === 'string') };
+    const page = await api.models.list();
+    return { models: (page.data ?? []).map(entry => entry.id).filter(id => typeof id === 'string') };
   } catch (error) {
-    return { models: [], reason: `cannot reach ${url} (${error.name === 'TimeoutError' ? 'timed out' : error.message})` };
+    return { models: [], reason: describe(error, `${trim(baseUrl)}/models`).message };
   }
 }
 
-/** POST the request to `<base_url>/chat/completions` and return the answer with the request that produced it. */
-export async function answer(payloadText, { baseUrl, apiKey, model, maxTokens, maxTokensField, extra, fetch: doFetch = globalThis.fetch } = {}) {
+/** Send the request with `client.chat.completions.create` and return the answer with the request that produced it. */
+export async function answer(payloadText, { baseUrl, apiKey, model, maxTokens, maxTokensField, extra, client } = {}) {
   const request = toRequest(payloadText, { model, maxTokens, maxTokensField, extra });
-  const url = `${trim(baseUrl)}/chat/completions`;
+  const api = client ?? createClient({ baseUrl, apiKey });
+  const url = `${trim(api.baseURL ?? baseUrl)}/chat/completions`;
   const start = performance.now();
-  let response;
+  let completion;
   try {
-    response = await doFetch(url, { method: 'POST', headers: headers(apiKey), body: JSON.stringify(request) });
+    completion = await api.chat.completions.create(request);
   } catch (error) {
-    throw fail(`cannot reach ${url}: ${error.message}`);
+    throw describe(error, url);
   }
-  const text = await response.text();
-  if (!response.ok) throw fail(`${url} answered ${response.status}: ${text.slice(0, 300)}`);
-  let body;
-  try { body = JSON.parse(text); } catch { throw fail(`${url} did not answer with JSON: ${text.slice(0, 300)}`); }
-  const choice = body.choices?.[0];
-  if (!choice) throw fail(`${url} answered without choices: ${text.slice(0, 300)}`);
+  const choice = completion?.choices?.[0];
+  if (!choice) { const error = new Error(`${url} answered without choices`); error.status = 502; throw error; }
   return {
     request: { url, ...request },
     text: choice.message?.content ?? '',
     reasoning: choice.message?.reasoning_content ?? choice.message?.reasoning ?? null,
     tool_calls: choice.message?.tool_calls ?? [],
-    model: body.model ?? request.model,
+    model: completion.model ?? request.model,
     stop_reason: choice.finish_reason ?? null,
     stop_details: null,
-    usage: body.usage ? { input_tokens: body.usage.prompt_tokens, output_tokens: body.usage.completion_tokens } : null,
+    usage: completion.usage ? { input_tokens: completion.usage.prompt_tokens, output_tokens: completion.usage.completion_tokens } : null,
     fallbacks: [],
     durationMs: Math.round(performance.now() - start),
   };

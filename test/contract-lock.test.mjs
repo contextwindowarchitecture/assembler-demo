@@ -1,5 +1,5 @@
 // vendor/cwa/ is the pinned contract: every file matches its SHA-256 in vendor/cwa.lock.json, and nothing is
-// vendored that the lock does not name. Change it only with `npm run vendor -- <website checkout>`.
+// vendored that the lock does not name. Change it only with `pnpm run vendor <website checkout>`.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';

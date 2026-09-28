@@ -5,10 +5,10 @@ Five steps, one question, about twelve minutes. Each step adds to the last: the 
 ## Before the talk
 
 - Start the local model server and check it lists the model: `curl -H "Authorization: Bearer $KEY" http://127.0.0.1:8000/v1/models`.
-- `.env` names the provider (see `.env.example`). `npm run inspector`, open `http://localhost:8787` at full width (the four columns need about 1400 px), and pick the OS theme the projector reads best; the page follows it.
+- `.env` names the provider (see `.env.example`). `pnpm run inspector`, open `http://localhost:8787` at full width (the four columns need about 1400 px), and pick the OS theme the projector reads best; the page follows it.
 - Click *Talk mode* in the masthead: larger type, the instruments folded behind one line (click the line to open them), and the tertiary details hidden from the candidate cards. The browser remembers it.
-- `npm test` once. It runs the 74 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
-- Have a terminal ready with `npm run compare` for the closing.
+- `pnpm test` once. It runs the 74 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
+- Have a terminal ready with `pnpm run compare` for the closing.
 - Arrow keys switch steps. The budget field reassembles live. The `frozen` button returns to the committed snapshot.
 
 The screen, left to right, four numbered columns with an arrow between each pair: **1 Candidate context** (what the producers sent, colored by outcome) → **2 CWA decisions** (the trace, with a budget meter) → **3 Outbound request** (the payload, or "no model request") → **4 Model answer** (a live call, with the exact request beside it). Each column's header says what it holds: how many items, the trace's counts, the payload's size, whether anything was sent. The masthead's stage rail and the step pills say where you are; both stay on screen as you scroll. Under the header, a strip says what changed since the step you came from, and a candidate card that changed says what it was, so step in order and the strip narrates the script.
@@ -83,7 +83,7 @@ The screen, left to right, four numbered columns with an arrow between each pair
 
 ## Closing
 
-**Run:** `npm run compare` in the terminal. Ten rows, one per step and rendering, three assemblers, all `passed`, all `agree`.
+**Run:** `pnpm run compare` in the terminal. Ten rows, one per step and rendering, three assemblers, all `passed`, all `agree`.
 
 **Say:** Three implementations, three languages, same frozen input, same bytes out. The expectation they are compared with is generated from one of them and reviewed by a person, because three matching assemblers can share a mistake. What the model then does with those bytes is evaluated separately, and that is the next stage: competing sources under a constrained budget, then a tool loop.
 
@@ -137,7 +137,7 @@ Six steps, one question, about fifteen minutes. The page is `/intermediate/`. St
 
 ## Closing
 
-`npm run compare` shows both stages: twenty-two rows, three assemblers, all passed, all agree.
+`pnpm run compare` shows both stages: twenty-two rows, three assemblers, all passed, all agree.
 
 # The advanced stage, as a script
 
@@ -181,18 +181,18 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 ## Closing
 
-`npm test` replays both reference runs through all three assemblers among its 122 checks. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
+`pnpm test` replays both reference runs through all three assemblers among its 122 checks. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
 
 ## If something goes wrong
 
 | Symptom | Do |
 | --- | --- |
 | A provider shows *not configured* | click *re-check* after starting the server; the reason names the variable to set |
-| The answer column says a request failed | the message quotes the server: usually the model name or the key; fix `.env` and restart `npm run inspector` |
-| An assembler shows *not built* | `npm run setup` |
+| The answer column says a request failed | the message quotes the server: usually the model name or the key; fix `.env` and restart `pnpm run inspector` |
+| An assembler shows *not built* | `pnpm run setup` |
 | The badge says *DISAGREE* | that is a finding, not a demo bug: hover the badge for the first difference, and run `node src/harness/cli.mjs run <snapshot> --json` |
 | The page is empty | the server prints the URL it listens on; check `PORT` |
 | Live mode says the producers are not present, or errors | `producers/pyproject.toml` must exist and `uv` must be on the path; the first live run installs the environment, which takes a moment |
-| Live ≠ replay | the corpus or a store changed since the step was frozen: `npm run producers:write`, then `npm run expect -- --from python scenarios/intermediate` |
+| Live ≠ replay | the corpus or a store changed since the step was frozen: `pnpm run producers:write`, then `pnpm run expect --from python scenarios/intermediate` |
 | A live agent run stops with `provider_error` | the model endpoint failed: the detail quotes it; the recorded reference runs still replay |
 | The model never re-checks the status | it is the model's choice; the reference runs show the supersession, and the output contract asks for the most recent check |

@@ -16,7 +16,7 @@ fi
 if [ -f node_modules/@contextwindowarchitecture/assembler/dist/index.js ]; then
   echo "typescript: linked ../cwa-assembler-ts (dist/ present)"
 else
-  echo "typescript: run 'npm install' here and 'npm run build' in ../cwa-assembler-ts; the TypeScript assembler will be skipped" >&2
+  echo "typescript: run 'pnpm install' here and 'npm run build' in ../cwa-assembler-ts; the TypeScript assembler will be skipped" >&2
   status=1
 fi
 

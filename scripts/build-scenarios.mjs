@@ -71,7 +71,7 @@ async function main(check) {
     }
   }
   if (check && stale.length) {
-    console.error(`stale (run npm run scenarios:build):\n  ${stale.join('\n  ')}`);
+    console.error(`stale (run pnpm run scenarios:build):\n  ${stale.join('\n  ')}`);
     return 1;
   }
   if (check) console.log(`${Object.keys(built).length} scenarios are current`);

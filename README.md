@@ -11,10 +11,10 @@ The last mile is the code people already write. The live answers go through the 
 ## Quick start
 
 ```sh
-npm install          # ajv, the Anthropic SDK, and a link to ../cwa-assembler-ts
-npm run setup        # builds the Go adapter into bin/ and checks the Python and TypeScript adapters
-npm test             # 64 tests: compare logic, scenario validity, the 74 vendored conformance snapshots through every adapter, the inspector API
-npm run inspector    # http://localhost:8787
+pnpm install          # ajv, the Anthropic SDK, and a link to ../cwa-assembler-ts
+pnpm run setup        # builds the Go adapter into bin/ and checks the Python and TypeScript adapters
+pnpm test             # 64 tests: compare logic, scenario validity, the 74 vendored conformance snapshots through every adapter, the inspector API
+pnpm run inspector    # http://localhost:8787
 ```
 
 The sibling checkouts are expected at `../cwa-assembler` (Python, run through `uv`), `../cwa-assembler-ts` (built, so `dist/` exists) and `../cwa-assembler-go`. `assemblers.json` names each adapter command and the environment variable that overrides it.
@@ -30,11 +30,11 @@ CWA_DEMO_LOCAL_REASONING_EFFORT=low      # a reasoning model otherwise spends th
 The inspector loads `.env` at startup, and what the file says is what runs. Two commands prove the live path from a terminal, against the real model:
 
 ```sh
-npm run live         # assemble step 3, send the payload to every configured provider, print each answer
-npm run test:live    # the same as a test: an answer with text, not cut off, citing the Pro chunk
+pnpm run live         # assemble step 3, send the payload to every configured provider, print each answer
+pnpm run test:live    # the same as a test: an answer with text, not cut off, citing the Pro chunk
 ```
 
-The test suite's only model is a mock under `test/helpers/`, used by one API test so `npm test` runs without a model; nothing in `src/` refers to it.
+The test suite's only model is a mock under `test/helpers/`, used by one API test so `pnpm test` runs without a model; nothing in `src/` refers to it.
 
 ## The basic stage
 
@@ -64,8 +64,8 @@ Every step has two frozen renderings: `snapshot.json` (`fixture-xml/v1`, for the
 | 6 evidence required | An off-topic question: nothing scores above the threshold, the route requires evidence | `below_threshold`, `evidence_required` with recovery `request_context` |
 
 ```sh
-npm run producers:write      # run the producers and freeze every intermediate step
-npm run producers:check      # fail when a committed snapshot differs from what the producers build now
+pnpm run producers:write      # run the producers and freeze every intermediate step
+pnpm run producers:check      # fail when a committed snapshot differs from what the producers build now
 ```
 
 ## The advanced stage
@@ -88,9 +88,9 @@ node src/harness/cli.mjs replay reference-01-investigate            # every reco
 ## The harness
 
 ```sh
-npm run compare                     # every step, both renderings, every assembler: passed/failed vs expectation, and three-way agreement
-npm run conformance                 # the vendored 52 cases and 22 rejections through every adapter: 52/52 and 22/22 for all three
-npm run expect -- --from python     # regenerate expectations from one assembler
+pnpm run compare                     # every step, both renderings, every assembler: passed/failed vs expectation, and three-way agreement
+pnpm run conformance                 # the vendored 52 cases and 22 rejections through every adapter: 52/52 and 22/22 for all three
+pnpm run expect --from python        # regenerate expectations from one assembler
 node src/harness/cli.mjs run scenarios/basic/04-budget/snapshot.json   # one snapshot, all assemblers, the payload printed
 node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider local   # assemble, then ask a real model
 ```

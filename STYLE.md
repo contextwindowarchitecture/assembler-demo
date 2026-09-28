@@ -2,7 +2,7 @@
 
 This guide records the visual language the inspector shares with the CWA website, so that every page of the demo reads as one family with the site, the spec and the other assets. It is the website's style guide (measured from its pages on 2026-09-28) applied to this app: the tokens, the type, the rules and the hover states are the site's; the components are the inspector's. When a page and this guide disagree, fix the page unless the page is one of the deliberate exceptions named in section 10.
 
-The inspector is plain HTML shells under `src/inspector/public/`, drawn by ES modules, styled by one class-based stylesheet, `src/inspector/public/style.css`. There is no framework, no build step and no inline styling beyond two runtime values (section 9). `npm test` checks the parts of this guide a test can check (section 9).
+The inspector is plain HTML shells under `src/inspector/public/`, drawn by ES modules, styled by one class-based stylesheet, `src/inspector/public/style.css`. There is no framework, no build step and no inline styling beyond two runtime values (section 9). `pnpm test` checks the parts of this guide a test can check (section 9).
 
 ## 1. Character
 
@@ -442,7 +442,7 @@ The pages are static files served by `src/inspector/server.mjs`; the markup is p
 - **Theme** is `data-theme` on `<html>`, `cwa-theme` in `localStorage`. A one-line script in each shell's head applies the stored choice before the first paint; `chrome.js` owns the masthead button `#theme` and its label. **Talk mode** is `data-talk`, `cwa-demo-talk`, the button `#talk`. The landing page runs `public/landing.js`, which only initialises this chrome.
 - **Responsive rules** are `@media (max-width: …)` blocks at the end of the stylesheet, selecting by class, without `!important`.
 - **The pages format; they never decide.** Every status, count, colour and meter segment is read from the trace or the snapshot. A plane comes from a slot id, an outcome from a trace row. No rule here may introduce logic the assemblers own (see `AGENTS.md`).
-- **Verification:** run the `inspector` launch configuration (`npm run inspector`, port 8787) rather than opening files, because the pages fetch from the server. Check both themes with the toggle, talk mode on and off, 1024px and 1440px widths, and a refusal step (basic step 5). Then run `npm test`: `test/inspector-pages.test.mjs` checks that the token block in section 2 appears verbatim in the stylesheet, that no colour literal appears outside it, that nothing declares a shadow, a transition, an animation or a radius other than the pill, that only the two families are used and their files are vendored with their licences, that no page loads anything from the network, that the shells carry no inline style, and that every page carries the theme toggle.
+- **Verification:** run the `inspector` launch configuration (`pnpm run inspector`, port 8787) rather than opening files, because the pages fetch from the server. Check both themes with the toggle, talk mode on and off, 1024px and 1440px widths, and a refusal step (basic step 5). Then run `pnpm test`: `test/inspector-pages.test.mjs` checks that the token block in section 2 appears verbatim in the stylesheet, that no colour literal appears outside it, that nothing declares a shadow, a transition, an animation or a radius other than the pill, that only the two families are used and their files are vendored with their licences, that no page loads anything from the network, that the shells carry no inline style, and that every page carries the theme toggle.
 
 ```mermaid
 flowchart LR
@@ -475,4 +475,4 @@ These are how the inspector differs from the website on purpose. They are record
 6. Use only tokens, only the two typefaces, only the pill radius, and no shadows, gradients, transitions or animations.
 7. Colour a candidate by its plane and an outcome by the ladder in section 3; give every chip its word.
 8. Give any fixed multi-column grid a collapse rule at the end of the stylesheet.
-9. Serve the folder, check light and dark, talk mode, 1024px and 1440px, a refusal step, and run `npm test`.
+9. Serve the folder, check light and dark, talk mode, 1024px and 1440px, a refusal step, and run `pnpm test`.

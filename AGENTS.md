@@ -7,7 +7,7 @@ Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work st
 ## Rules
 
 - **Test-first.** Red, then green, then refactor. Write the failing test, watch it fail for the reason you expect, then make it pass.
-- **Commit unasked at each green step.** One behavior, or one refactor, per commit. Every commit passes `npm test`.
+- **Commit unasked at each green step.** One behavior, or one refactor, per commit. Every commit passes `pnpm test`.
 - **Conventional Commits, signed off.** `git commit -s` with a Conventional Commits subject (`feat:`, `fix:`, `test:`, `docs:`, `chore:`, `refactor:`, `build:`). Scopes: `harness`, `adapters`, `scenarios`, `inspector`, `provider`, `contract`, `docs`.
 - **Never push.** The maintainer publishes commits.
 - **Docs change in the same commit as the behavior.** A commit that changes behavior also updates the README, PLAN.md, DESIGN.md or the comments that describe it.
@@ -23,29 +23,31 @@ Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work st
 
 ## The contract is vendored
 
-`vendor/cwa/` is a copy of the website repository's `schema/`, `contract/` and `conformance/`, pinned by SHA-256 in `vendor/cwa.lock.json`. Don't edit it here. Re-vendor from a committed website checkout with `npm run vendor -- ../website`, and commit the lock change as `build(contract): vendor website <short-sha>`.
+`vendor/cwa/` is a copy of the website repository's `schema/`, `contract/` and `conformance/`, pinned by SHA-256 in `vendor/cwa.lock.json`. Don't edit it here. Re-vendor from a committed website checkout with `pnpm run vendor ../website`, and commit the lock change as `build(contract): vendor website <short-sha>`.
 
 ## Commands
 
 ```sh
-npm install                      # installs ajv and links ../cwa-assembler-ts
-npm run setup                    # builds the Go adapter into bin/, checks the Python and TypeScript adapters
-npm test                         # unit tests, scenario checks, and the harness against every available assembler
-npm run conformance              # the vendored conformance cases through every adapter: the harness's self-check
-npm run scenarios:build          # regenerate every stage's snapshots: the basic generator, then the intermediate producers
-npm run producers:write          # run the intermediate producers (LlamaIndex etc., a uv project under producers/) and freeze the steps
-npm run producers:check          # fail when a committed intermediate snapshot differs from what the producers build now
+pnpm install                      # installs ajv and links ../cwa-assembler-ts
+pnpm run setup                    # builds the Go adapter into bin/, checks the Python and TypeScript adapters
+pnpm test                         # unit tests, scenario checks, and the harness against every available assembler
+pnpm run conformance              # the vendored conformance cases through every adapter: the harness's self-check
+pnpm run scenarios:build          # regenerate every stage's snapshots: the basic generator, then the intermediate producers
+pnpm run producers:write          # run the intermediate producers (LlamaIndex etc., a uv project under producers/) and freeze the steps
+pnpm run producers:check          # fail when a committed intermediate snapshot differs from what the producers build now
 node src/harness/cli.mjs agent 01-investigate --reference                    # re-record a reference run of the advanced stage (real model)
 node src/harness/cli.mjs agent 01-investigate --route incident-agent-reinforced --reference   # the same on the second route
 node src/harness/cli.mjs replay reference-01-investigate                     # replay a recorded run through the assemblers
-npm run expect -- --from python  # regenerate expected payloads and traces from the reference assembler
-npm run compare                  # every scenario through every assembler, against expectations and each other
-npm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
-npm run live                     # step 3 through the assemblers, then to every configured provider: real model answers on the terminal
-npm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
+pnpm run expect --from python     # regenerate expected payloads and traces from the reference assembler
+pnpm run compare                  # every scenario through every assembler, against expectations and each other
+pnpm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
+pnpm run live                     # step 3 through the assemblers, then to every configured provider: real model answers on the terminal
+pnpm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
 ```
 
-The intermediate stage's producers are Python under `producers/`, run with `uv run --directory producers`; their data is under `scenarios/intermediate/source/`. A change to the corpus, a store or a producer means `npm run producers:write`, then `npm run expect -- --from python scenarios/intermediate`, and the tests will say so.
+pnpm is the package manager: `packageManager` in package.json pins its version, and the TypeScript assembler is a `link:` dependency, so a rebuild in `../cwa-assembler-ts` reaches this app without a reinstall. Don't run `npm install` here: it writes its own lockfile and a different layout, and `test/toolchain.test.mjs` will say so.
+
+The intermediate stage's producers are Python under `producers/`, run with `uv run --directory producers`; their data is under `scenarios/intermediate/source/`. A change to the corpus, a store or a producer means `pnpm run producers:write`, then `pnpm run expect --from python scenarios/intermediate`, and the tests will say so.
 
 The advanced stage's MCP servers are under `mcp/servers/` and the controller under `src/agent/`. Reference runs are recorded against a real model and committed; live runs (`scenarios/advanced/runs/live-*`) are ignored. A change to the controller, the policy or the services means re-recording the reference runs with `--reference`, since the recorded snapshots carry the instructions and the grant.
 

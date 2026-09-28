@@ -24,7 +24,7 @@ test('the generated snapshots are current with scenarios/basic/source', async ()
   const built = await buildScenarios();
   for (const [id, { files }] of Object.entries(built)) {
     for (const [name, content] of Object.entries(files)) {
-      assert.equal(await readFile(path.join(ROOT, 'scenarios', 'basic', id, name), 'utf8'), content, `${id}/${name} is stale: run npm run scenarios:build`);
+      assert.equal(await readFile(path.join(ROOT, 'scenarios', 'basic', id, name), 'utf8'), content, `${id}/${name} is stale: run pnpm run scenarios:build`);
     }
   }
 });
@@ -46,7 +46,7 @@ for (const scenario of scenarios) {
     });
 
     test(`${label}: the expectation is present, valid, and consistent with the snapshot`, () => {
-      assert.ok(variant.expected, `no expected trace: run npm run expect -- --from python`);
+      assert.ok(variant.expected, `no expected trace: run pnpm run expect --from python`);
       const { payload, trace } = variant.expected;
       assert.ok(validateTrace(trace), problems(validateTrace).join('; '));
       assert.equal(trace.context.snapshot_digest, snapshotDigest(snapshot), 'the expected trace is for another snapshot');

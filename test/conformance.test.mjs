@@ -17,7 +17,7 @@ const { cases, rejections } = await loadConformance(path.join(ROOT, 'vendor', 'c
 const items = [...cases, ...rejections].filter(item => !process.env.CWA_DEMO_QUICK || QUICK.includes(item.id));
 
 for (const [id, assembler] of Object.entries(assemblers)) {
-  test(`${id} adapter is available`, { skip: assembler.available ? false : `missing ${assembler.missing.join(', ')}; run npm run setup` }, () => {
+  test(`${id} adapter is available`, { skip: assembler.available ? false : `missing ${assembler.missing.join(', ')}; run pnpm run setup` }, () => {
     assert.ok(assembler.available);
   });
 }

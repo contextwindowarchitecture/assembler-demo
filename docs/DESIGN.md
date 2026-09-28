@@ -169,17 +169,18 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 
 ## Testing
 
-`npm test` runs, in about four seconds:
+`pnpm test` runs, in about four seconds:
 
 - `compare.test.mjs`: the judging rules on hand-built traces, including UTF-16 key order.
 - `contract-lock.test.mjs`: every vendored file matches its SHA-256; nothing unlocked.
+- `toolchain.test.mjs`: pnpm is pinned, its lockfile is the only one, and the installed TypeScript assembler is `../cwa-assembler-ts` itself, not a copy.
 - `conformance.test.mjs`: the 74 vendored snapshots through every available assembler, judged as the reference runner judges them, and three-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.
 - `scenarios.test.mjs`: schema validity, generated files current, expectations consistent (hash, digest, reason codes).
 - `inspector.test.mjs`: the API on an ephemeral port, with a mock OpenAI-compatible server so the local-model path runs end to end over HTTP.
 - `mcp.test.mjs`, `guard.test.mjs`, `agent.test.mjs`, `replay.test.mjs`: the servers over stdio (proposals, the timeline, a timeout as a result), the guard's decisions, the controller with a scripted model (observations enter the next turn, supersession, a denial never executed, a timeout observed, the bounds), and the reference runs replayed through every assembler.
 - `producers.test.mjs`: the committed intermediate snapshots are current (`freeze --check`), every step records its producers' report with LlamaIndex named, and a live run reproduces the frozen digest.
 - `provider.test.mjs`, `provider-chat.test.mjs`: request mapping, status from the environment, dispatch, and error reporting, with the SDK client and `fetch` injected.
-- `live.test.mjs` (`npm run test:live`, off by default): the step 3 request to every provider `.env` configures, against the real model. It asserts what the demo needs: text, not cut off, and the Pro citation. Model output varies, so this is a readiness check for the talk, not part of the commit gate.
+- `live.test.mjs` (`pnpm run test:live`, off by default): the step 3 request to every provider `.env` configures, against the real model. It asserts what the demo needs: text, not cut off, and the Pro citation. Model output varies, so this is a readiness check for the talk, not part of the commit gate.
 
 The rule in AGENTS.md holds: before a test is trusted, the code is broken on purpose and the test watched failing.
 

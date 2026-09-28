@@ -1,5 +1,5 @@
 // Real models, on purpose: every provider .env configures gets the step 3 request and must answer. Off unless
-// CWA_DEMO_LIVE=1 (npm run test:live), since it needs a running model and is as fast as the model is. What it asserts
+// CWA_DEMO_LIVE=1 (pnpm run test:live), since it needs a running model and is as fast as the model is. What it asserts
 // is what the demo needs: an answer with text, not cut off, and the citation the instructions demand.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';

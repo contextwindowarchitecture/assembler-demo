@@ -91,7 +91,7 @@ export function select(assemblers, names) {
   for (const name of names) {
     const assembler = assemblers[name];
     if (!assembler) throw new Error(`no assembler ${name}; assemblers.json names ${Object.keys(assemblers).join(', ')}`);
-    if (!assembler.available) throw new Error(`${name} is not available: missing ${assembler.missing.join(', ')} (run npm run setup)`);
+    if (!assembler.available) throw new Error(`${name} is not available: missing ${assembler.missing.join(', ')} (run pnpm run setup)`);
     chosen[name] = assembler;
   }
   return chosen;

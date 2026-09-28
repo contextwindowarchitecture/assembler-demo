@@ -112,3 +112,11 @@ a.brand-name { color: var(--text); text-decoration: none; }
 .stage-card .question { color: var(--accent); font-size: 15px; margin: 0 0 8px; }
 .stage-card p { margin: 0 0 8px; }
 .stage-card.planned { opacity: .7; }
+.producers-strip { padding: 4px 20px 0; }
+.producers-head { display: flex; align-items: baseline; gap: 12px; }
+.producer-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 4px; }
+.producer-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+.producer-card .pipeline { margin: 4px 0 6px; padding-left: 18px; color: var(--muted); }
+.producer-card .pipeline li { margin: 1px 0; }
+.producer-card details { margin-top: 6px; }
+.producer-card summary { cursor: pointer; color: var(--muted); font-size: 12px; }

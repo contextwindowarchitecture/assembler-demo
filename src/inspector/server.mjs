@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { loadAssemblers, ROOT, runAll, select } from '../harness/adapters.mjs';
 import { loadScenarios, VARIANTS } from '../harness/cases.mjs';
 import { agreement, compareResult } from '../harness/compare.mjs';
+import { produce, producersAvailable } from '../harness/producers.mjs';
 import { loadDotEnv } from '../env.mjs';
 import { answer, describeProviders } from '../provider/index.mjs';
 import { snippets } from '../provider/snippets.mjs';
@@ -71,6 +72,34 @@ async function assemble(body, assemblers) {
   };
 }
 
+/** POST /api/produce: {scenario, variant, assemblers?}. Runs the stage's producers now, assembles what they built,
+ * and says whether the live snapshot's digest equals the frozen one's: live production and replay agree. */
+async function produceAndAssemble(body, assemblers) {
+  const scenario = await findScenario(body.scenario);
+  const variant = scenario.variants.find(v => v.name === (body.variant ?? 'fixture'));
+  if (!variant) throw new HttpError(404, `scenario ${scenario.id} has no ${body.variant} rendering`);
+  if (!producersAvailable()) throw new HttpError(409, 'the producers project is not present (producers/pyproject.toml)');
+  let live;
+  try { live = await produce(scenario.meta.id); } catch (error) { throw new HttpError(502, error.message); }
+  const snapshot = variant.name === 'messages' ? live.snapshot_messages : live.snapshot;
+  const bytes = Buffer.from(JSON.stringify(snapshot, null, 2) + '\n', 'utf8');
+  let chosen;
+  try { chosen = select(assemblers, body.assemblers); } catch (error) { throw new HttpError(400, error.message); }
+  const results = await runAll(chosen, bytes);
+  const liveDigest = results.find(r => r.trace)?.trace.context.snapshot_digest ?? null;
+  const frozenDigest = variant.expected?.trace.context.snapshot_digest ?? null;
+  return {
+    scenario: scenario.id, variant: variant.name, live: true, derived: false, snapshot,
+    report: live.report,
+    results: results.map(publicResult),
+    agreement: agreement(results),
+    expectation: variant.expected
+      ? { ...scenario.meta.expectations, results: results.map(r => ({ assembler: r.assembler, ...compareResult(r, variant.expected) })) }
+      : null,
+    replay: { frozen_digest: frozenDigest, live_digest: liveDigest, matches: frozenDigest !== null && frozenDigest === liveDigest },
+  };
+}
+
 async function handle(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const assemblers = await loadAssemblers();
@@ -79,6 +108,7 @@ async function handle(req, res) {
     return json(res, 200, {
       assemblers: Object.values(assemblers).map(({ id, language, name, available, missing }) => ({ id, language, name, available, missing })),
       providers: await describeProviders(),
+      producers: { available: producersAvailable() },
       scenarios: scenarios.map(s => ({ id: s.id, meta: s.meta, variants: s.variants.map(v => v.name) })),
     });
   }
@@ -92,6 +122,7 @@ async function handle(req, res) {
     return send(res, 200, variant.snapshot, MIME['.json']);
   }
   if (req.method === 'POST' && url.pathname === '/api/assemble') return json(res, 200, await assemble(await readJsonBody(req), assemblers));
+  if (req.method === 'POST' && url.pathname === '/api/produce') return json(res, 200, await produceAndAssemble(await readJsonBody(req), assemblers));
   if (req.method === 'POST' && url.pathname === '/api/answer') {
     const body = await readJsonBody(req);
     if (typeof body.payload !== 'string') throw new HttpError(400, 'a live answer needs the payload of a successful cwa-messages/v1 assembly');

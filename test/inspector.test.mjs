@@ -99,6 +99,18 @@ test('POST /api/assemble reports a refusal as a result with a null payload', asy
   assert.equal(result.trace.refused.reason, 'protected_content_over_budget');
 });
 
+test('POST /api/produce runs the producers live, assembles the result, and matches the frozen digest', { timeout: 120_000 }, async () => {
+  const { status, body } = await post('/api/produce', { scenario: 'intermediate/03-memory', variant: 'fixture', assemblers: ['python'] });
+  assert.equal(status, 200, body.error);
+  assert.equal(body.live, true);
+  assert.equal(body.report['kb-search'].framework, 'LlamaIndex');
+  assert.equal(body.results[0].outcome, 'assembled');
+  assert.ok(body.results[0].trace.excluded.some(row => row.item_id === 'mem:u_77:tone' && row.reason === 'out_of_scope'));
+  assert.equal(body.replay.matches, true, `live ${body.replay.live_digest} vs frozen ${body.replay.frozen_digest}`);
+  assert.equal(body.expectation.results[0].outcome, 'passed');
+  assert.equal((await post('/api/produce', { scenario: 'basic/01-clean' })).status, 502, 'the basic stage has no producers to run');
+});
+
 test('POST /api/assemble rejects unknown scenarios and assemblers', async () => {
   assert.equal((await post('/api/assemble', { scenario: 'basic/nope' })).status, 404);
   assert.equal((await post('/api/assemble', { scenario: 'basic/01-clean', assemblers: ['cobol'] })).status, 400);

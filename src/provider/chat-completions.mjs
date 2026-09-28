@@ -76,6 +76,15 @@ export async function listModels({ baseUrl, apiKey, client, timeoutMs = 1500 } =
   }
 }
 
+/** Tool calls in one shape for the application: {id, name, arguments}, with the arguments parsed (never string-matched). */
+export function normaliseToolCalls(calls) {
+  return (calls ?? []).map(call => {
+    let args;
+    try { args = JSON.parse(call.function?.arguments ?? '{}'); } catch { args = { _unparsable: call.function?.arguments }; }
+    return { id: call.id, name: call.function?.name, arguments: args };
+  });
+}
+
 /** Send the request with `client.chat.completions.create` and return the answer with the request that produced it. */
 export async function answer(payloadText, { baseUrl, apiKey, model, maxTokens, maxTokensField, extra, client } = {}) {
   const request = toRequest(payloadText, { model, maxTokens, maxTokensField, extra });
@@ -94,7 +103,7 @@ export async function answer(payloadText, { baseUrl, apiKey, model, maxTokens, m
     request: { url, ...request },
     text: choice.message?.content ?? '',
     reasoning: choice.message?.reasoning_content ?? choice.message?.reasoning ?? null,
-    tool_calls: choice.message?.tool_calls ?? [],
+    tool_calls: normaliseToolCalls(choice.message?.tool_calls),
     model: completion.model ?? request.model,
     stop_reason: choice.finish_reason ?? null,
     stop_details: null,

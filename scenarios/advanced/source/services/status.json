@@ -1,0 +1,9 @@
+{
+  "$comment": "The service-status service behind the status MCP server. Each region has a timeline: successive calls return successive entries (the last one repeats), so a run can observe an incident and then its resolution, and the assembler can supersede the earlier observation. A fault entry makes the call fail that way once.",
+  "eu": [
+    { "state": "degraded", "incident": "INC-2041", "severity": 2, "summary": "Elevated API error rates in the EU region; in-app chat delayed. Engineers are rolling back a deployment.", "updated": "2026-09-28T15:41:00Z" },
+    { "state": "operational", "incident": "INC-2041", "severity": 2, "summary": "The EU rollback completed; API error rates are back to baseline. A post-incident summary will be published on the status page.", "updated": "2026-09-28T15:52:00Z" }
+  ],
+  "us": [ { "state": "operational", "incident": null, "severity": null, "summary": "All systems operational.", "updated": "2026-09-28T15:30:00Z" } ],
+  "apac": [ { "state": "operational", "incident": null, "severity": null, "summary": "All systems operational.", "updated": "2026-09-28T15:30:00Z" } ]
+}

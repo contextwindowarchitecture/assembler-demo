@@ -1,0 +1,8 @@
+{
+  "$comment": "The ticketing service behind the tickets MCP server: each user's recent tickets.",
+  "u_1042": [
+    { "id": "T-88213", "opened": "2026-09-27T09:12:00Z", "severity": 3, "status": "open", "subject": "Webhook deliveries retried late", "last_update": "2026-09-27T16:40:00Z" },
+    { "id": "T-87990", "opened": "2026-09-20T11:03:00Z", "severity": 4, "status": "closed", "subject": "Invoice shows the old seat count", "last_update": "2026-09-21T08:15:00Z" }
+  ],
+  "u_77": []
+}

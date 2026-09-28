@@ -1,0 +1,14 @@
+{
+  "$comment": "The application's capability policy for the incident-agent route: the versioned allow-list of tools the model may be offered, and the scope rule each call must satisfy. MCP servers propose tools; only this policy grants them (R-15), and the guard checks every request before a call is made.",
+  "policy_producer": "capability-policy",
+  "allow_list_version": "incident-agent/v2",
+  "granted": {
+    "cap:get_account": { "server": "accounts", "tool": "get_account", "scope": { "user_id": "request.user" } },
+    "cap:get_service_status": { "server": "status", "tool": "get_service_status", "scope": { "region": "account.region" } },
+    "cap:list_tickets": { "server": "tickets", "tool": "list_tickets", "scope": { "user_id": "request.user" } }
+  },
+  "not_granted": {
+    "$comment": "Tools the servers expose that this route never offers the model. close_ticket changes state; it needs a human.",
+    "close_ticket": "changes state; not on this route"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "$comment": "The account service behind the accounts MCP server.",
+  "u_1042": { "tenant": "acme", "name": "Workspace 4a9f", "plan": "pro", "seats": 12, "region": "eu", "renewal": "2027-03-01", "support_contact": "ops@workspace4a9f.example" },
+  "u_77": { "tenant": "acme", "name": "Workspace 21c0", "plan": "free", "seats": 2, "region": "us", "renewal": null, "support_contact": "priya@workspace21c0.example" }
+}

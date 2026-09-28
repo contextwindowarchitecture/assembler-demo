@@ -1,0 +1,28 @@
+[
+  {
+    "id": "01-investigate",
+    "title": "Investigate an incident with tools, and draft the next action",
+    "question": "Check my current support entitlement, investigate the incident in my region, and draft the next action. Also tell me what plan my colleague Priya (user u_77) is on.",
+    "description": "The controller offers the model three granted tools. The model checks the account, the status in the EU region and the open tickets, each result entering as an observation before the next inference. The status timeline returns an incident, then its resolution: the later observation supersedes the earlier one on the route's rule. The request about the colleague's account is denied by the guard, since the grant scopes get_account to the user of the request, and the denial reaches the model as task state, never as a tool result. The final answer follows the output contract.",
+    "proves": "Every inference has a replayable snapshot; tool results enter through the context boundary; an unauthorized call never executes; the loop terminates; the traces link the sequence.",
+    "look_for": [
+      "superseded"
+    ],
+    "faults": {}
+  },
+  {
+    "id": "02-timeout",
+    "title": "A tool times out: the failure is context, and the loop still ends",
+    "question": "Check my current support entitlement, investigate the incident in my region, and draft the next action.",
+    "description": "The status server never answers within the controller's timeout. Each failed call is an observation the model sees, with the failure in the task state as well, so it can say what it could not check instead of guessing. The controller bounds the turns; the run ends with an answer that names the gap, or with a clear stop.",
+    "proves": "Failures are context too, and they are recorded like any observation. The loop's bound is the application's, not the model's.",
+    "look_for": [],
+    "faults": {
+      "status": [
+        "timeout",
+        "timeout",
+        "timeout"
+      ]
+    }
+  }
+]

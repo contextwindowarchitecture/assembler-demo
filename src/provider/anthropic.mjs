@@ -98,10 +98,12 @@ export async function answer(payloadText, { maxTokens, model: chosen, client, en
     throw describe(error);
   }
   const text = response.content.filter(block => block.type === 'text').map(block => block.text).join('');
+  const toolCalls = response.content.filter(block => block.type === 'tool_use').map(block => ({ id: block.id, name: block.name, arguments: block.input ?? {} }));
   const fallbacks = response.content.filter(block => block.type === 'fallback').map(block => `${block.from?.model} declined; ${block.to?.model} continued`);
   return {
     request: params,
     text,
+    tool_calls: toolCalls,
     model: response.model,
     stop_reason: response.stop_reason,
     stop_details: response.stop_reason === 'refusal' ? response.stop_details ?? null : null,

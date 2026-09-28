@@ -1,0 +1,27 @@
+{
+  "$comment": "What every run of the advanced stage shares. Each inference freezes its own snapshot with the controller's clock for that turn; a recorded run replays those snapshots exactly.",
+  "scope": {
+    "tenant": "acme",
+    "user": "u_1042",
+    "session": "s_104",
+    "task": "incident_investigation"
+  },
+  "tokenizer": "fixture-whitespace/v1",
+  "renderers": {
+    "fixture": "fixture-xml/v1",
+    "messages": "cwa-messages/v1"
+  },
+  "budget": {
+    "input": 1400,
+    "reserved_output": 1200
+  },
+  "controller": {
+    "max_turns": 7,
+    "max_recoveries": 2,
+    "tool_timeout_ms": 2000
+  },
+  "retrieval": {
+    "query": "incident response severity escalation response target Pro plan",
+    "top_k": 3
+  }
+}

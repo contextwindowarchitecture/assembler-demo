@@ -7,3 +7,4 @@ bin/
 __pycache__/
 .env
 producers/.venv/
+scenarios/advanced/runs/live-*/

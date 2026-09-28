@@ -7,6 +7,8 @@
 //   cwa-demo expect --from <assembler> [scenarios]
 //   cwa-demo conformance [--assembler ...] [--dir vendor/cwa/conformance]
 //   cwa-demo answer <snapshot.messages.json> [--assembler python] [--provider local|anthropic|openai|all]
+//   cwa-demo agent <scenario> [--provider local] [--assembler python] [--faults '{"status":["timeout"]}'] [--id name] [--reference]
+//   cwa-demo replay <run-id> [--assembler a,b]
 import { existsSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -23,6 +25,9 @@ const USAGE = `usage:
   cwa-demo conformance [--assembler a,b] [--dir <conformance>]  the vendored conformance cases: the harness's self-check
   cwa-demo answer <snapshot.messages.json> [--assembler a] [--provider p|all] [--json]
                                                                 assemble, then send the payload to a real model and print its answer
+  cwa-demo agent <scenario> [--provider p] [--assembler a] [--faults json] [--id name] [--reference]
+                                                                run the advanced stage's tool loop against a real model and record it
+  cwa-demo replay <run-id> [--assembler a,b]                    every recorded inference through the assemblers, against its recorded trace
 `;
 
 function parseArgs(argv) {
@@ -30,7 +35,8 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--json') flags.json = true;
-    else if (arg === '--assembler' || arg === '--from' || arg === '--dir' || arg === '--provider') flags[arg.slice(2)] = argv[++i];
+    else if (arg === '--reference') flags.reference = true;
+    else if (arg === '--assembler' || arg === '--from' || arg === '--dir' || arg === '--provider' || arg === '--faults' || arg === '--id') flags[arg.slice(2)] = argv[++i];
     else if (arg.startsWith('--')) throw new Error(`unknown flag ${arg}`);
     else positional.push(arg);
   }
@@ -209,7 +215,54 @@ async function answer({ positional, flags }, assemblers) {
   return failures === 0 ? 0 : 1;
 }
 
-const COMMANDS = { run, compare, expect, conformance, answer };
+/** Run the advanced stage's controller against a real model, printing the timeline, and record the run. */
+async function agent({ positional, flags }) {
+  const { runAgent } = await import('../agent/controller.mjs');
+  const { saveRun } = await import('../agent/store.mjs');
+  const [scenarioId] = positional;
+  if (!scenarioId) throw new Error('agent needs a scenario id (see scenarios/advanced/source/scenarios.json)');
+  let faults;
+  if (flags.faults) { try { faults = JSON.parse(flags.faults); } catch { throw new Error('--faults takes JSON, for example {"status":["timeout"]}'); } }
+  const assemblerId = flags.assembler?.[0] ?? 'python';
+  const run = await runAgent({
+    scenarioId, providerId: flags.provider ?? 'local', assemblerId, faults, id: flags.id, reference: flags.reference === true,
+    onTurn: turn => {
+      const model = turn.response ? `${turn.response.model} · ${turn.response.durationMs} ms · ${turn.response.tool_calls.length ? turn.response.tool_calls.map(c => `${c.name}(${JSON.stringify(c.arguments)})`).join(', ') : 'answer'}` : '';
+      console.log(`turn ${turn.n}  ${turn.outcome}${turn.trace?.refused?.reason ? ` ${turn.trace.refused.reason}` : ''}${turn.trace?.result ? ` ${turn.trace.result.input_tokens} tokens` : ''}  ${model}`);
+      for (const r of turn.tool_requests) console.log(`         ${r.decision.toUpperCase().padEnd(8)} ${r.call.name}(${JSON.stringify(r.call.arguments)}) ${r.executed ? `-> observation ${r.observation} in ${r.ms} ms` : `-> ${r.reason}`}`);
+      if (turn.recovery) console.log(`         recovery: ${turn.recovery.reason} (${turn.recovery.action ?? 'no action'})`);
+    },
+  });
+  const dir = await saveRun(run);
+  console.log(`\nstop: ${run.stop.reason} at turn ${run.stop.turn}: ${run.stop.detail}`);
+  if (run.answer) console.log(`\n--- answer (${run.validation.ok ? 'follows the output contract' : `misses ${run.validation.missing.join(', ')}`}) ---\n${run.answer}`);
+  console.log(`\nrecorded: ${path.relative(ROOT, dir)}/run.json · ${run.turns.length} turns, ${run.observations.length} observations, ${run.denials.length} denied`);
+  return run.stop.reason === 'answer' || run.stop.reason === 'refused' ? 0 : 1;
+}
+
+/** Replay a recorded run: every recorded snapshot through the chosen assemblers, judged against the recorded trace. */
+async function replay({ positional, flags }, assemblers) {
+  const { loadRun } = await import('../agent/store.mjs');
+  const [id] = positional;
+  const run = id ? await loadRun(id) : null;
+  if (!run) throw new Error(`no recorded run ${id}`);
+  const chosen = select(assemblers, flags.assembler);
+  let failures = 0;
+  const rows = [];
+  for (const turn of run.turns) {
+    const bytes = Buffer.from(JSON.stringify(turn.snapshot, null, 2) + '\n', 'utf8');
+    const results = await runAll(chosen, bytes);
+    const expected = turn.trace ? { payload: turn.payload === null ? null : Buffer.from(turn.payload, 'utf8'), trace: turn.trace } : null;
+    const judged = results.map(r => ({ assembler: r.assembler, ...(expected ? compareResult(r, expected) : { outcome: 'no expectation' }) }));
+    const agree = agreement(results);
+    failures += judged.filter(j => j.outcome === 'failed').length + (agree.agree ? 0 : 1);
+    rows.push([`turn ${turn.n}`, turn.outcome, ...judged.map(j => j.outcome + (j.detail ? ` (${j.detail})` : '')), agree.agree ? 'agree' : 'DISAGREE']);
+  }
+  console.log(table([['inference', 'recorded', ...Object.keys(chosen), 'agreement'], ...rows]));
+  return failures === 0 ? 0 : 1;
+}
+
+const COMMANDS = { run, compare, expect, conformance, answer, agent, replay };
 
 async function main(argv) {
   const parsed = parseArgs(argv);

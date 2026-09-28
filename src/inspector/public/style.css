@@ -120,3 +120,6 @@ a.brand-name { color: var(--text); text-decoration: none; }
 .producer-card .pipeline li { margin: 1px 0; }
 .producer-card details { margin-top: 6px; }
 .producer-card summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+.scenario .meta { max-width: min(48ch, 42%); }
+.scenario .meta .mono { word-break: break-word; }
+@media (max-width: 900px) { .scenario { grid-template-columns: 1fr; } .scenario .meta { max-width: none; text-align: left; } }

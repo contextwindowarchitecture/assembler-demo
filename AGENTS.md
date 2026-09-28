@@ -35,6 +35,8 @@ npm run conformance              # the vendored conformance cases through every 
 npm run scenarios:build          # regenerate every stage's snapshots: the basic generator, then the intermediate producers
 npm run producers:write          # run the intermediate producers (LlamaIndex etc., a uv project under producers/) and freeze the steps
 npm run producers:check          # fail when a committed intermediate snapshot differs from what the producers build now
+node src/harness/cli.mjs agent 01-investigate --provider local --reference   # re-record a reference run of the advanced stage (real model)
+node src/harness/cli.mjs replay reference-01-investigate                     # replay a recorded run through the assemblers
 npm run expect -- --from python  # regenerate expected payloads and traces from the reference assembler
 npm run compare                  # every scenario through every assembler, against expectations and each other
 npm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
@@ -43,6 +45,8 @@ npm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); ne
 ```
 
 The intermediate stage's producers are Python under `producers/`, run with `uv run --directory producers`; their data is under `scenarios/intermediate/source/`. A change to the corpus, a store or a producer means `npm run producers:write`, then `npm run expect -- --from python scenarios/intermediate`, and the tests will say so.
+
+The advanced stage's MCP servers are under `mcp/servers/` and the controller under `src/agent/`. Reference runs are recorded against a real model and committed; live runs (`scenarios/advanced/runs/live-*`) are ignored. A change to the controller, the policy or the services means re-recording the reference runs with `--reference`, since the recorded snapshots carry the instructions and the grant.
 
 The sibling checkouts are expected at `../cwa-assembler` (Python, with its `.venv` or `uv`), `../cwa-assembler-ts` (built: `dist/` present) and `../cwa-assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
 

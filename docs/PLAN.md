@@ -18,7 +18,7 @@ That view separates a producer error from an assembler error from an adapter err
 | M4 Live model | Three providers through the official Anthropic and OpenAI SDKs (the local server through the OpenAI SDK's `baseURL`); captured outbound request; answer column; the request as SDK code in TypeScript and Python | done; verified against a local gpt-oss-20b through both API styles |
 | M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | done |
 | Intermediate | Competing sources under a constrained budget: LlamaIndex retrieval, an account database, a memory store, history with summaries, declared conflicts, dedupe, diversity, required evidence; live or replayed producers | done; expectations await review |
-| Advanced | A bounded tool loop with authorization, checkpoints and replay | after intermediate |
+| Advanced | A bounded tool loop over three MCP servers: capability policy, guard, observations as evidence with supersession, task state, bounded recovery, every inference recorded and replayed; two reference runs against a real model | done; the second route with its own profile remains |
 
 ## Decisions
 
@@ -116,9 +116,13 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 
 **Question:** *Given my account and our previous conversation, what support am I entitled to?* **Route:** `support-entitlement/v1`: requires evidence (one chunk at least), exact deduplication and two chunks per source on evidence, a fact policy for `plan` (state service before memory store), instruction conflicts surfaced, history compressed before evidence, `state.user` protected. **Producers:** `producers/` (see DESIGN.md), run live or replayed. **Steps:** retrieval with copies and an expired edition; a wider retrieval with the diversity cap and a foreign tenant; an expired and a leaked memory; the plan conflict and the surfaced citation conflict; summaries under budget; and an off-topic question refused for lack of evidence. The scenario tests, the producer tests and `compare` cover all six in both renderings.
 
+## The advanced stage
+
+**Question:** *Check my current support entitlement, investigate the incident in my region, and draft the next action.* **Route:** `incident-agent/v1`: requires evidence; `evidence.tool_results` superseded by source and aged out after an hour; `state.user` and `state.task` protected; an output contract placed. **Tools:** three MCP servers propose four tools; `capabilities.json` grants three with scope rules. **Controller:** `src/agent/controller.mjs`, at most seven turns and two recoveries, a two-second tool timeout. **Runs:** `reference-01-investigate` and `reference-02-timeout`, recorded against the local gpt-oss-20b, committed under `scenarios/advanced/runs/`, replayed by the tests through every assembler. **Not yet:** the brief's second route with its own placement profile, and persisting the memory proposal.
+
 ## Reuse in the later stages
 
-The harness, the inspector's shared columns and the provider adapters did not change for the intermediate stage, and will not for the advanced one. The advanced stage adds a controller around a third page: a capability policy, MCP tool producers whose results enter as `evidence.tool_results` with `supersede: source` on the route, bounded turns with authorization outside the model, and a replay store that feeds every recorded snapshot back through the harness.
+The harness, the inspector's shared columns and the provider adapters did not change across the three stages. What each stage added sits at its own boundary: fixtures, then producers, then a controller around the assembler.
 
 ## Open questions for the maintainer
 

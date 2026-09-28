@@ -138,6 +138,40 @@ Six steps, one question, about fifteen minutes. The page is `/intermediate/`. St
 
 `npm run compare` shows both stages: twenty-two rows, three assemblers, all passed, all agree.
 
+# The advanced stage, as a script
+
+Two recorded runs and one live one, about twelve minutes. The page is `/advanced/`. Open `reference-01-investigate` first.
+
+**Say:** Now the context changes while we work. The model has tools. Three MCP servers propose four tools; the application's capability policy grants three, and `close_ticket` is never offered, whatever the server says. Every tool request goes through the guard before anything is called.
+
+## Run 1: investigate
+
+**Point at:** the timeline. Turn 1: the model asks for the account; approved, observation 1. Turn 2: it asks for the colleague's account, `u_77`. **Denied**: the grant scopes `get_account` to the user of the request. It never ran. Click turn 3 and open the task state item in the candidates: the denial is there, written by the controller, which is the only way the model learns of it.
+
+**Point at:** turn 3, status: degraded, incident INC-2041. Turn 4, status again: operational. Click turn 5 and open the decisions: observation 2 is `superseded` by observation 4, the route's rule for the same call. The model reasons from the latest.
+
+**Point at:** the request column on any turn: one user message. The model's earlier turns are inside it as history. The tools are in the tools channel, from the grant.
+
+**Point at:** the answer on turn 5: three sections, the contract; the colleague's plan named as unchecked.
+
+**Click:** *Replay through all three*. Every turn badges: three assemblers agree and match the trace recorded at the time.
+
+**Ask:** which part of this would you trust the model with? None of it decided what it was allowed to do.
+
+## Run 2: timeout
+
+**Open** `reference-02-timeout`. **Point at:** turns 2, 3 and 5: the status server timed out three times. Each is an observation with an error body and a line in the task state. Turn 6: it answered; open turn 7's decisions: the three failures are `superseded` by the success. The answer says what happened.
+
+**Say:** failures are context. The bound on turns is the controller's; the model did not get to decide when to stop.
+
+## Live
+
+**Click:** *Run live* with the local model on `01-investigate`. Twenty to forty seconds; the timeline fills. It will differ from the reference in wording and maybe in the order of calls, and it will not differ in what was allowed. Replay it.
+
+## Closing
+
+`npm test` replays both reference runs through all three assemblers among its 122 checks. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
+
 ## If something goes wrong
 
 | Symptom | Do |
@@ -149,3 +183,5 @@ Six steps, one question, about fifteen minutes. The page is `/intermediate/`. St
 | The page is empty | the server prints the URL it listens on; check `PORT` |
 | Live mode says the producers are not present, or errors | `producers/pyproject.toml` must exist and `uv` must be on the path; the first live run installs the environment, which takes a moment |
 | Live ≠ replay | the corpus or a store changed since the step was frozen: `npm run producers:write`, then `npm run expect -- --from python scenarios/intermediate` |
+| A live agent run stops with `provider_error` | the model endpoint failed: the detail quotes it; the recorded reference runs still replay |
+| The model never re-checks the status | it is the model's choice; the reference runs show the supersession, and the output contract asks for the most recent check |

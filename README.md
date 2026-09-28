@@ -68,6 +68,20 @@ npm run producers:write      # run the producers and freeze every intermediate s
 npm run producers:check      # fail when a committed snapshot differs from what the producers build now
 ```
 
+## The advanced stage
+
+*Check my current support entitlement, investigate the incident in my region, and draft the next action.* Context evolves through a bounded tool loop, and the pieces are real: three **MCP** servers (the official SDK, stdio) over local services propose tools; the application's **capability policy** grants three of them and never offers `close_ticket`; the **guard** authorizes every request the model makes, against the grant, the tool's schema and a scope rule, before any call; each observation enters the next inference as `evidence.tool_results`, and the route keeps the latest observation of a call. The model's earlier turns are history inside the one user message. The controller bounds turns and recoveries and records every inference. Reference runs recorded against a local gpt-oss-20b are committed and replay through all three assemblers.
+
+| Run | What happens |
+| --- | --- |
+| `reference-01-investigate` | account checked; a request for a colleague's account **denied** by the guard and reported to the model as task state; status checked, then re-checked, the later observation superseding the first; an answer in the output contract that says what could not be checked |
+| `reference-02-timeout` | the status server times out three times; each failure is an observation and task state; the eventual success supersedes them; the answer names the gap |
+
+```sh
+node src/harness/cli.mjs agent 01-investigate --provider local      # run the loop against a real model and record it
+node src/harness/cli.mjs replay reference-01-investigate            # every recorded inference through the assemblers
+```
+
 ## The harness
 
 ```sh
@@ -89,7 +103,10 @@ Comparison follows `conformance/README.md`: payloads byte for byte; traces field
 | `scenarios/basic/source/` | The route policy, the two profiles, the clean fixture's batches, and each step's additions |
 | `scenarios/basic/NN-step/` | Generated snapshots, `scenario.json`, and the expected payloads and traces |
 | `scenarios/intermediate/source/` | The corpus (markdown with front matter), the account, memory and history stores, the summaries, the route policy, the profiles and the step specs |
-| `producers/` | The intermediate stage's producers, a `uv` project: the LlamaIndex retrieval pipeline, the other producers, and `freeze` |
+| `producers/` | The intermediate stage's producers, a `uv` project: the LlamaIndex retrieval pipeline, the other producers, `freeze`, and `retrieve` for the agent |
+| `mcp/servers/` | The advanced stage's MCP servers over `scenarios/advanced/source/services/`, with fault injection |
+| `src/agent/` | The controller, the capability policy, the guard, the MCP client, the agent's producers and the run store |
+| `scenarios/advanced/` | The stage's source (services, capability policy, route, profiles, instructions, scenarios) and the recorded reference runs |
 | `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `producers.mjs` (run the producers live), `cli.mjs` |
 | `src/inspector/` | The server; `public/` holds the landing page, a page per stage and the shared columns |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |

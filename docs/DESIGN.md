@@ -97,6 +97,35 @@ flowchart LR
 - **Frozen means frozen.** The snapshot carries the clock, so a live run and a replay give the same digest; a test checks it, and the inspector's live mode shows it as a badge. The frozen `scenario.json` keeps the producers' report without timings, so `freeze --check` is stable.
 - **The route protects state.user** (`tier_upgrades`), after the basic stage showed it being shed.
 
+### The tool loop (advanced stage)
+
+```mermaid
+flowchart TB
+    Q["question"] --> C["controller<br/>bounded turns and recoveries"]
+    M1["accounts server"] & M2["status server"] & M3["tickets server"] -->|"tools/list"| P["proposed tools"]
+    P --> CP["capability policy<br/>versioned allow-list, scope rules"]
+    CP -->|"grants"| G["governance.capabilities items<br/>+ snapshot.capabilities"]
+    C --> PR["producers: policy, state (account, task), retrieval, observations so far, conversation"]
+    PR & G --> S["freeze snapshot for this inference"]
+    S --> A["assembler"]
+    A -->|"payload"| L["provider → model"]
+    A -->|"refused"| R["bounded recovery, or stop"]
+    L -->|"answer"| V["validate against the output contract"]
+    L -->|"tool request"| GD["guard<br/>grant? schema? scope?"]
+    GD -->|"approved"| X["MCP callTool with timeout"]
+    GD -->|"denied"| T["task state next turn; never executed"]
+    X --> O["observation<br/>evidence.tool_results, source = the call"]
+    O --> C
+    S & A & L & GD --> ST["run record: snapshot, trace, payload, request, response, decisions"]
+```
+
+- **Proposals are not grants.** The servers say what they can do; `capabilities.json` says what this route offers, by version, and the grant travels in the snapshot so the assembler can exclude any capability the policy did not name (R-15). `close_ticket` is proposed and never offered.
+- **The guard runs outside the model** (R-5). It reads only the request's name and arguments, the grant, the tool's own input schema and the application's state. A denied request produces no observation; the model learns of it from `state.task`, which the controller writes each turn, never from a fabricated tool result.
+- **Observations are evidence.** Each is an `evidence.tool_results` item whose `source` names the call and its arguments, so the route's `supersede: source` keeps the latest observation of the same call and the trace records the rest as `superseded` (R-25). A timeout or a server error is an observation with an error body, and a later success supersedes it.
+- **Prior turns stay in the transcript** (R-7). Each model turn, text and tool requests alike, becomes an `interaction.history` item with `lineage: generated`; the question is the one live user turn; every inference is a single-user-message request.
+- **Everything is recorded.** A run holds, per inference, the snapshot, the trace, the payload, the outbound request, the response and each tool request with its decision. `replay` feeds the snapshots back through any assembler against the recorded traces; the reference runs, recorded against a real model, are the stage's regression suite.
+- **The bounds are the application's.** `max_turns` and `max_recoveries` come from `common.json`; a run ends with an answer (validated against the output contract's headings), a refusal with no recovery left, or the turn bound, and says which.
+
 ### The inspector
 
 `server.mjs` is `node:http`, static files and six JSON routes. `/` is a landing page; each stage has its own page under `public/<stage>/` with its own state, steps and controls, and the four columns are shared functions in `public/shared/panels.js`. Run as a program it loads `.env` first (values in the file replace ambient ones); imported by a test it does not, so a developer's `.env` cannot leak into the suite. It reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart.
@@ -110,6 +139,9 @@ flowchart LR
 | `POST /api/answer` | `{provider, payload, reserved_output}` → the answer with the exact request that produced it |
 | `POST /api/snippets` | `{payload, reserved_output}` → the request as SDK code, TypeScript and Python, per configured endpoint |
 | `POST /api/produce` | `{scenario, variant, assemblers?}` → runs the stage's producers now, assembles what they built, reports how each ran, and whether the live digest equals the frozen one |
+| `GET /api/agent/runs`, `GET /api/agent/runs/:id` | the recorded runs, and one run in full |
+| `POST /api/agent/run` | `{scenario, provider, assembler?, faults?}` → runs the controller against a real model, records the run, returns it |
+| `POST /api/agent/replay` | `{run, assemblers?}` → every recorded inference through the assemblers, judged against its recorded trace |
 
 The page (`public/app.js`) formats; it never decides. Each candidate's status comes from the shown assembler's trace: an assembler-stage `excluded` row, else a `compressed` row, else an `included` row, else, on a refusal, "admitted; assembly refused". Reason codes carry the registry text as a tooltip and are listed with it under the decisions, since a projector cannot hover.
 
@@ -140,6 +172,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 - `conformance.test.mjs`: the 74 vendored snapshots through every available assembler, judged as the reference runner judges them, and three-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.
 - `scenarios.test.mjs`: schema validity, generated files current, expectations consistent (hash, digest, reason codes).
 - `inspector.test.mjs`: the API on an ephemeral port, with a mock OpenAI-compatible server so the local-model path runs end to end over HTTP.
+- `mcp.test.mjs`, `guard.test.mjs`, `agent.test.mjs`, `replay.test.mjs`: the servers over stdio (proposals, the timeline, a timeout as a result), the guard's decisions, the controller with a scripted model (observations enter the next turn, supersession, a denial never executed, a timeout observed, the bounds), and the reference runs replayed through every assembler.
 - `producers.test.mjs`: the committed intermediate snapshots are current (`freeze --check`), every step records its producers' report with LlamaIndex named, and a live run reproduces the frozen digest.
 - `provider.test.mjs`, `provider-chat.test.mjs`: request mapping, status from the environment, dispatch, and error reporting, with the SDK client and `fetch` injected.
 - `live.test.mjs` (`npm run test:live`, off by default): the step 3 request to every provider `.env` configures, against the real model. It asserts what the demo needs: text, not cut off, and the Pro citation. Model output varies, so this is a readiness check for the talk, not part of the commit gate.

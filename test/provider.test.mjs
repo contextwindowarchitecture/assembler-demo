@@ -9,6 +9,7 @@ import { ROOT } from '../src/harness/adapters.mjs';
 import { answer, DEFAULT_MODEL, FALLBACK_BETA, providerStatus, toRequest } from '../src/provider/anthropic.mjs';
 
 const payload = await readFile(path.join(ROOT, 'scenarios', 'basic', '03-authority', 'expected.messages.payload.txt'), 'utf8');
+const HOME = path.join(ROOT, 'test', 'no-such-home');
 
 test('toRequest puts system entries in system, the one user message in messages, and nothing else', () => {
   const request = toRequest(payload, { maxTokens: 400 });
@@ -45,7 +46,7 @@ test('providerStatus reads credentials from the environment without a network ca
   const home = path.join(ROOT, 'test', 'no-such-home');
   assert.equal(providerStatus({ HOME: home }).configured, false);
   assert.match(providerStatus({ HOME: home }).reason, /ANTHROPIC_API_KEY/);
-  assert.deepEqual(providerStatus({ HOME: home, ANTHROPIC_API_KEY: 'sk-test' }), { provider: 'anthropic', model: DEFAULT_MODEL, fallbacks: true, configured: true, source: 'environment' });
+  assert.deepEqual(providerStatus({ HOME: home, ANTHROPIC_API_KEY: 'sk-test' }), { provider: 'anthropic', model: DEFAULT_MODEL, base_url: 'https://api.anthropic.com', fallbacks: true, thinking: true, configured: true, source: 'environment' });
   assert.equal(providerStatus({ HOME: home, ANTHROPIC_PROFILE: 'work' }).source, 'profile');
   assert.equal(providerStatus({ HOME: home, ANTHROPIC_API_KEY: 'sk-test', CWA_DEMO_ANTHROPIC_MODEL: 'claude-sonnet-5' }).model, 'claude-sonnet-5');
   assert.equal(providerStatus({ HOME: home, ANTHROPIC_API_KEY: 'sk-test', CWA_DEMO_ANTHROPIC_FALLBACKS: 'off' }).fallbacks, false);
@@ -72,6 +73,22 @@ test('answer sends the captured request through the beta endpoint with fallbacks
   assert.deepEqual(result.usage, { input_tokens: 300, output_tokens: 40 });
   assert.deepEqual(result.fallbacks, []);
   assert.equal(result.stop_details, null);
+});
+
+test('a custom base URL means an Anthropic-compatible server: no beta fallbacks, no thinking, a placeholder key', async () => {
+  const env = { HOME, ANTHROPIC_BASE_URL: 'http://127.0.0.1:8000' };
+  const local = providerStatus(env);
+  assert.deepEqual([local.configured, local.source, local.base_url, local.fallbacks, local.thinking], [true, 'custom base URL, placeholder key', 'http://127.0.0.1:8000', false, false]);
+  assert.deepEqual([providerStatus({ ...env, CWA_DEMO_ANTHROPIC_FALLBACKS: 'on', CWA_DEMO_ANTHROPIC_THINKING: 'adaptive' }).fallbacks, providerStatus({ ...env, CWA_DEMO_ANTHROPIC_THINKING: 'adaptive' }).thinking], [true, true]);
+  assert.equal(providerStatus({ HOME, ANTHROPIC_API_KEY: 'k' }).thinking, true, 'the real API gets adaptive thinking');
+  const calls = [];
+  const client = { messages: { create: async params => { calls.push(params); return { model: 'local-model', stop_reason: 'end_turn', content: [{ type: 'text', text: 'ok' }], usage: { input_tokens: 1, output_tokens: 1 } }; } },
+    beta: { messages: { create: async () => { throw new Error('no beta endpoint against a compatible server'); } } } };
+  const result = await answer(payload, { client, env: { ...env, CWA_DEMO_ANTHROPIC_MODEL: 'local-model' } });
+  assert.equal(calls[0].model, 'local-model');
+  assert.equal('thinking' in calls[0], false);
+  assert.equal('betas' in calls[0], false);
+  assert.equal(result.text, 'ok');
 });
 
 test('answer uses the regular endpoint with fallbacks off, and surfaces a refusal with its details', async () => {

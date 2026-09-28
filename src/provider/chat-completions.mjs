@@ -85,6 +85,7 @@ export async function answer(payloadText, { baseUrl, apiKey, model, maxTokens, m
   return {
     request: { url, ...request },
     text: choice.message?.content ?? '',
+    reasoning: choice.message?.reasoning_content ?? choice.message?.reasoning ?? null,
     tool_calls: choice.message?.tool_calls ?? [],
     model: body.model ?? request.model,
     stop_reason: choice.finish_reason ?? null,

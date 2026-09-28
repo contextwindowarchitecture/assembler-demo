@@ -15,8 +15,16 @@ export const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 /** Whether a live answer can be requested, without a network call. The SDK resolves credentials from
  * ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an `ant auth login` profile under ~/.config/anthropic. */
 export function providerStatus(env = process.env) {
-  const base = { provider: 'anthropic', model: env.CWA_DEMO_ANTHROPIC_MODEL || DEFAULT_MODEL, fallbacks: env.CWA_DEMO_ANTHROPIC_FALLBACKS !== 'off' };
+  // A custom base URL means an Anthropic-compatible server, such as a local model: it may not know the beta
+  // features or the thinking parameter, so both are off unless asked for, and a placeholder key satisfies the SDK.
+  const custom = env.ANTHROPIC_BASE_URL || null;
+  const base = {
+    provider: 'anthropic', model: env.CWA_DEMO_ANTHROPIC_MODEL || DEFAULT_MODEL, base_url: custom ?? 'https://api.anthropic.com',
+    fallbacks: env.CWA_DEMO_ANTHROPIC_FALLBACKS ? env.CWA_DEMO_ANTHROPIC_FALLBACKS !== 'off' : !custom,
+    thinking: env.CWA_DEMO_ANTHROPIC_THINKING ? env.CWA_DEMO_ANTHROPIC_THINKING !== 'off' : !custom,
+  };
   if (env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN) return { ...base, configured: true, source: 'environment' };
+  if (custom) return { ...base, configured: true, source: 'custom base URL, placeholder key' };
   const profiles = path.join(env.HOME || homedir(), '.config', 'anthropic');
   if (env.ANTHROPIC_PROFILE || (existsSync(profiles) && readdirSync(profiles).length > 0)) return { ...base, configured: true, source: 'profile' };
   return { ...base, configured: false, reason: 'no credentials: set ANTHROPIC_API_KEY, or run `ant auth login`' };
@@ -35,7 +43,7 @@ function toTool(entry) {
 
 /** The Messages API request for a cwa-messages/v1 payload. `maxTokens` is the route's reserved output; the payload
  * was fitted to the input budget that remains after it. Throws when the payload is not a cwa-messages/v1 document. */
-export function toRequest(payloadText, { model: chosen = DEFAULT_MODEL, maxTokens = 4096 } = {}) {
+export function toRequest(payloadText, { model: chosen = DEFAULT_MODEL, maxTokens = 4096, thinking = true } = {}) {
   let ir;
   try { ir = JSON.parse(payloadText); } catch { throw new Error('the payload is not a cwa-messages/v1 document'); }
   if (!ir || !Array.isArray(ir.system) || !Array.isArray(ir.tools) || !Array.isArray(ir.messages) || ir.messages.length !== 1) {
@@ -44,7 +52,7 @@ export function toRequest(payloadText, { model: chosen = DEFAULT_MODEL, maxToken
   const request = {
     model: chosen,
     max_tokens: maxTokens,
-    thinking: { type: 'adaptive' },
+    ...(thinking ? { thinking: { type: 'adaptive' } } : {}),
     messages: ir.messages.map(message => ({ role: message.role, content: message.content })),
   };
   if (ir.system.length) {
@@ -74,10 +82,14 @@ function describe(error) {
  * answered. `client` is injectable for tests.
  */
 export async function answer(payloadText, { maxTokens, model: chosen, client, env = process.env } = {}) {
-  const request = toRequest(payloadText, { maxTokens, model: chosen ?? env.CWA_DEMO_ANTHROPIC_MODEL ?? DEFAULT_MODEL });
-  const withFallbacks = env.CWA_DEMO_ANTHROPIC_FALLBACKS !== 'off';
+  const status = providerStatus(env);
+  const request = toRequest(payloadText, { maxTokens, model: chosen ?? status.model, thinking: status.thinking });
+  const withFallbacks = status.fallbacks;
   const params = withFallbacks ? { ...request, betas: [FALLBACK_BETA], fallbacks: 'default' } : request;
-  const api = client ?? new Anthropic();
+  const api = client ?? new Anthropic({
+    ...(env.ANTHROPIC_BASE_URL ? { baseURL: env.ANTHROPIC_BASE_URL } : {}),
+    ...(env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN || !env.ANTHROPIC_BASE_URL ? {} : { apiKey: 'local' }),
+  });
   const start = performance.now();
   let response;
   try {

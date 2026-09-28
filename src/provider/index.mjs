@@ -4,11 +4,12 @@
 // Three providers, each configured from the environment and selectable in the inspector:
 //   local      an OpenAI-compatible endpoint, such as Ollama, LM Studio, vLLM or llama.cpp
 //              CWA_DEMO_LOCAL_BASE_URL (default http://localhost:11434/v1), CWA_DEMO_LOCAL_MODEL (default: the
-//              first model the server lists), CWA_DEMO_LOCAL_API_KEY (optional)
+//              first model the server lists), CWA_DEMO_LOCAL_API_KEY (optional), CWA_DEMO_LOCAL_REASONING_EFFORT
+//              (optional: low, medium or high; a reasoning model otherwise spends the reserved output thinking)
 //   anthropic  the Anthropic Messages API: ANTHROPIC_API_KEY or an `ant auth login` profile,
 //              CWA_DEMO_ANTHROPIC_MODEL (default claude-opus-5), CWA_DEMO_ANTHROPIC_FALLBACKS=off to disable
 //   openai     the OpenAI API: OPENAI_API_KEY, OPENAI_BASE_URL (default https://api.openai.com/v1),
-//              CWA_DEMO_OPENAI_MODEL (default gpt-5)
+//              CWA_DEMO_OPENAI_MODEL (default gpt-5), CWA_DEMO_OPENAI_REASONING_EFFORT (optional)
 // CWA_DEMO_PROVIDERS=off disables all three.
 import * as anthropic from './anthropic.mjs';
 import * as chat from './chat-completions.mjs';
@@ -18,7 +19,7 @@ export const OPENAI_BASE_URL = 'https://api.openai.com/v1';
 export const OPENAI_MODEL = 'gpt-5';
 
 async function localStatus(env, options) {
-  const base = { id: 'local', label: 'Local model', provider: 'openai-compatible', base_url: env.CWA_DEMO_LOCAL_BASE_URL || LOCAL_BASE_URL, model: env.CWA_DEMO_LOCAL_MODEL || null, fallbacks: false };
+  const base = { id: 'local', label: 'Local model', provider: 'openai-compatible', base_url: env.CWA_DEMO_LOCAL_BASE_URL || LOCAL_BASE_URL, model: env.CWA_DEMO_LOCAL_MODEL || null, fallbacks: false, reasoning_effort: env.CWA_DEMO_LOCAL_REASONING_EFFORT || null };
   if (base.model) return { ...base, configured: true, source: 'CWA_DEMO_LOCAL_MODEL' };
   const listed = await chat.listModels({ baseUrl: base.base_url, apiKey: env.CWA_DEMO_LOCAL_API_KEY, fetch: options.fetch });
   if (listed.models.length) return { ...base, model: listed.models[0], configured: true, source: `first of ${listed.models.length} models the server lists`, models: listed.models };
@@ -26,7 +27,7 @@ async function localStatus(env, options) {
 }
 
 function openaiStatus(env) {
-  const base = { id: 'openai', label: 'OpenAI', provider: 'openai', base_url: env.OPENAI_BASE_URL || OPENAI_BASE_URL, model: env.CWA_DEMO_OPENAI_MODEL || OPENAI_MODEL, fallbacks: false };
+  const base = { id: 'openai', label: 'OpenAI', provider: 'openai', base_url: env.OPENAI_BASE_URL || OPENAI_BASE_URL, model: env.CWA_DEMO_OPENAI_MODEL || OPENAI_MODEL, fallbacks: false, reasoning_effort: env.CWA_DEMO_OPENAI_REASONING_EFFORT || null };
   if (!env.OPENAI_API_KEY) return { ...base, configured: false, reason: 'set OPENAI_API_KEY' };
   return { ...base, configured: true, source: 'environment' };
 }
@@ -61,6 +62,7 @@ export async function answer(payloadText, { provider, maxTokens, env = process.e
       baseUrl: status.base_url, model: status.model, maxTokens, fetch: doFetch,
       apiKey: status.id === 'openai' ? env.OPENAI_API_KEY : env.CWA_DEMO_LOCAL_API_KEY,
       maxTokensField: status.id === 'openai' ? 'max_completion_tokens' : 'max_tokens',
+      extra: status.reasoning_effort ? { reasoning_effort: status.reasoning_effort } : {},
     });
   return { provider: status.id, label: status.label, ...answered };
 }

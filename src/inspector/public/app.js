@@ -227,7 +227,7 @@ function renderAnswer(result) {
   const configured = providers.filter(p => p.configured);
   if (!configured.some(p => p.id === state.provider)) state.provider = configured[0]?.id ?? null;
   const options = providers.map(p => `<option value="${esc(p.id)}"${p.configured ? '' : ' disabled'}${p.id === state.provider ? ' selected' : ''}>${esc(p.label)} · ${esc(p.model ?? 'not configured')}</option>`).join('');
-  const legend = providers.map(p => `<li><strong>${esc(p.label)}</strong>: ${p.configured ? `${esc(p.model)}${p.base_url ? ` at ${esc(p.base_url)}` : ''}${p.fallbacks ? ', refusal fallbacks on' : ''}` : `<span class="hint">${esc(p.reason)}</span>`}</li>`).join('');
+  const legend = providers.map(p => `<li><strong>${esc(p.label)}</strong>: ${p.configured ? `${esc(p.model)}${p.base_url ? ` at ${esc(p.base_url)}` : ''}${p.fallbacks ? ', refusal fallbacks on' : ''}${p.reasoning_effort ? `, reasoning effort ${esc(p.reasoning_effort)}` : ''}` : `<span class="hint">${esc(p.reason)}</span>`}</li>`).join('');
   const cards = providers.filter(p => state.answers[p.id]).map(p => {
     const a = state.answers[p.id];
     return `<div class="entry">
@@ -236,7 +236,8 @@ function renderAnswer(result) {
       ${a.stop_details ? `<div class="outcome bad">refusal: ${esc(a.stop_details.category ?? '')} ${esc(a.stop_details.explanation ?? '')}</div>` : ''}
       ${a.fallbacks?.length ? `<p class="hint">${esc(a.fallbacks.join('; '))}</p>` : ''}
       ${a.tool_calls?.length ? `<h3>Tool calls requested</h3><pre>${esc(JSON.stringify(a.tool_calls, null, 2))}</pre><p class="hint">Not executed: the basic stage has no tool loop.</p>` : ''}
-      ${a.text !== undefined ? `<div class="answer-text">${esc(a.text)}</div>` : ''}
+      ${a.text ? `<div class="answer-text">${esc(a.text)}</div>` : a.request && !a.error ? `<p class="hint">No answer text${a.stop_reason === 'length' ? `: the model stopped at <span class="mono">length</span> after ${a.usage?.output_tokens ?? '?'} output tokens, the route's reserved_output. A reasoning model spends that budget thinking first; set a lower reasoning effort in .env, or reserve more output on the route.` : '.'}</p>` : ''}
+      ${a.reasoning ? `<details><summary>reasoning (${a.reasoning.length} characters)</summary><div class="snippet">${esc(a.reasoning)}</div></details>` : ''}
       ${a.request ? `<details><summary>outbound request (exact)</summary><pre>${esc(JSON.stringify(a.request, null, 2))}</pre></details>` : ''}
     </div>`;
   }).join('');

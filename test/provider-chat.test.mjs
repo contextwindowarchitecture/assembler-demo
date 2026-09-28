@@ -52,6 +52,16 @@ test('answer POSTs the captured request to <base>/chat/completions and returns t
   assert.equal(result.model, 'llama3.1:8b');
   assert.equal(result.stop_reason, 'stop');
   assert.deepEqual(result.usage, { input_tokens: 310, output_tokens: 38 });
+  assert.equal(result.reasoning, null);
+});
+
+test('answer keeps a reasoning model\'s reasoning beside its (possibly empty) text', async () => {
+  const fetch = ok({ choices: [{ finish_reason: 'length', message: { role: 'assistant', reasoning_content: 'thinking about it' } }], usage: { prompt_tokens: 5, completion_tokens: 400 } });
+  const result = await answer(payload, { baseUrl: 'http://x/v1', model: 'gpt-oss', fetch, extra: { reasoning_effort: 'low' } });
+  assert.equal(result.text, '');
+  assert.equal(result.reasoning, 'thinking about it');
+  assert.equal(result.stop_reason, 'length');
+  assert.equal(result.request.reasoning_effort, 'low');
 });
 
 test('answer sends a bearer key when one is given, and reports HTTP and connection failures plainly', async () => {
@@ -92,6 +102,10 @@ test('answer dispatches by provider id, with the token field each API expects, a
   const localCall = calls.find(c => c.url.endsWith('/chat/completions'));
   assert.equal(localCall.body.max_tokens, 400);
   assert.equal(localCall.auth, undefined);
+  assert.equal('reasoning_effort' in localCall.body, false);
+  calls.length = 0;
+  await dispatch(payload, { provider: 'local', env: { ...home, CWA_DEMO_LOCAL_MODEL: 'gpt-oss', CWA_DEMO_LOCAL_REASONING_EFFORT: 'low' }, fetch });
+  assert.equal(calls[0].body.reasoning_effort, 'low');
   calls.length = 0;
   const openai = await dispatch(payload, { provider: 'openai', maxTokens: 400, env: { ...home, OPENAI_API_KEY: 'sk-openai' }, fetch });
   assert.equal(openai.provider, 'openai');

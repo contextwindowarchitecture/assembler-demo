@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // The inspector: a small HTTP server that serves the four-column screen and runs the assemblers for it through the
 // same harness the CLI uses. It never assembles anything itself. Usage: node src/inspector/server.mjs [--port 8787]
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
@@ -9,6 +10,11 @@ import { loadAssemblers, ROOT, runAll, select } from '../harness/adapters.mjs';
 import { loadScenarios, VARIANTS } from '../harness/cases.mjs';
 import { agreement, compareResult } from '../harness/compare.mjs';
 import { answer, describeProviders } from '../provider/index.mjs';
+
+// Provider settings for a demo machine live in .env (gitignored; see .env.example). What the file says is what runs:
+// its values replace ambient ones, so a stray ANTHROPIC_BASE_URL in the shell cannot redirect the demo.
+const ENV_FILE = path.join(ROOT, '.env');
+if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
 
 const PORT = Number(process.env.PORT ?? (process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 8787));
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');

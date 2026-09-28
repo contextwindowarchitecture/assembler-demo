@@ -96,6 +96,17 @@ select, input { font-family: var(--mono); font-size: var(--fs-mono); color: var(
 .select::after { content: ""; position: absolute; right: 13px; top: calc(50% - 5px); width: 6px; height: 6px; border-right: 1px solid var(--muted); border-bottom: 1px solid var(--muted); transform: rotate(45deg); pointer-events: none; }
 .select:hover select { border-color: var(--fg); }
 .select:hover::after { border-color: var(--fg); }
+/* A number input sits in a .number wrapper: the native spinner is off, and the wrapper draws an up and a down chevron
+   12px in from the edge; chrome.js steps the value when that zone is clicked. */
+.number { position: relative; display: inline-flex; }
+.number input { appearance: textfield; padding-right: 30px; }
+.number input::-webkit-inner-spin-button, .number input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.number::before, .number::after { content: ""; position: absolute; right: 13px; width: 5px; height: 5px; border-right: 1px solid var(--muted); border-bottom: 1px solid var(--muted); pointer-events: none; }
+.number::before { top: calc(50% - 6px); transform: rotate(-135deg); }
+.number::after { top: calc(50% + 1px); transform: rotate(45deg); }
+.number:hover input { border-color: var(--fg); }
+.number:hover::before, .number:hover::after { border-color: var(--fg); }
+.number:has(input:disabled)::before, .number:has(input:disabled)::after { opacity: 0.5; }
 .field { display: inline-flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 input#budget { width: 7em; }
 

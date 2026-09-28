@@ -10,6 +10,13 @@ export const resolveTheme = stored => (stored === 'dark' ? 'dark' : 'light');
 /** What the toggle says: the theme you would switch to, in the website's lowercase. */
 export const themeLabel = theme => (theme === 'dark' ? 'light' : 'dark');
 
+/** The stepper zone is the right 30px of a number input, the stylesheet's two chevrons: the upper half steps up, the
+ * lower half down, and a click on the text is not a step. */
+export function stepperHit({ x, y }, { right, top, height }) {
+  if (right - x > 30) return null;
+  return y < top + height / 2 ? 'up' : 'down';
+}
+
 /** Talk mode: larger type for a projector, the instruments folded behind one line. Remembered per browser. */
 function initTalkMode() {
   const button = $('#talk');
@@ -67,11 +74,26 @@ function initPinned() {
   measure();
 }
 
+/** The stepper the stylesheet draws on a .number wrapper: a click in its zone steps the input and fires the change the
+ * page listens for, as the native spinner would have. */
+function initSteppers() {
+  for (const input of document.querySelectorAll('.number input')) {
+    input.addEventListener('click', event => {
+      if (input.disabled) return;
+      const hit = stepperHit({ x: event.clientX, y: event.clientY }, input.getBoundingClientRect());
+      if (!hit) return;
+      if (hit === 'up') input.stepUp(); else input.stepDown();
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+}
+
 export function initChrome() {
   initTheme();
   initTalkMode();
   initInstruments();
   initPinned();
+  initSteppers();
 }
 
 /** The one line that stands for the instruments while they are folded. */

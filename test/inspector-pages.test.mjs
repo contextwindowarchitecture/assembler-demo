@@ -7,7 +7,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../src/harness/adapters.mjs';
 import { columnHeads, meterFor, planeOf, statusOf } from '../src/inspector/public/shared/panels.js';
-import { resolveTheme, themeLabel } from '../src/inspector/public/shared/chrome.js';
+import { resolveTheme, stepperHit, themeLabel } from '../src/inspector/public/shared/chrome.js';
 
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
 const read = file => fs.readFileSync(path.join(PUBLIC, file), 'utf8');
@@ -108,6 +108,26 @@ test('every select sits in a .select wrapper, and the stylesheet draws its caret
     assert.ok(selects > 0, `${file} has a select`);
     assert.equal(wrapped, selects, `${file}: every select is wrapped`);
   }
+});
+
+test('every number input sits in a .number wrapper whose stepper the stylesheet draws clear of the edge, and a click in the stepper zone steps', () => {
+  const css = read('style.css');
+  assert.match(css, /\.number input\s*{[^}]*appearance: textfield/, 'the native spinner is off');
+  assert.match(css, /\.number input::-webkit-inner-spin-button[^{]*{[^}]*appearance: none/, 'and hidden in WebKit');
+  assert.match(css, /\.number::before[^{]*{[^}]*var\(--muted\)/, 'the up chevron is drawn in the muted token');
+  assert.match(css, /\.number::after[^{]*{[^}]*var\(--muted\)/, 'and the down chevron');
+  for (const file of ['basic/index.html', 'intermediate/index.html']) {
+    const text = read(file);
+    const inputs = (text.match(/<input\b[^>]*type="number"/g) ?? []).length;
+    const wrapped = (text.match(/<span class="number"><input\b[^>]*type="number"/g) ?? []).length;
+    assert.ok(inputs > 0, `${file} has a number input`);
+    assert.equal(wrapped, inputs, `${file}: every number input is wrapped`);
+  }
+  const box = { right: 300, top: 100, height: 30 };
+  assert.equal(stepperHit({ x: 290, y: 105 }, box), 'up', 'the upper half of the stepper zone steps up');
+  assert.equal(stepperHit({ x: 290, y: 125 }, box), 'down', 'the lower half steps down');
+  assert.equal(stepperHit({ x: 290, y: 115 }, box), 'down', 'the middle counts as the lower half');
+  assert.equal(stepperHit({ x: 260, y: 105 }, box), null, 'a click in the text is not a step');
 });
 
 test('planeOf names the plane a slot belongs to, by the part of its id before the dot', () => {

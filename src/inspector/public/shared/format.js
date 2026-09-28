@@ -1,9 +1,14 @@
 // Small formatting helpers every page shares. Nothing here decides anything.
 export const $ = selector => document.querySelector(selector);
 export const esc = value => String(value ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-export const tag = (text, cls = '', title = '') => `<span class="tag ${cls}"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</span>`;
+/** A chip: the one shape badges, tags and statuses share. `cls` picks the outcome color (ok, info, bad, warn, gray, line). */
+export const tag = (text, cls = '', title = '') => `<span class="chip ${cls}"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</span>`;
 export const short = value => String(value).replace(/^\d+-/, '');
+/** A step id as its pill reads it: `02-stale-and-foreign` is "stale and foreign". */
+export const words = value => short(value).replace(/-/g, ' ');
 export const when = iso => (iso ? iso.replace('T', ' ').replace(/(:\d\d)(\.\d+)?Z$/, '$1Z') : '');
+/** A date-time without its seconds, for a card's tertiary line: `2026-09-28T13:59:30Z` is "2026-09-28 13:59". */
+export const brief = iso => (iso ? iso.replace('T', ' ').replace(/(:\d\d):\d\d(\.\d+)?Z$/, '$1') : '');
 
 export async function api(path, options) {
   const res = await fetch(path, options);
@@ -23,9 +28,9 @@ export function reasonTextFor(contract) {
   };
 }
 
-/** The header's stage switcher: every stage, the current one marked. */
+/** The masthead's stage rail: every stage, numbered, the current one in ink. */
 export function stageNav(current) {
   const stages = [['basic', '/basic/', 'Basic'], ['intermediate', '/intermediate/', 'Intermediate'], ['advanced', '/advanced/', 'Advanced']];
-  return `<nav class="stages" aria-label="Stages">${stages.map(([id, href, label]) =>
-    href ? `<a href="${href}" class="${id === current ? 'active' : ''}">${label}</a>` : `<span class="planned" title="not built yet">${label}</span>`).join('')}</nav>`;
+  return `<nav class="stages" aria-label="Stages">${stages.map(([id, href, label], i) =>
+    `<a href="${href}" class="stage${id === current ? ' active' : ''}"${id === current ? ' aria-current="page"' : ''}><span class="num">${i + 1}</span>${label}</a>`).join('')}</nav>`;
 }

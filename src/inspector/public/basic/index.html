@@ -4,17 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CWA demo · basic</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header class="top">
-    <div class="brand">
-      <a class="brand-name" href="/">CWA</a>
-      <span class="brand-sub">basic · candidate context → decisions → outbound request → answer</span>
+    <div class="masthead">
+      <a class="brand" href="/">CWA</a>
+      <span class="brand-sub">support-assistant demo</span>
+      <div id="stages"></div>
+      <div class="masthead-right">
+        <button id="talk" type="button" aria-pressed="false" title="larger type for a projector; folds the instruments behind one line">Talk mode</button>
+      </div>
     </div>
-    <div id="stages"></div>
-    <nav class="steps" id="steps" aria-label="Scenario steps"></nav>
-    <div class="controls">
+    <div class="stepband">
+      <nav class="steps" id="steps" aria-label="Scenario steps"></nav>
+      <span id="agreement" class="badges"></span>
+    </div>
+  </header>
+
+  <div class="instruments" id="instruments">
+    <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
+    <div class="controls" id="controls">
       <label>Assembler
         <select id="assembler"></select>
       </label>
@@ -28,17 +39,18 @@
         <input id="budget" type="number" min="0" step="10" inputmode="numeric">
       </label>
       <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>
-      <span id="agreement" class="badge"></span>
+      <span class="hint">← → switch steps</span>
     </div>
-  </header>
+  </div>
 
   <section class="scenario" id="scenario"></section>
+  <section class="delta" id="delta" aria-label="What changed since the previous step"></section>
 
   <main class="columns">
-    <section class="column" id="candidates"><h2>Candidate context</h2><div class="body"></div></section>
-    <section class="column" id="decisions"><h2>CWA decisions</h2><div class="body"></div></section>
-    <section class="column" id="request"><h2>Outbound request</h2><div class="body"></div></section>
-    <section class="column" id="answer"><h2>Model answer</h2><div class="body"></div></section>
+    <section class="column" id="candidates"><h2><span class="num">1</span><span class="col-title">Candidate context</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="decisions"><h2><span class="num">2</span><span class="col-title">CWA decisions</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="request"><h2><span class="num">3</span><span class="col-title">Outbound request</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="answer"><h2><span class="num">4</span><span class="col-title">Model answer</span><span class="col-sub"></span></h2><div class="body"></div></section>
   </main>
 
   <footer class="foot" id="foot"></footer>

@@ -6,11 +6,12 @@ Five steps, one question, about twelve minutes. Each step adds to the last: the 
 
 - Start the local model server and check it lists the model: `curl -H "Authorization: Bearer $KEY" http://127.0.0.1:8000/v1/models`.
 - `.env` names the provider (see `.env.example`). `npm run inspector`, open `http://localhost:8787` at full width (the four columns need about 1400 px), and pick the OS theme the projector reads best; the page follows it.
+- Click *Talk mode* in the masthead: larger type, the instruments folded behind one line (click the line to open them), and the tertiary details hidden from the candidate cards. The browser remembers it.
 - `npm test` once. It runs the 74 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
 - Have a terminal ready with `npm run compare` for the closing.
 - Arrow keys switch steps. The budget field reassembles live. The `frozen` button returns to the committed snapshot.
 
-The screen, left to right: **Candidate context** (what the producers sent, colored by outcome) → **CWA decisions** (the trace) → **Outbound request** (the payload, or "no model request") → **Model answer** (a live call, with the exact request beside it).
+The screen, left to right, four numbered columns with an arrow between each pair: **1 Candidate context** (what the producers sent, colored by outcome) → **2 CWA decisions** (the trace, with a budget meter) → **3 Outbound request** (the payload, or "no model request") → **4 Model answer** (a live call, with the exact request beside it). Each column's header says what it holds: how many items, the trace's counts, the payload's size, whether anything was sent. The masthead's stage rail and the step pills say where you are; both stay on screen as you scroll.
 
 ## Step 1: assemble a clean fixture
 

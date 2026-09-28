@@ -1,16 +1,15 @@
-/* The inspector's design language: warm paper, one ink, the Plex family for the interface and a serif for what a
-   speaker reads aloud. Color belongs to outcomes, so a colored thing on screen is always a decision an assembler
-   made; navigation, selection and emphasis are ink. Light is tuned first (a projector reads it better); dark keeps
-   the same lightness steps and follows the OS. Talk mode raises the type scale and folds the instruments. */
+/* The inspector's design language is the website's (STYLE.md): warm paper, one ink, one clay accent, Space Grotesk
+   for what a reader reads and IBM Plex Mono for what a machine or a spec would say. Colour belongs to outcomes and to
+   the four planes, so a coloured thing on screen is always a decision an assembler made or the plane a slot belongs
+   to; navigation, selection and emphasis are ink and the accent. Talk mode raises the type scale and folds the
+   instruments. */
 
 /* The faces are vendored under public/fonts/ (SIL Open Font License 1.1; the LICENSE files sit beside them), so the
    page loads nothing from the network and a talk machine without one gets the same type. */
-@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 400 700; font-display: swap; src: url(/fonts/ibm-plex-sans.woff2) format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 400 700; font-display: swap; src: url(/fonts/space-grotesk.woff2) format("woff2"); }
 @font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/ibm-plex-mono-400.woff2) format("woff2"); }
 @font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/ibm-plex-mono-500.woff2) format("woff2"); }
 @font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/ibm-plex-mono-600.woff2) format("woff2"); }
-@font-face { font-family: "Newsreader"; font-style: normal; font-weight: 400 600; font-display: swap; src: url(/fonts/newsreader.woff2) format("woff2"); }
-@font-face { font-family: "Newsreader"; font-style: italic; font-weight: 400 500; font-display: swap; src: url(/fonts/newsreader-italic.woff2) format("woff2"); }
 
 :root {
   --paper: #F5F3EE; --surface: #FFFFFF; --sunken: #F0EEE7; --line: #DCD8CE; --line-2: #EDEAE3; --line-strong: #B9B4A7;
@@ -20,9 +19,8 @@
   --bad: #A3271B; --bad-bg: #F7E1DD; --on-bad: #FFFFFF;
   --warn: #8A5A00; --warn-bg: #F6EAD0;
   --gray: #5C5952; --gray-bg: #ECE9E2;
-  --serif: "Newsreader", Georgia, "Times New Roman", serif;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: 'Space Grotesk', Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
   --fs: 15px; --fs-sm: 13px; --fs-xs: 12px; --fs-mono: 13px; --fs-chip: 12px; --fs-col: 15px; --fs-title: 32px; --fs-q: 20px; --fs-lead: 17px;
   --control: 36px; --control-sm: 30px; --num: 24px; --mast-h: 56px; --band-h: 58px;
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7h9M7 3l4 4-4 4' fill='none' stroke='%23B9B4A7' stroke-width='1.5'/%3E%3C/svg%3E");
@@ -51,7 +49,6 @@ html, body { margin: 0; background: var(--paper); color: var(--ink); font: var(-
 a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 a:hover { color: var(--info); text-decoration-color: var(--info); }
 h1, h2, h3, p { margin: 0; }
-.serif { font-family: var(--serif); }
 .mono, code, pre { font-family: var(--mono); font-size: var(--fs-mono); }
 .hint, .meta { color: var(--muted); font-size: var(--fs-xs); }
 .eyebrow { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -77,7 +74,7 @@ details > summary { cursor: pointer; }
 /* Masthead and step band: one sticky block. */
 .top { position: sticky; top: 0; z-index: 3; background: var(--surface); border-bottom: 1px solid var(--line); }
 .masthead { height: var(--mast-h); display: flex; align-items: center; gap: 24px; padding: 0 32px; }
-.brand { font-family: var(--serif); font-size: 24px; font-weight: 600; text-decoration: none; color: var(--ink); }
+.brand { font-size: 24px; font-weight: 600; text-decoration: none; color: var(--ink); }
 .brand-sub { color: var(--muted); font-size: var(--fs-sm); }
 .stages { display: flex; align-items: center; margin-left: 8px; }
 .stage { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink-2); font-size: var(--fs-sm); font-weight: 500; padding: 0 4px; position: relative; }
@@ -120,8 +117,8 @@ details > summary { cursor: pointer; }
 /* The step header: what this step is, and the snapshot's facts. */
 .scenario { padding: 22px 32px 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 40px; align-items: start; }
 .scenario .lead { display: flex; flex-direction: column; gap: 8px; }
-.scenario h1 { font-family: var(--serif); font-size: var(--fs-title); font-weight: 500; line-height: 1.12; letter-spacing: -.01em; }
-.scenario .question { font-family: var(--serif); font-size: var(--fs-q); font-style: italic; color: var(--ink-2); }
+.scenario h1 { font-size: var(--fs-title); font-weight: 500; line-height: 1.12; letter-spacing: -.01em; }
+.scenario .question { font-size: var(--fs-q); font-style: italic; color: var(--ink-2); }
 .scenario .lead > p { color: var(--ink-2); max-width: 82ch; }
 .scenario .proves { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--ink-2); }
 .scenario .proves strong { color: var(--ink); }
@@ -209,7 +206,7 @@ pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: var(
 .entry .id { font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .entry .tools { display: flex; gap: 6px; flex-wrap: wrap; }
 .norequest { background: var(--bad-bg); border-radius: 6px; padding: 28px 22px; display: flex; flex-direction: column; gap: 8px; }
-.norequest .big { font-family: var(--serif); font-size: 32px; font-weight: 500; color: var(--bad); line-height: 1.1; }
+.norequest .big { font-size: 32px; font-weight: 500; color: var(--bad); line-height: 1.1; }
 .norequest p { color: var(--ink); }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .seg button { border: 0; border-radius: 0; height: var(--control-sm); font-size: var(--fs-xs); background: var(--surface); }
@@ -219,7 +216,7 @@ pre { margin: 0; white-space: pre-wrap; word-break: break-word; background: var(
 .sendrow .right { margin-left: auto; }
 .snippet-code { max-height: 460px; overflow: auto; }
 .empty { background: var(--sunken); border: 1px dashed var(--line); border-radius: 6px; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px; }
-.empty .big { font-family: var(--serif); font-size: 22px; font-weight: 500; }
+.empty .big { font-size: 22px; font-weight: 500; }
 .answer-text { white-space: pre-wrap; }
 .answer .body ul, .entry ul { padding-left: 18px; margin: 4px 0; }
 .foot { padding: 8px 32px 24px; color: var(--muted); font-size: var(--fs-xs); }
@@ -262,7 +259,7 @@ button.turn .call { font-family: var(--mono); font-size: calc(var(--fs-xs) - .5p
 .landing { padding: 48px 40px 0; max-width: 1360px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
 .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 56px; align-items: end; }
 .hero .lead { display: flex; flex-direction: column; gap: 14px; }
-.hero h1 { font-family: var(--serif); font-size: 52px; font-weight: 500; line-height: 1.05; letter-spacing: -.015em; }
+.hero h1 { font-size: 52px; font-weight: 500; line-height: 1.05; letter-spacing: -.015em; }
 .hero .lede { font-size: var(--fs-lead); color: var(--ink-2); max-width: 60ch; }
 .hero .cta { display: flex; gap: 12px; align-items: center; margin-top: 6px; }
 a.btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 6px; background: var(--ink); color: var(--on-ink); text-decoration: none; font-weight: 600; }
@@ -279,8 +276,8 @@ a.btn:hover { color: var(--on-ink); }
 .stage-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 30px 22px 20px; display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: var(--ink); position: relative; }
 .stage-card:hover { border-color: var(--ink); color: var(--ink); }
 .stage-card > .num { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; font-size: 16px; background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
-.stage-card h2 { font-family: var(--serif); font-size: 28px; font-weight: 500; line-height: 1.15; }
-.stage-card .question { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--ink-2); }
+.stage-card h2 { font-size: 28px; font-weight: 500; line-height: 1.15; }
+.stage-card .question { font-size: 18px; font-style: italic; color: var(--ink-2); }
 .stage-card p { font-size: 14px; color: var(--ink-2); }
 .stage-card .codes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 .stage-card .hint { margin-top: auto; padding-top: 8px; }

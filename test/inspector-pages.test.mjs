@@ -31,19 +31,26 @@ test('the landing links every stage and names the four columns once', () => {
   }
 });
 
-test('the fonts are vendored: every face the stylesheet declares is a file under public/fonts, with its license, and no page loads from the network', () => {
+test('the fonts are vendored: the two faces the guide names, each a file under public/fonts with its licence, and no page loads from the network', () => {
   const css = read('style.css');
-  const urls = [...css.matchAll(/@font-face[^}]*url\(["']?([^"')]+)["']?\)/g)].map(m => m[1]);
-  assert.ok(urls.length >= 6, `six faces vendored, found ${urls.length}`);
-  for (const url of urls) {
+  const faces = [...css.matchAll(/@font-face\s*{([^}]*)}/g)].map(m => ({
+    family: m[1].match(/font-family:\s*"([^"]+)"/)[1],
+    url: m[1].match(/url\(["']?([^"')]+)["']?\)/)[1],
+  }));
+  assert.deepEqual([...new Set(faces.map(f => f.family))].sort(), ['IBM Plex Mono', 'Space Grotesk'], 'Space Grotesk for reading, IBM Plex Mono for labels and code, nothing else');
+  for (const { url } of faces) {
     assert.match(url, /^\/fonts\/[\w.-]+\.woff2$/, url);
     assert.ok(fs.existsSync(path.join(PUBLIC, url)), `${url} exists`);
   }
+  const vendored = fs.readdirSync(path.join(PUBLIC, 'fonts')).filter(f => f.endsWith('.woff2')).map(f => `/fonts/${f}`).sort();
+  assert.deepEqual(vendored, [...new Set(faces.map(f => f.url))].sort(), 'every vendored file is declared, and nothing else is vendored');
   assert.doesNotMatch(css, /@import|googleapis/, 'the stylesheet imports nothing');
   for (const file of ['index.html', 'basic/index.html', 'intermediate/index.html', 'advanced/index.html']) {
     assert.doesNotMatch(read(file), /<(link|script)[^>]+(href|src)="https?:/, `${file} loads no stylesheet or script from the network`);
   }
-  for (const license of ['LICENSE-IBM-Plex.txt', 'LICENSE-Newsreader.txt']) assert.match(read(`fonts/${license}`), /SIL OPEN FONT LICENSE/);
+  for (const license of ['LICENSE-IBM-Plex.txt', 'LICENSE-Space-Grotesk.txt']) assert.match(read(`fonts/${license}`), /SIL OPEN FONT LICENSE/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'NOTICE'), 'utf8'), /Space Grotesk/, 'NOTICE lists the face');
+  assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'NOTICE'), 'utf8'), /Newsreader|Plex Sans/, 'NOTICE no longer lists faces that are gone');
 });
 
 const trace = {

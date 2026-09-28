@@ -10,9 +10,9 @@ the same license; see vendor/cwa/LICENSE and vendor/cwa/NOTICE.
 scripts/vendor_contract.py comes from the cwa-assembler-template repository
 (https://github.com/contextwindowarchitecture/assembler-template), Apache-2.0.
 
-src/inspector/public/fonts/ holds the inspector's typefaces, each under the SIL
-Open Font License 1.1, with its license text beside it:
-IBM Plex Sans and IBM Plex Mono, Copyright 2017 IBM Corp., Reserved Font Name
-"Plex" (https://github.com/IBM/plex); Newsreader, Copyright 2020 The Newsreader
-Project Authors (https://github.com/productiontype/Newsreader). The files are the
-latin woff2 builds Google Fonts serves.
+src/inspector/public/fonts/ holds the inspector's typefaces, the website's, each
+under the SIL Open Font License 1.1, with its license text beside it:
+Space Grotesk, Copyright 2020 The Space Grotesk Project Authors
+(https://github.com/floriankarsten/space-grotesk); IBM Plex Mono, Copyright 2017
+IBM Corp., Reserved Font Name "Plex" (https://github.com/IBM/plex). The files are
+the latin woff2 builds Google Fonts serves.

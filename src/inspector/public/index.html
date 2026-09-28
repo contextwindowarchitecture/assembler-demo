@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CWA demo inspector</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-name">CWA</span>
+      <span class="brand-sub">support-assistant demo · candidate context → decisions → outbound request → answer</span>
+    </div>
+    <nav class="steps" id="steps" aria-label="Scenario steps"></nav>
+    <div class="controls">
+      <label>Assembler
+        <select id="assembler"></select>
+      </label>
+      <label>Rendering
+        <select id="variant">
+          <option value="fixture">fixture-xml/v1 (compare)</option>
+          <option value="messages">cwa-messages/v1 (model)</option>
+        </select>
+      </label>
+      <label>budget.input
+        <input id="budget" type="number" min="0" step="10" inputmode="numeric">
+      </label>
+      <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>
+      <span id="agreement" class="badge"></span>
+    </div>
+  </header>
+
+  <section class="scenario" id="scenario"></section>
+
+  <main class="columns">
+    <section class="column" id="candidates"><h2>Candidate context</h2><div class="body"></div></section>
+    <section class="column" id="decisions"><h2>CWA decisions</h2><div class="body"></div></section>
+    <section class="column" id="request"><h2>Outbound request</h2><div class="body"></div></section>
+    <section class="column" id="answer"><h2>Model answer</h2><div class="body"></div></section>
+  </main>
+
+  <footer class="foot" id="foot"></footer>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

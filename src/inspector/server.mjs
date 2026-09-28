@@ -113,7 +113,7 @@ async function handle(req, res) {
     } catch (error) { throw new HttpError(400, error.message); }
   }
   if (req.method === 'GET') {
-    const file = path.normalize(url.pathname === '/' ? '/index.html' : url.pathname);
+    const file = path.normalize(url.pathname.endsWith('/') ? `${url.pathname}index.html` : url.pathname);
     const target = path.join(PUBLIC, file);
     if (!target.startsWith(PUBLIC)) throw new HttpError(404, 'not found');
     try { return send(res, 200, await readFile(target), MIME[path.extname(target)] ?? 'application/octet-stream'); }

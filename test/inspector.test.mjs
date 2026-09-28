@@ -47,10 +47,17 @@ test('GET /api/contract serves the reason registry keyed by code, and the slot d
   assert.equal(body.slot_defaults['interaction.query'].tier, 'protected');
 });
 
-test('GET / serves the page and unknown paths are 404', async () => {
-  const page = await fetch(base + '/');
-  assert.equal(page.status, 200);
-  assert.match(await page.text(), /Candidate context/);
+test('GET / is the landing page, each stage has its own page, and unknown paths are 404', async () => {
+  const landing = await fetch(base + '/');
+  assert.equal(landing.status, 200);
+  const landingText = await landing.text();
+  assert.match(landingText, /href="\/basic\/"/);
+  assert.match(landingText, /href="\/intermediate\/"/);
+  const basic = await fetch(base + '/basic/');
+  assert.equal(basic.status, 200);
+  assert.match(await basic.text(), /Candidate context/);
+  assert.equal((await fetch(base + '/basic/page.js')).status, 200);
+  assert.equal((await fetch(base + '/shared/panels.js')).status, 200);
   assert.equal((await get('/nope.js')).status, 404);
   assert.equal((await fetch(base + '/../package.json')).status, 404);
 });

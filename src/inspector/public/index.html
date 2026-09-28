@@ -3,44 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CWA demo inspector</title>
+  <title>CWA demo</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header class="top">
     <div class="brand">
       <span class="brand-name">CWA</span>
-      <span class="brand-sub">support-assistant demo · candidate context → decisions → outbound request → answer</span>
-    </div>
-    <nav class="steps" id="steps" aria-label="Scenario steps"></nav>
-    <div class="controls">
-      <label>Assembler
-        <select id="assembler"></select>
-      </label>
-      <label>Rendering
-        <select id="variant">
-          <option value="fixture">fixture-xml/v1 (compare)</option>
-          <option value="messages">cwa-messages/v1 (model)</option>
-        </select>
-      </label>
-      <label>budget.input
-        <input id="budget" type="number" min="0" step="10" inputmode="numeric">
-      </label>
-      <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>
-      <span id="agreement" class="badge"></span>
+      <span class="brand-sub">support-assistant demo · one question, three assemblers, every decision on one screen</span>
     </div>
   </header>
-
-  <section class="scenario" id="scenario"></section>
-
-  <main class="columns">
-    <section class="column" id="candidates"><h2>Candidate context</h2><div class="body"></div></section>
-    <section class="column" id="decisions"><h2>CWA decisions</h2><div class="body"></div></section>
-    <section class="column" id="request"><h2>Outbound request</h2><div class="body"></div></section>
-    <section class="column" id="answer"><h2>Model answer</h2><div class="body"></div></section>
+  <main class="landing">
+    <p class="landing-lead">Each stage is its own page with its own frozen scenarios. They share the four columns: <strong>candidate context → CWA decisions → outbound request → model answer</strong>.</p>
+    <div class="stage-cards">
+      <a class="stage-card" href="/basic/">
+        <h2>Basic</h2>
+        <p class="question">“What support does the Pro plan include?”</p>
+        <p>Show me exactly what CWA assembled. Local fixtures, five cumulative steps: a clean assembly, stale and foreign documents, authority boundaries, budget pressure, and a refusal.</p>
+        <p class="hint">Proves admission, authority boundaries, budgeting, rendering and reproducibility across Python, TypeScript and Go.</p>
+      </a>
+      <a class="stage-card" href="/intermediate/">
+        <h2>Intermediate</h2>
+        <p class="question">“Given my account and our previous conversation, what support am I entitled to?”</p>
+        <p>Several sources compete for a limited budget. LlamaIndex retrieval and postprocessing over a corpus of support documents, an account database, a memory store and the conversation, run live or replayed from the captured batches.</p>
+        <p class="hint">Proves declared conflicts, deduplication, source diversity, supplied summaries, and the route's required-evidence behaviour.</p>
+      </a>
+      <div class="stage-card planned">
+        <h2>Advanced</h2>
+        <p class="question">“Check my entitlement, investigate this incident, and draft the next action.”</p>
+        <p>Context evolves through a bounded tool loop: authorization, checkpoints, failures, recovery and replay.</p>
+        <p class="hint">Planned.</p>
+      </div>
+    </div>
   </main>
-
-  <footer class="foot" id="foot"></footer>
-  <script type="module" src="/app.js"></script>
+  <footer class="foot">Arrow keys switch steps on a stage page. Providers come from <span class="mono">.env</span>.</footer>
 </body>
 </html>

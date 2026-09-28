@@ -97,3 +97,18 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .sendrow select { max-width: 100%; }
 .answer .body ul { padding-left: 18px; margin: 4px 0; }
 .snippet-code { max-height: 460px; overflow: auto; font-size: 12px; }
+a.brand-name { color: var(--text); text-decoration: none; }
+.stages { display: flex; gap: 4px; }
+.stages a, .stages .planned { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; text-decoration: none; color: var(--text); }
+.stages a.active { background: var(--panel-2); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.stages .planned { color: var(--muted); }
+.tag.conflict { color: var(--warn); background: var(--warn-bg); border-color: transparent; font-weight: 600; }
+.landing { padding: 24px 20px; max-width: 1200px; margin: 0 auto; }
+.landing-lead { color: var(--muted); font-size: 16px; max-width: 80ch; }
+.stage-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px; }
+.stage-card { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; color: var(--text); text-decoration: none; }
+.stage-card:hover { border-color: var(--accent); }
+.stage-card h2 { font-size: 18px; letter-spacing: 0; text-transform: none; color: var(--text); margin: 0 0 6px; }
+.stage-card .question { color: var(--accent); font-size: 15px; margin: 0 0 8px; }
+.stage-card p { margin: 0 0 8px; }
+.stage-card.planned { opacity: .7; }

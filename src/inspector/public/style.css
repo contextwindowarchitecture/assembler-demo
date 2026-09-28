@@ -131,3 +131,9 @@ button.turn .turn-head { display: flex; justify-content: space-between; gap: 8px
 button.turn .tags { margin: 3px 0; }
 button.turn { min-width: 0; overflow-wrap: anywhere; }
 button.turn .tags .mono { overflow-wrap: anywhere; word-break: break-word; }
+.routes { padding: 4px 20px 0; }
+.routes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.route-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 10px; margin: 8px 0 4px; }
+.route-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+.route-card.active { border-color: var(--accent); }
+.route-card ul.pipeline { padding-left: 18px; color: var(--muted); margin: 4px 0; }

@@ -99,10 +99,12 @@ export async function answer(payloadText, { maxTokens, model: chosen, client, en
   }
   const text = response.content.filter(block => block.type === 'text').map(block => block.text).join('');
   const toolCalls = response.content.filter(block => block.type === 'tool_use').map(block => ({ id: block.id, name: block.name, arguments: block.input ?? {} }));
+  const reasoning = response.content.filter(block => block.type === 'thinking' && block.thinking).map(block => block.thinking).join('\n') || null;
   const fallbacks = response.content.filter(block => block.type === 'fallback').map(block => `${block.from?.model} declined; ${block.to?.model} continued`);
   return {
     request: params,
     text,
+    reasoning,
     tool_calls: toolCalls,
     model: response.model,
     stop_reason: response.stop_reason,

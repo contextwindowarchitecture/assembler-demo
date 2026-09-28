@@ -16,11 +16,13 @@ export async function saveRun(run, { dir = RUNS } = {}) {
 
 export async function listRuns({ dir = RUNS } = {}) {
   if (!existsSync(dir)) return [];
-  const ids = (await readdir(dir)).filter(name => existsSync(path.join(dir, name, 'run.json'))).sort();
+  // Reference runs first, then live ones, each by id: the committed record is what a page opens by default.
+  const ids = (await readdir(dir)).filter(name => existsSync(path.join(dir, name, 'run.json')))
+    .sort((a, b) => (a.startsWith('reference-') === b.startsWith('reference-') ? (a < b ? -1 : a > b ? 1 : 0) : a.startsWith('reference-') ? -1 : 1));
   const runs = [];
   for (const id of ids) {
     const run = JSON.parse(await readFile(path.join(dir, id, 'run.json'), 'utf8'));
-    runs.push({ id: run.id, scenario: run.scenario, title: run.title, started: run.started, provider: run.provider, model: run.model, assembler: run.assembler, turns: run.turns.length, stop: run.stop, reference: run.reference === true });
+    runs.push({ id: run.id, scenario: run.scenario, route: run.route?.id ?? 'incident-agent', title: run.title, started: run.started, provider: run.provider, model: run.model, assembler: run.assembler, turns: run.turns.length, stop: run.stop, reference: run.reference === true });
   }
   return runs;
 }

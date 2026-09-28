@@ -1,0 +1,34 @@
+{
+  "$comment": "The routes of the advanced stage. Each names its route policy, its placement profiles and the provider (the model) it targets. Compare routes independently: different profiles produce different requests from the same tools and guard.",
+  "incident-agent": {
+    "title": "Route 1: incident-agent",
+    "policy": "route-policy.json",
+    "profiles": {
+      "messages": "messages",
+      "fixture": "fixture"
+    },
+    "provider": "local",
+    "summary": "Instructions in the system channel once; state before evidence and observations; observations kept for an hour with no cap. The model reached through the OpenAI-style endpoint.",
+    "differences": []
+  },
+  "incident-agent-reinforced": {
+    "title": "Route 2: incident-agent-reinforced",
+    "policy": "route-policy-reinforced.json",
+    "profiles": {
+      "messages": "reinforced-messages",
+      "fixture": "reinforced-fixture"
+    },
+    "provider": "anthropic",
+    "summary": "The same tools and guard, a different route for a model reached through the Anthropic-style endpoint: instructions restated just before the query, evidence and observations ahead of state, the output contract next to the query, and a tighter input budget under which the evidence chunks take their supplied summaries while every observation stays.",
+    "differences": [
+      "governance.instructions is placed twice: in the system channel and again as <instructions> right before the query; the trace counts both occurrences",
+      "evidence and observations come before the user profile and the task state, and the output contract sits next to the query",
+      "budget.input is 620 instead of 1400: as observations accumulate, the route's fitting order compresses the evidence chunks to their summaries (compressed rows), and nothing protected moves",
+      "the provider is the Anthropic-style endpoint, so the outbound request is a Messages API request: system blocks and one user message"
+    ],
+    "budget": {
+      "input": 620,
+      "reserved_output": 1200
+    }
+  }
+}

@@ -66,6 +66,35 @@ test('a run: observations enter the next turn, a repeated call supersedes, a for
   assert.ok(run.memory_proposal.body.includes('INC-2041'));
 });
 
+test('the reinforced route places the instructions twice, evidence ahead of state, and compresses evidence under its budget', { timeout: 120_000 }, async () => {
+  const answer = scripted([
+    { tool_calls: [{ id: 'c1', name: 'get_account', arguments: { user_id: 'u_1042' } }] },
+    { tool_calls: [{ id: 'c2', name: 'get_service_status', arguments: { region: 'eu' } }] },
+    { tool_calls: [{ id: 'c3', name: 'list_tickets', arguments: { user_id: 'u_1042' } }] },
+    { text: ANSWER },
+  ]);
+  const run = await runAgent({ scenarioId: '01-investigate', routeId: 'incident-agent-reinforced', providerId: 'scripted', assemblerId: 'python', answer, clock, id: 'test-reinforced' });
+  assert.equal(run.route.id, 'incident-agent-reinforced');
+  assert.equal(run.route.profile, 'incident-agent-reinforced-messages');
+  const last = run.turns.at(-1);
+  assert.equal(last.trace.context.route_policy_version, 'incident-agent-reinforced/v1');
+  const slots = last.trace.included.map(row => row.slot);
+  assert.equal(slots.filter(s => s === 'governance.instructions').length, 2, 'the instructions are placed twice and counted twice');
+  assert.ok(slots.indexOf('evidence.knowledge') < slots.indexOf('state.user'), 'evidence comes before the user profile');
+  assert.equal(slots.at(-1), 'interaction.query');
+  assert.equal(slots.at(-2), 'governance.instructions', 'the restated instructions sit right before the query');
+  const ir = JSON.parse(last.payload);
+  assert.equal(ir.system.length, 1);
+  assert.match(ir.messages[0].content, /<instructions id="policy:incident-agent:v1">[\s\S]*<query id=/);
+  // Under the route's tighter budget, the evidence chunks take their summaries once observations accumulate, and
+  // every observation stays: nothing protected moves, and no tool result is shed.
+  assert.equal(last.snapshot.budget.input, 620);
+  assert.ok(last.trace.compressed.length >= 1, `evidence is compressed: ${JSON.stringify(last.trace.compressed)}`);
+  assert.ok(last.trace.compressed.every(row => row.slot === 'evidence.knowledge'));
+  assert.equal(last.trace.included.filter(r => r.slot === 'evidence.tool_results').length, 3, 'every observation is still included');
+  assert.equal(run.turns[0].trace.compressed.length, 0, 'the first inference fits without compression');
+});
+
 test('a timeout is an observation; a later success supersedes it; recovery and turns are bounded', { timeout: 120_000 }, async () => {
   const answer = scripted([
     { tool_calls: [{ id: 'c1', name: 'get_service_status', arguments: { region: 'eu' } }] },
@@ -83,18 +112,26 @@ test('a timeout is an observation; a later success supersedes it; recovery and t
   assert.equal(run.stop.reason, 'answer');
 });
 
-test('a run that never answers stops at max_turns', { timeout: 120_000 }, async () => {
+test('on the last turn no tool is offered, so a model that keeps requesting tools is stopped with what it wrote', { timeout: 120_000 }, async () => {
   const answer = scripted(Array.from({ length: 9 }, () => ({ tool_calls: [{ id: 'c', name: 'list_tickets', arguments: { user_id: 'u_1042' } }] })));
   const run = await runAgent({ scenarioId: '01-investigate', providerId: 'scripted', assemblerId: 'python', answer, clock, id: 'test-max' });
-  assert.equal(run.stop.reason, 'max_turns');
   assert.equal(run.turns.length, run.limits.max_turns);
+  const last = run.turns.at(-1);
+  assert.equal(last.snapshot.batches.find(b => b.producer.id === 'capability-policy').items.length, 0, 'no tool is offered on the last turn');
+  assert.deepEqual(last.snapshot.capabilities.allowed_ids, []);
+  assert.equal(JSON.parse(last.payload).tools.length, 0);
+  assert.match(last.snapshot.batches.find(b => b.producer.id === 'state-svc').items[1].body, /the last: no tool is offered/);
+  assert.deepEqual(last.tool_requests.map(r => [r.decision, r.executed]), [['denied', false]]);
+  assert.equal(run.observations.length, run.limits.max_turns - 1, 'every earlier turn executed its call; the last could not');
+  assert.equal(run.stop.reason, 'no_answer', 'a scripted model that wrote nothing gets a clear stop, not an answer');
+  assert.match(run.stop.detail, /asked for list_tickets, which was not offered; it was the last turn/);
 });
 
 test('the store saves, lists and loads runs', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'cwa-runs-'));
   const run = { id: 'reference-x', scenario: '01-investigate', title: 't', started: '2026-09-28T16:00:00Z', provider: 'local', model: 'm', assembler: 'python', turns: [{ n: 1 }], stop: { reason: 'answer', turn: 1 }, reference: true };
   await saveRun(run, { dir });
-  assert.deepEqual(await listRuns({ dir }), [{ id: 'reference-x', scenario: '01-investigate', title: 't', started: '2026-09-28T16:00:00Z', provider: 'local', model: 'm', assembler: 'python', turns: 1, stop: { reason: 'answer', turn: 1 }, reference: true }]);
+  assert.deepEqual(await listRuns({ dir }), [{ id: 'reference-x', scenario: '01-investigate', route: 'incident-agent', title: 't', started: '2026-09-28T16:00:00Z', provider: 'local', model: 'm', assembler: 'python', turns: 1, stop: { reason: 'answer', turn: 1 }, reference: true }]);
   assert.equal((await loadRun('reference-x', { dir })).turns.length, 1);
   assert.equal(await loadRun('nope', { dir }), null);
 });

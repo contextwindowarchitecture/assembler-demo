@@ -9,7 +9,7 @@ import { answer as defaultAnswer } from '../provider/index.mjs';
 import { grantTools, loadSource } from './capabilities.mjs';
 import { authorize } from './guard.mjs';
 import { connectServers } from './mcp.mjs';
-import { conversationBatch, freezeTurn, observationSource, policyBatch, retrieveBatch, stateBatch, toolsBatch } from './producers.mjs';
+import { conversationBatch, freezeTurn, loadRoutes, observationSource, policyBatch, retrieveBatch, stateBatch, toolsBatch } from './producers.mjs';
 
 const HEADINGS = ['Entitlement', 'Incident', 'Next action'];
 
@@ -19,22 +19,30 @@ export function validateAnswer(text) {
   return { ok: missing.length === 0 && (text ?? '').trim().length > 0, missing };
 }
 
+export const DEFAULT_ROUTE = 'incident-agent';
+
 export async function runAgent({
-  scenarioId, providerId = 'local', assemblerId = 'python', faults, id, reference = false,
+  scenarioId, routeId = DEFAULT_ROUTE, providerId, assemblerId = 'python', faults, id, reference = false,
   clock = () => new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'), answer = defaultAnswer, env = process.env, onTurn = () => {},
 } = {}) {
   const scenario = loadSource('scenarios.json').find(s => s.id === scenarioId);
   if (!scenario) throw new Error(`no advanced scenario ${scenarioId}`);
+  const route = loadRoutes()[routeId];
+  if (!route) throw new Error(`no route ${routeId}; routes.json names ${Object.keys(loadRoutes()).join(', ')}`);
+  providerId = providerId ?? route.provider;
+  const routeSuffix = routeId === DEFAULT_ROUTE ? '' : `-${routeId.replace(`${DEFAULT_ROUTE}-`, '')}`;
   const common = loadSource('common.json');
-  const { scope, budget, controller: limits } = common;
+  const { scope, controller: limits } = common;
+  const budget = route.budget ?? common.budget;
   const account = loadSource('services/accounts.json')[scope.user];
   const assemblers = await loadAssemblers();
   const assembler = assemblers[assemblerId];
   if (!assembler?.available) throw new Error(`assembler ${assemblerId} is not available`);
 
   const run = {
-    id: id ?? `${reference ? 'reference' : 'live'}-${scenarioId}${reference ? '' : `-${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID().slice(0, 6)}`}`,
+    id: id ?? `${reference ? 'reference' : 'live'}-${scenarioId}${routeSuffix}${reference ? '' : `-${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID().slice(0, 6)}`}`,
     scenario: scenarioId, title: scenario.title, question: scenario.question, reference,
+    route: { id: routeId, title: route.title, policy_version: route.route_policy.version, profile: route.profile.messages.id, placement: route.profile.messages.placement, budget, summary: route.summary, differences: route.differences },
     started: clock(), provider: providerId, model: null, assembler: assemblerId, faults: { ...scenario.faults, ...(faults ?? {}) },
     limits, turns: [], observations: [], denials: [], answer: null, validation: null, stop: null, memory_proposal: null,
   };
@@ -49,9 +57,14 @@ export async function runAgent({
     for (let n = 1; n <= limits.max_turns; n++) {
       task.turn = n;
       const now = clock();
-      const batches = [policyBatch(now), { producer: { id: 'capability-policy', kind: 'capability_policy' }, items: grant.items, excluded: [] },
+      // The application ends the loop, not the model: on the last turn no tool is offered, the grant is empty, and
+      // the task state says so, so the only move left is the answer.
+      const lastTurn = n === limits.max_turns;
+      task.lastTurn = lastTurn;
+      const offered = lastTurn ? { items: [], grant: { ...grant.grant, allowed_ids: [] } } : { items: grant.items, grant: grant.grant };
+      const batches = [policyBatch(now), { producer: { id: 'capability-policy', kind: 'capability_policy' }, items: offered.items, excluded: [] },
         stateBatch({ scope, account, now, task }), kb.batch, toolsBatch(run.observations, scope), conversationBatch({ scope, question: scenario.question, questionAt: run.started, modelTurns })];
-      const snapshot = freezeTurn({ now, scope, budget, tokenizer: common.tokenizer, renderers: common.renderers, batches, grant: grant.grant });
+      const snapshot = freezeTurn({ route, now, scope, budget, tokenizer: common.tokenizer, renderers: common.renderers, batches, grant: offered.grant });
       const result = await runAdapter(assembler, Buffer.from(JSON.stringify(snapshot, null, 2) + '\n', 'utf8'));
       const turn = { n, at: now, snapshot, outcome: result.outcome, trace: result.trace ?? null, payload: result.payload ? result.payload.toString('utf8') : null, detail: result.detail ?? null, tool_requests: [], request: null, response: null, recovery: null };
       run.turns.push(turn);
@@ -79,10 +92,25 @@ export async function runAgent({
       run.model = response.model ?? run.model;
       turn.request = response.request;
       turn.response = { text: response.text ?? '', tool_calls: response.tool_calls ?? [], model: response.model, usage: response.usage ?? null, stop_reason: response.stop_reason ?? null, durationMs: response.durationMs ?? null, reasoning: response.reasoning ?? null };
+      if (lastTurn && turn.response.tool_calls.length) {
+        // No tool was offered; a request for one is recorded as denied and the run ends with what the model wrote.
+        for (const call of turn.response.tool_calls) {
+          turn.tool_requests.push({ call, decision: 'denied', reason: 'no tool is offered on the last turn', cap: null, executed: false, observation: null, ms: null });
+          run.denials.push({ turn: n, tool: call.name, arguments: call.arguments, reason: 'no tool is offered on the last turn' });
+        }
+        turn.response.tool_calls = [];
+      }
+      if (!turn.response.tool_calls.length && !turn.response.text.trim()) {
+        // No tool request and no text: the model returned nothing usable. A clear stop, not an answer.
+        const asked = turn.tool_requests.map(r => r.call.name);
+        run.stop = { reason: 'no_answer', turn: n, detail: `the model wrote no text${asked.length ? ` and asked for ${asked.join(', ')}, which was not offered` : ' and requested no tool'}${turn.response.reasoning ? ' (only reasoning came back)' : ''}${lastTurn ? '; it was the last turn' : ''}` };
+        onTurn(turn);
+        break;
+      }
       if (!turn.response.tool_calls.length) {
         run.answer = turn.response.text;
         run.validation = validateAnswer(run.answer);
-        run.stop = { reason: 'answer', turn: n, detail: run.validation.ok ? 'the answer follows the output contract' : `the answer misses ${run.validation.missing.join(', ')}` };
+        run.stop = { reason: 'answer', turn: n, detail: `${run.validation.ok ? 'the answer follows the output contract' : `the answer misses ${run.validation.missing.join(', ')}`}${lastTurn ? '; written on the last turn, with no tool offered' : ''}` };
         run.memory_proposal = { body: `On ${now.slice(0, 10)} the user investigated ${run.observations.find(o => o.ok && o.value?.incident)?.value?.incident ?? 'an incident'} in region ${account.region}; the assistant drafted the next action.`, source: `turn:${scope.session}#1`, note: 'proposed to the memory store after the answer was validated; not written by the demo' };
         onTurn(turn);
         break;

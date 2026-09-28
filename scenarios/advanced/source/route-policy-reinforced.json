@@ -1,0 +1,99 @@
+{
+  "route": "incident-agent-reinforced",
+  "version": "incident-agent-reinforced/v1",
+  "clock_skew_seconds": 5,
+  "requires_evidence": true,
+  "on_unresolved_instruction": "surface",
+  "producers": {
+    "policy-registry": {
+      "kind": "policy",
+      "slots": [
+        "governance.instructions",
+        "governance.output_contract"
+      ]
+    },
+    "capability-policy": {
+      "kind": "capability_policy",
+      "slots": [
+        "governance.capabilities"
+      ]
+    },
+    "state-svc": {
+      "kind": "state",
+      "slots": [
+        "state.user",
+        "state.task"
+      ]
+    },
+    "kb-search": {
+      "kind": "retrieval",
+      "slots": [
+        "evidence.knowledge"
+      ]
+    },
+    "tools-mcp": {
+      "kind": "mcp",
+      "slots": [
+        "evidence.tool_results"
+      ]
+    },
+    "conversation": {
+      "kind": "interaction",
+      "slots": [
+        "interaction.history",
+        "interaction.query"
+      ]
+    }
+  },
+  "slots": {
+    "state.user": {
+      "max_age_seconds": 300,
+      "required_scope": [
+        "tenant",
+        "user"
+      ]
+    },
+    "state.task": {
+      "max_age_seconds": 60,
+      "required_scope": [
+        "tenant",
+        "task"
+      ]
+    },
+    "evidence.knowledge": {
+      "min_relevance": 0.3,
+      "required_scope": [
+        "tenant"
+      ],
+      "order_by": [
+        "-relevance",
+        "-freshness"
+      ],
+      "dedupe": "exact",
+      "max_per_source": 2
+    },
+    "evidence.tool_results": {
+      "max_age_seconds": 3600,
+      "order_by": [
+        "-freshness"
+      ],
+      "supersede": "source"
+    },
+    "interaction.history": {
+      "priority": -1,
+      "order_by": [
+        "-freshness"
+      ]
+    }
+  },
+  "tier_upgrades": {
+    "state.user": "protected",
+    "state.task": "protected"
+  },
+  "fitting_order": [
+    {
+      "slot": "evidence.knowledge",
+      "action": "compress"
+    }
+  ]
+}

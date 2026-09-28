@@ -25,7 +25,7 @@ export function stateBatch({ scope, account, now, task }) {
     item({ id: `task:${scope.task}`, slot: 'state.task', source: 'controller:task', source_version: String(task.turn), authority: 'state', trust: 'verified', freshness: now,
       scope: { tenant: scope.tenant, task: scope.task }, conflict_policy: 'governs', lineage: 'extracted', injection_risk: 'none',
       eligibility: 'incident-agent/v1: tenant and task of the request; written by the controller this turn',
-      body: [`task=${scope.task}`, `turn=${task.turn} of ${task.maxTurns}`,
+      body: [`task=${scope.task}`, `turn=${task.turn} of ${task.maxTurns}${task.lastTurn ? ' (the last: no tool is offered; write the answer now from what you have)' : ''}`,
         task.denied.length ? `tool requests denied by the application: ${task.denied.map(d => `${d.tool}(${JSON.stringify(d.arguments)}) because ${d.reason}`).join(' | ')}` : 'tool requests denied: none',
         task.failed.length ? `tool calls that failed: ${task.failed.map(f => `${f.tool}(${JSON.stringify(f.arguments)}): ${f.error}`).join(' | ')}` : 'tool calls that failed: none',
         `recoveries used=${task.recoveries} of ${task.maxRecoveries}`].join('; ') }),
@@ -75,11 +75,20 @@ export function conversationBatch({ scope, question, questionAt, modelTurns }) {
   return { producer: { id: 'conversation', kind: 'interaction' }, items, excluded: [] };
 }
 
-/** The snapshot for one inference, in the messages rendering the model sees, or the fixture one for comparison. */
-export function freezeTurn({ variant = 'messages', now, scope, budget, tokenizer, renderers, batches, grant, conflicts = [] }) {
+/** The routes of the stage, each with its policy loaded and its profiles resolved. */
+export function loadRoutes() {
+  const routes = loadSource('routes.json');
   const profiles = loadSource('profiles.json');
+  return Object.fromEntries(Object.entries(routes).filter(([id]) => !id.startsWith('$')).map(([id, route]) => [id, {
+    id, ...route, route_policy: loadSource(route.policy),
+    profile: { messages: profiles[route.profiles.messages], fixture: profiles[route.profiles.fixture] },
+  }]));
+}
+
+/** The snapshot for one inference on a route, in the messages rendering the model sees, or the fixture one. */
+export function freezeTurn({ route, variant = 'messages', now, scope, budget, tokenizer, renderers, batches, grant, conflicts = [] }) {
   return {
-    assembly_time: now, scope, budget, profile: profiles[variant], route_policy: loadSource('route-policy.json'),
+    assembly_time: now, scope, budget, profile: route.profile[variant], route_policy: route.route_policy,
     tokenizer, renderer: renderers[variant], batches, capabilities: grant, conflicts,
   };
 }

@@ -10,15 +10,15 @@ import { agreement, compareResult } from '../src/harness/compare.mjs';
 const references = (await listRuns()).filter(r => r.reference);
 const assemblers = select(await loadAssemblers(), []);
 
-test('there is a reference run for each advanced scenario', () => {
-  assert.deepEqual(references.map(r => r.scenario).sort(), ['01-investigate', '02-timeout']);
+test('there is a reference run for each advanced scenario, and one for the second route', () => {
+  assert.deepEqual(references.map(r => `${r.scenario}@${r.route}`).sort(), ['01-investigate@incident-agent', '01-investigate@incident-agent-reinforced', '02-timeout@incident-agent']);
 });
 
 for (const summary of references) {
   test(`${summary.id}: every inference has a snapshot and a trace, unauthorized calls never executed, the loop terminated`, async () => {
     const run = await loadRun(summary.id);
     assert.ok(run.turns.length >= 1 && run.turns.length <= run.limits.max_turns);
-    assert.ok(['answer', 'refused', 'max_turns'].includes(run.stop.reason), run.stop.reason);
+    assert.ok(['answer', 'refused', 'max_turns', 'no_answer'].includes(run.stop.reason), run.stop.reason);
     for (const turn of run.turns) {
       assert.ok(turn.snapshot, `turn ${turn.n} has a snapshot`);
       if (turn.outcome === 'assembled' || turn.outcome === 'refused') assert.match(turn.trace.context.snapshot_digest, /^[0-9a-f]{64}$/);

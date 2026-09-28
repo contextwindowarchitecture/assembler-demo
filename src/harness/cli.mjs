@@ -7,7 +7,7 @@
 //   cwa-demo expect --from <assembler> [scenarios]
 //   cwa-demo conformance [--assembler ...] [--dir vendor/cwa/conformance]
 //   cwa-demo answer <snapshot.messages.json> [--assembler python] [--provider local|anthropic|openai|all]
-//   cwa-demo agent <scenario> [--provider local] [--assembler python] [--faults '{"status":["timeout"]}'] [--id name] [--reference]
+//   cwa-demo agent <scenario> [--route incident-agent] [--provider local] [--assembler python] [--faults json] [--id name] [--reference]
 //   cwa-demo replay <run-id> [--assembler a,b]
 import { existsSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
@@ -25,7 +25,7 @@ const USAGE = `usage:
   cwa-demo conformance [--assembler a,b] [--dir <conformance>]  the vendored conformance cases: the harness's self-check
   cwa-demo answer <snapshot.messages.json> [--assembler a] [--provider p|all] [--json]
                                                                 assemble, then send the payload to a real model and print its answer
-  cwa-demo agent <scenario> [--provider p] [--assembler a] [--faults json] [--id name] [--reference]
+  cwa-demo agent <scenario> [--route r] [--provider p] [--assembler a] [--faults json] [--id name] [--reference]
                                                                 run the advanced stage's tool loop against a real model and record it
   cwa-demo replay <run-id> [--assembler a,b]                    every recorded inference through the assemblers, against its recorded trace
 `;
@@ -36,7 +36,7 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--json') flags.json = true;
     else if (arg === '--reference') flags.reference = true;
-    else if (arg === '--assembler' || arg === '--from' || arg === '--dir' || arg === '--provider' || arg === '--faults' || arg === '--id') flags[arg.slice(2)] = argv[++i];
+    else if (arg === '--assembler' || arg === '--from' || arg === '--dir' || arg === '--provider' || arg === '--faults' || arg === '--id' || arg === '--route') flags[arg.slice(2)] = argv[++i];
     else if (arg.startsWith('--')) throw new Error(`unknown flag ${arg}`);
     else positional.push(arg);
   }
@@ -225,7 +225,7 @@ async function agent({ positional, flags }) {
   if (flags.faults) { try { faults = JSON.parse(flags.faults); } catch { throw new Error('--faults takes JSON, for example {"status":["timeout"]}'); } }
   const assemblerId = flags.assembler?.[0] ?? 'python';
   const run = await runAgent({
-    scenarioId, providerId: flags.provider ?? 'local', assemblerId, faults, id: flags.id, reference: flags.reference === true,
+    scenarioId, routeId: flags.route ?? undefined, providerId: flags.provider, assemblerId, faults, id: flags.id, reference: flags.reference === true,
     onTurn: turn => {
       const model = turn.response ? `${turn.response.model} · ${turn.response.durationMs} ms · ${turn.response.tool_calls.length ? turn.response.tool_calls.map(c => `${c.name}(${JSON.stringify(c.arguments)})`).join(', ') : 'answer'}` : '';
       console.log(`turn ${turn.n}  ${turn.outcome}${turn.trace?.refused?.reason ? ` ${turn.trace.refused.reason}` : ''}${turn.trace?.result ? ` ${turn.trace.result.input_tokens} tokens` : ''}  ${model}`);
@@ -234,10 +234,11 @@ async function agent({ positional, flags }) {
     },
   });
   const dir = await saveRun(run);
+  console.log(`route ${run.route.id} (${run.route.profile}) · provider ${run.provider}`);
   console.log(`\nstop: ${run.stop.reason} at turn ${run.stop.turn}: ${run.stop.detail}`);
   if (run.answer) console.log(`\n--- answer (${run.validation.ok ? 'follows the output contract' : `misses ${run.validation.missing.join(', ')}`}) ---\n${run.answer}`);
   console.log(`\nrecorded: ${path.relative(ROOT, dir)}/run.json · ${run.turns.length} turns, ${run.observations.length} observations, ${run.denials.length} denied`);
-  return run.stop.reason === 'answer' || run.stop.reason === 'refused' ? 0 : 1;
+  return ['answer', 'refused', 'no_answer'].includes(run.stop.reason) ? 0 : 1;
 }
 
 /** Replay a recorded run: every recorded snapshot through the chosen assemblers, judged against the recorded trace. */

@@ -12,6 +12,7 @@ import { produce, producersAvailable } from '../harness/producers.mjs';
 import { runAgent } from '../agent/controller.mjs';
 import { listRuns, loadRun, saveRun } from '../agent/store.mjs';
 import { loadSource } from '../agent/capabilities.mjs';
+import { loadRoutes } from '../agent/producers.mjs';
 import { loadDotEnv } from '../env.mjs';
 import { answer, describeProviders } from '../provider/index.mjs';
 import { snippets } from '../provider/snippets.mjs';
@@ -143,6 +144,9 @@ async function handle(req, res) {
   if (req.method === 'POST' && url.pathname === '/api/assemble') return json(res, 200, await assemble(await readJsonBody(req), assemblers));
   if (req.method === 'POST' && url.pathname === '/api/produce') return json(res, 200, await produceAndAssemble(await readJsonBody(req), assemblers));
   if (req.method === 'GET' && url.pathname === '/api/agent/scenarios') return json(res, 200, loadSource('scenarios.json').map(s => ({ ...s, faults: s.faults })));
+  if (req.method === 'GET' && url.pathname === '/api/agent/routes') {
+    return json(res, 200, Object.values(loadRoutes()).map(r => ({ id: r.id, title: r.title, provider: r.provider, budget: r.budget ?? loadSource('common.json').budget, summary: r.summary, differences: r.differences, policy_version: r.route_policy.version, profile: r.profile.messages.id, placement: r.profile.messages.placement, slots: r.route_policy.slots })));
+  }
   if (req.method === 'GET' && url.pathname === '/api/agent/runs') return json(res, 200, await listRuns());
   const runFile = url.pathname.match(/^\/api\/agent\/runs\/([^/]+)$/);
   if (req.method === 'GET' && runFile) {
@@ -154,7 +158,7 @@ async function handle(req, res) {
     const body = await readJsonBody(req);
     if (typeof body.scenario !== 'string') throw new HttpError(400, 'name the scenario');
     let run;
-    try { run = await runAgent({ scenarioId: body.scenario, providerId: body.provider ?? 'local', assemblerId: body.assembler ?? 'python', faults: body.faults }); }
+    try { run = await runAgent({ scenarioId: body.scenario, routeId: body.route ?? undefined, providerId: body.provider || undefined, assemblerId: body.assembler ?? 'python', faults: body.faults }); }
     catch (error) { throw new HttpError(502, error.message); }
     await saveRun(run);
     return json(res, 200, run);

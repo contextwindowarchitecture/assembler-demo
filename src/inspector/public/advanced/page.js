@@ -16,7 +16,7 @@ const page = {
     return { label: `turn ${turn.n} · ${state.run.provider}`, ...turn.response, request: turn.request };
   },
   state: {
-    runs: [], run: null, turn: 1, scenarios: [], providers: [], assemblers: [], contract: null,
+    runs: [], run: null, turn: 1, scenarios: [], routes: [], providers: [], assemblers: [], contract: null,
     variant: 'messages', response: null, busy: null, error: null, replay: null,
     snippets: null, snippetLang: 'typescript', snippetTab: 'anthropic',
   },
@@ -40,6 +40,7 @@ async function selectRun(id) {
   catch (error) { state.error = error.message; state.run = null; }
   state.busy = null;
   location.hash = id;
+  if ($('#run')) $('#run').value = id;
   await selectTurn(1);
 }
 
@@ -53,7 +54,7 @@ async function selectTurn(n) {
 }
 
 function render() {
-  renderHead(); renderTimeline(); renderBadges();
+  renderHead(); renderRoutes(); renderTimeline(); renderBadges();
   const result = state.response?.results[0] ?? null;
   renderCandidates(page, result); renderDecisions(page, result); renderRequest(page, result); renderAnswer(page, result); renderFoot();
 }
@@ -72,11 +73,33 @@ function renderHead() {
     </div>
     <div class="meta">
       <span>${run.reference ? 'reference run' : 'live run'} · ${esc(run.started)}</span>
+      <span>route <span class="mono">${esc(run.route?.id ?? 'incident-agent')}</span> · profile <span class="mono">${esc(run.route?.profile ?? '')}</span></span>
       <span>model <span class="mono">${esc(run.model ?? '?')}</span> via ${esc(run.provider)} · assembled by ${esc(run.assembler)}</span>
       <span>stop: <span class="mono">${esc(run.stop.reason)}</span> at turn ${run.stop.turn} · ${esc(run.stop.detail)}</span>
       <span>${run.observations.length} observations · ${run.denials.length} denied request${run.denials.length === 1 ? '' : 's'}${run.validation ? ` · answer ${run.validation.ok ? 'follows' : 'misses part of'} the output contract` : ''}</span>
       ${run.memory_proposal ? `<span title="${esc(run.memory_proposal.note)}">memory proposed: <span class="mono">${esc(run.memory_proposal.body)}</span></span>` : ''}
     </div>`;
+}
+
+/** Both routes side by side: placement order, the rules that differ, and the recorded runs of each. */
+function renderRoutes() {
+  const routes = state.routes;
+  if (!routes.length) { $('#routes').innerHTML = ''; return; }
+  $('#routes').innerHTML = `<details ${state.run ? '' : 'open'}><summary>Routes: two placement profiles for the same tools and guard, compared independently</summary>
+    <div class="route-cards">${routes.map(route => {
+      const runs = state.runs.filter(r => r.route === route.id);
+      const active = state.run?.route?.id === route.id;
+      return `<div class="route-card ${active ? 'active' : ''}">
+        <div class="producer-head"><strong>${esc(route.title)}</strong><span class="kind">${esc(route.policy_version)}</span><span class="kind">provider ${esc(route.provider)}</span></div>
+        <p class="hint">${esc(route.summary)}</p>
+        <div class="section-label">placement (messages profile)</div>
+        <ol class="pipeline">${route.placement.map(p => `<li><span class="mono">${esc(p.slot)}</span> as <span class="mono">${esc(p.wrap)}</span></li>`).join('')}</ol>
+        ${route.differences.length ? `<div class="section-label">what differs</div><ul class="pipeline">${route.differences.map(d => `<li>${esc(d)}</li>`).join('')}</ul>` : ''}
+        <div class="section-label">recorded runs</div>
+        ${runs.length ? runs.map(r => `<div><a href="#${esc(r.id)}" data-run="${esc(r.id)}" class="run-link">${esc(r.id)}</a> · ${r.turns} turns · ${esc(r.stop.reason)}</div>`).join('') : '<p class="hint">none yet</p>'}
+      </div>`;
+    }).join('')}</div></details>`;
+  $('#routes').querySelectorAll('a.run-link').forEach(a => a.addEventListener('click', event => { event.preventDefault(); selectRun(a.dataset.run); }));
 }
 
 function renderTimeline() {
@@ -118,20 +141,22 @@ function renderFoot() {
 
 async function init() {
   $('#stages').innerHTML = stageNav(STAGE);
-  const [st, contract, scenarios, runs] = await Promise.all([api('/api/state'), api('/api/contract'), api('/api/agent/scenarios'), api('/api/agent/runs')]);
-  Object.assign(state, { providers: st.providers, assemblers: st.assemblers, contract, scenarios, runs });
+  const [st, contract, scenarios, runs, routes] = await Promise.all([api('/api/state'), api('/api/contract'), api('/api/agent/scenarios'), api('/api/agent/runs'), api('/api/agent/routes')]);
+  Object.assign(state, { providers: st.providers, assemblers: st.assemblers, contract, scenarios, runs, routes });
+  $('#route').innerHTML = routes.map(r => `<option value="${esc(r.id)}">${esc(r.title)} · ${esc(r.provider)}</option>`).join('');
+  $('#route').addEventListener('change', () => { const route = routes.find(r => r.id === $('#route').value); if (route) $('#provider').value = route.provider; });
   page.reasonText = reasonTextFor(contract);
   const configured = st.providers.filter(p => p.configured);
   $('#provider').innerHTML = st.providers.map(p => `<option value="${esc(p.id)}"${p.configured ? '' : ' disabled'}>${esc(p.label)} · ${esc(p.model ?? 'not configured')}</option>`).join('');
   $('#start').disabled = configured.length === 0;
   $('#scenario').innerHTML = scenarios.map(s => `<option value="${esc(s.id)}">${esc(s.id)} · ${esc(s.title)}</option>`).join('');
-  const fillRuns = () => { $('#run').innerHTML = state.runs.map(r => `<option value="${esc(r.id)}"${r.id === state.run?.id ? ' selected' : ''}>${esc(r.id)} · ${r.turns} turns · ${esc(r.stop.reason)}</option>`).join('') || '<option value="">none yet</option>'; };
+  const fillRuns = () => { $('#run').innerHTML = state.runs.map(r => `<option value="${esc(r.id)}"${r.id === state.run?.id ? ' selected' : ''}>${esc(r.id)} · ${esc(r.route)} · ${r.turns} turns · ${esc(r.stop.reason)}</option>`).join('') || '<option value="">none yet</option>'; };
   fillRuns();
   $('#run').addEventListener('change', event => selectRun(event.target.value));
   $('#start').addEventListener('click', async () => {
     state.busy = 'running'; state.error = null; render();
     try {
-      const run = await postJson('/api/agent/run', { scenario: $('#scenario').value, provider: $('#provider').value });
+      const run = await postJson('/api/agent/run', { scenario: $('#scenario').value, route: $('#route').value, provider: $('#provider').value });
       state.runs = await api('/api/agent/runs'); fillRuns();
       state.busy = null;
       await selectRun(run.id);

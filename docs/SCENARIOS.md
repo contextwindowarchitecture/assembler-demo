@@ -164,9 +164,19 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 **Say:** failures are context. The bound on turns is the controller's; the model did not get to decide when to stop.
 
+## The second route
+
+**Open** `reference-01-investigate-reinforced`, and expand *Routes* above the timeline. **Point at:** the two placement lists side by side. Route 2 restates the instructions right before the query, puts evidence and observations ahead of the user profile, and runs under a budget of 620 instead of 1400, through the Anthropic-style endpoint.
+
+**Click:** a late turn. **Point at:** the decisions: `governance.instructions` appears twice in the included rows, counted twice; the evidence chunks are `compressed` to their summaries while every observation stays. **Point at:** the outbound request: system blocks and one user message, a Messages API request, where route 1's was a chat completion.
+
+**Point at:** the last turn: no tools in the request, and the task state saying so. On this route the model kept re-checking the status, so the controller ended the loop by offering nothing but the answer.
+
+**Say:** same tools, same grant, same guard; a different route produces a different request, and a different behaviour from the same model. Compare each route on its own terms: the pass criteria hold on both, and the trace says what each one did. A profile is evaluated per model, never assumed.
+
 ## Live
 
-**Click:** *Run live* with the local model on `01-investigate`. Twenty to forty seconds; the timeline fills. It will differ from the reference in wording and maybe in the order of calls, and it will not differ in what was allowed. Replay it.
+**Click:** *Run live* with the local model on `01-investigate`, on either route. Twenty to forty seconds; the timeline fills. It will differ from the reference in wording and maybe in the order of calls, and it will not differ in what was allowed. Replay it.
 
 ## Closing
 

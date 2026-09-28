@@ -35,7 +35,8 @@ npm run conformance              # the vendored conformance cases through every 
 npm run scenarios:build          # regenerate every stage's snapshots: the basic generator, then the intermediate producers
 npm run producers:write          # run the intermediate producers (LlamaIndex etc., a uv project under producers/) and freeze the steps
 npm run producers:check          # fail when a committed intermediate snapshot differs from what the producers build now
-node src/harness/cli.mjs agent 01-investigate --provider local --reference   # re-record a reference run of the advanced stage (real model)
+node src/harness/cli.mjs agent 01-investigate --reference                    # re-record a reference run of the advanced stage (real model)
+node src/harness/cli.mjs agent 01-investigate --route incident-agent-reinforced --reference   # the same on the second route
 node src/harness/cli.mjs replay reference-01-investigate                     # replay a recorded run through the assemblers
 npm run expect -- --from python  # regenerate expected payloads and traces from the reference assembler
 npm run compare                  # every scenario through every assembler, against expectations and each other

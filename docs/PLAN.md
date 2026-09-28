@@ -18,7 +18,7 @@ That view separates a producer error from an assembler error from an adapter err
 | M4 Live model | Three providers through the official Anthropic and OpenAI SDKs (the local server through the OpenAI SDK's `baseURL`); captured outbound request; answer column; the request as SDK code in TypeScript and Python | done; verified against a local gpt-oss-20b through both API styles |
 | M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | done |
 | Intermediate | Competing sources under a constrained budget: LlamaIndex retrieval, an account database, a memory store, history with summaries, declared conflicts, dedupe, diversity, required evidence; live or replayed producers | done; expectations await review |
-| Advanced | A bounded tool loop over three MCP servers: capability policy, guard, observations as evidence with supersession, task state, bounded recovery, every inference recorded and replayed; two reference runs against a real model | done; the second route with its own profile remains |
+| Advanced | A bounded tool loop over three MCP servers: capability policy, guard, observations as evidence with supersession, task state, bounded recovery, every inference recorded and replayed; a second route with its own placement profile, budget and endpoint; three reference runs against a real model | done |
 
 ## Decisions
 
@@ -118,7 +118,7 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 
 ## The advanced stage
 
-**Question:** *Check my current support entitlement, investigate the incident in my region, and draft the next action.* **Route:** `incident-agent/v1`: requires evidence; `evidence.tool_results` superseded by source and aged out after an hour; `state.user` and `state.task` protected; an output contract placed. **Tools:** three MCP servers propose four tools; `capabilities.json` grants three with scope rules. **Controller:** `src/agent/controller.mjs`, at most seven turns and two recoveries, a two-second tool timeout. **Runs:** `reference-01-investigate` and `reference-02-timeout`, recorded against the local gpt-oss-20b, committed under `scenarios/advanced/runs/`, replayed by the tests through every assembler. **Not yet:** the brief's second route with its own placement profile, and persisting the memory proposal.
+**Question:** *Check my current support entitlement, investigate the incident in my region, and draft the next action.* **Route:** `incident-agent/v1`: requires evidence; `evidence.tool_results` superseded by source and aged out after an hour; `state.user` and `state.task` protected; an output contract placed. **Tools:** three MCP servers propose four tools; `capabilities.json` grants three with scope rules. **Controller:** `src/agent/controller.mjs`, at most seven turns and two recoveries, a two-second tool timeout. **Runs:** `reference-01-investigate` and `reference-02-timeout`, recorded against the local gpt-oss-20b, committed under `scenarios/advanced/runs/`, replayed by the tests through every assembler. **Second route:** `incident-agent-reinforced/v1` in `routes.json`: instructions placed twice, evidence and observations ahead of state, the output contract next to the query, `budget.input` 620, the Anthropic-style endpoint; `reference-01-investigate-reinforced` records it. The controller offers no tool on its last turn, so a run that keeps requesting tools still ends with an answer. **Not yet:** persisting the memory proposal.
 
 ## Reuse in the later stages
 

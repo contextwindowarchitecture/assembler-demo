@@ -76,6 +76,9 @@ npm run producers:check      # fail when a committed snapshot differs from what 
 | --- | --- |
 | `reference-01-investigate` | account checked; a request for a colleague's account **denied** by the guard and reported to the model as task state; status checked, then re-checked, the later observation superseding the first; an answer in the output contract that says what could not be checked |
 | `reference-02-timeout` | the status server times out three times; each failure is an observation and task state; the eventual success supersedes them; the answer names the gap |
+| `reference-01-investigate-reinforced` | the same scenario on the **second route**: a different placement profile (instructions restated before the query, evidence and observations ahead of state), a tighter budget under which the evidence chunks take their summaries, and the model reached through the Anthropic-style endpoint, so the outbound request is a Messages API request |
+
+Two routes, two profiles, the same tools and guard: `scenarios/advanced/source/routes.json` names each route's policy, profiles, provider and budget, and the page shows them side by side. Different profiles produce different requests; the pass criteria hold on both.
 
 ```sh
 node src/harness/cli.mjs agent 01-investigate --provider local      # run the loop against a real model and record it

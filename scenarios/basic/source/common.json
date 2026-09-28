@@ -1,0 +1,8 @@
+{
+  "$comment": "What every step of the basic stage shares. The tokenizer is the conformance fixture, not a model tokenizer: it makes the comparison portable across the three assemblers. A production route names the model's tokenizer, or estimate-utf8/v1 with a budget.margin_percent.",
+  "assembly_time": "2026-09-28T14:00:00Z",
+  "scope": { "tenant": "acme", "user": "u_1042", "session": "s_88", "task": "support_question" },
+  "tokenizer": "fixture-whitespace/v1",
+  "renderers": { "fixture": "fixture-xml/v1", "messages": "cwa-messages/v1" },
+  "conflicts": []
+}

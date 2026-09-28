@@ -1,0 +1,18 @@
+{
+  "route": "support-chat",
+  "version": "demo-basic/v1",
+  "clock_skew_seconds": 5,
+  "producers": {
+    "policy-registry": { "kind": "policy", "slots": ["governance.instructions"] },
+    "state-svc": { "kind": "state", "slots": ["state.user"] },
+    "kb-search": { "kind": "retrieval", "slots": ["evidence.knowledge"] },
+    "memory-svc": { "kind": "memory", "slots": ["interaction.memory"] },
+    "conversation": { "kind": "interaction", "slots": ["interaction.history", "interaction.query"] }
+  },
+  "slots": {
+    "state.user": { "max_age_seconds": 300, "required_scope": ["tenant", "user"] },
+    "evidence.knowledge": { "min_relevance": 0.6, "required_scope": ["tenant"], "order_by": ["-relevance", "-freshness"] },
+    "interaction.memory": { "source_prefix": "turn:", "required_scope": ["tenant", "user"] },
+    "interaction.history": { "priority": -1, "order_by": ["-freshness"] }
+  }
+}

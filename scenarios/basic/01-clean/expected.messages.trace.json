@@ -1,0 +1,102 @@
+{
+  "profile": {
+    "id": "support-chat-messages",
+    "version": 1
+  },
+  "budget": {
+    "input": 600,
+    "reserved_output": 400
+  },
+  "result": {
+    "input_tokens": 233,
+    "hash": "c7a9f4832bfdae81636f4f96acfb767f188212fb01f306750e96ebcf0afa5c8a"
+  },
+  "included": [
+    {
+      "slot": "governance.instructions",
+      "item_id": "policy:support-assistant:v3",
+      "tokens": 51,
+      "source_version": "v3",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "state.user",
+      "item_id": "user:u_1042:plan",
+      "tokens": 3,
+      "source_version": "2026-09-28T13:59:30Z",
+      "eligibility": "support-chat/demo-basic: tenant acme, user u_1042; observed within 300 s"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:support-plans:v7#enterprise",
+      "tokens": 30,
+      "source_version": "v7",
+      "eligibility": "support-chat/demo-basic: tenant acme; rerank at least 0.6"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:support-plans:v7#free",
+      "tokens": 24,
+      "source_version": "v7",
+      "eligibility": "support-chat/demo-basic: tenant acme; rerank at least 0.6"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:support-plans:v7#pro",
+      "tokens": 66,
+      "source_version": "v7",
+      "eligibility": "support-chat/demo-basic: tenant acme; rerank at least 0.6"
+    },
+    {
+      "slot": "interaction.memory",
+      "item_id": "mem:u_1042:tone",
+      "tokens": 8,
+      "source_version": "1",
+      "eligibility": "support-chat/demo-basic: tenant acme, user u_1042; not expired"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_88#1",
+      "tokens": 9,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_88#2",
+      "tokens": 9,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "interaction.query",
+      "item_id": "turn:s_88#3",
+      "tokens": 7,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    }
+  ],
+  "compressed": [],
+  "excluded": [
+    {
+      "item_id": "mem:u_1042:old-plan",
+      "reason": "expired",
+      "stage": "producer"
+    }
+  ],
+  "conflicts": [],
+  "refused": {
+    "bool": false,
+    "reason": null
+  },
+  "context": {
+    "spec": "cwa/draft",
+    "assembly_time": "2026-09-28T14:00:00Z",
+    "route_policy_version": "demo-basic/v1",
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "cwa-messages/v1",
+    "snapshot_digest": "e1587984a39d5d0e523bfdca354430cb510f2c4d1c613d7600d2024acd35c5d3"
+  },
+  "defaults_filled": [],
+  "trace_id": "basic/01-clean:messages"
+}

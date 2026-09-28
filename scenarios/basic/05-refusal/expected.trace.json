@@ -1,0 +1,65 @@
+{
+  "profile": {
+    "id": "support-chat-fixture",
+    "version": 1
+  },
+  "budget": {
+    "input": 60,
+    "reserved_output": 400
+  },
+  "result": null,
+  "included": [],
+  "compressed": [],
+  "excluded": [
+    {
+      "item_id": "mem:u_1042:old-plan",
+      "reason": "expired",
+      "stage": "producer"
+    },
+    {
+      "item_id": "kb:agent-notes:v1#override",
+      "reason": "producer_slot_not_allowed",
+      "stage": "assembler",
+      "slot": "governance.instructions"
+    },
+    {
+      "item_id": "kb:billing-faq:v2#refunds",
+      "reason": "below_threshold",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:globex-support:v1#pro",
+      "reason": "out_of_scope",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:support-plans:v7#overview",
+      "reason": "tier_upgrade_not_allowed",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:support-sla-2025:v3#pro",
+      "reason": "expired",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    }
+  ],
+  "conflicts": [],
+  "refused": {
+    "bool": true,
+    "reason": "protected_content_over_budget"
+  },
+  "context": {
+    "spec": "cwa/draft",
+    "assembly_time": "2026-09-28T14:00:00Z",
+    "route_policy_version": "demo-basic/v1",
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "fixture-xml/v1",
+    "snapshot_digest": "297b04885b3ec5bda8129817ffe002d216717e07aa3576a793a6542ae5225627"
+  },
+  "defaults_filled": [],
+  "trace_id": "basic/05-refusal:fixture"
+}

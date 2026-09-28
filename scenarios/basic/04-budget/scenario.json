@@ -1,0 +1,20 @@
+{
+  "id": "04-budget",
+  "step": 4,
+  "title": "Lower the budget until optional content is omitted",
+  "question": "What support does the Pro plan include?",
+  "description": "The same candidates as step 3 with budget.input lowered from 600 to 170. The droppable user state goes first. Then compressible items are reduced in the route's fitting order: the supplied summaries replace the Enterprise and Pro chunks, both prior turns are omitted (history sheds before evidence on this route), and the lowest-ranked chunk, Free, is omitted. Every replacement is a compressed row and every omission an over_budget row.",
+  "proves": "Tier order, supplied variants and the route's fitting order. Nothing is truncated; every reduction is recorded.",
+  "look_for": [
+    "over_budget"
+  ],
+  "budget": {
+    "input": 170,
+    "reserved_output": 400
+  },
+  "added": {},
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

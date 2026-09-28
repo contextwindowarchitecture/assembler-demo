@@ -1,0 +1,37 @@
+{
+  "$comment": "Two placements of the same slots. fixture wraps every slot in xml: for the byte-exact comparison across assemblers; messages puts the instructions in the platform's system channel for the model. The xml: tags are the same in both, so the user message of the messages rendering matches the fixture payload's material.",
+  "fixture": {
+    "spec": "cwa/draft",
+    "id": "support-chat-fixture",
+    "version": 1,
+    "route": "support-chat",
+    "model_family": null,
+    "route_policy_version": "demo-basic/v1",
+    "placement": [
+      { "slot": "governance.instructions", "wrap": "xml:instructions" },
+      { "slot": "state.user", "wrap": "xml:user_profile" },
+      { "slot": "evidence.knowledge", "wrap": "xml:evidence" },
+      { "slot": "interaction.memory", "wrap": "xml:memory" },
+      { "slot": "interaction.history", "wrap": "xml:history" },
+      { "slot": "interaction.query", "wrap": "xml:query" }
+    ],
+    "evaluation": { "status": "unevaluated", "suite": null, "date": null, "result": null, "artifact": null }
+  },
+  "messages": {
+    "spec": "cwa/draft",
+    "id": "support-chat-messages",
+    "version": 1,
+    "route": "support-chat",
+    "model_family": null,
+    "route_policy_version": "demo-basic/v1",
+    "placement": [
+      { "slot": "governance.instructions", "wrap": "system" },
+      { "slot": "state.user", "wrap": "xml:user_profile" },
+      { "slot": "evidence.knowledge", "wrap": "xml:evidence" },
+      { "slot": "interaction.memory", "wrap": "xml:memory" },
+      { "slot": "interaction.history", "wrap": "xml:history" },
+      { "slot": "interaction.query", "wrap": "xml:query" }
+    ],
+    "evaluation": { "status": "unevaluated", "suite": null, "date": null, "result": null, "artifact": null }
+  }
+}

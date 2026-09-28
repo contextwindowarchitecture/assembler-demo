@@ -1,0 +1,20 @@
+{
+  "id": "01-clean",
+  "step": 1,
+  "title": "Assemble a clean fixture",
+  "question": "What support does the Pro plan include?",
+  "description": "Instructions, the user's plan, three support-plan chunks, one memory, two prior turns and the query, all admitted. The memory producer reports an expired memory without its body, and that row reaches the trace unchanged.",
+  "proves": "Placement order, rendering, per-item token counts, the payload hash and the snapshot digest. Three assemblers produce the same bytes.",
+  "look_for": [
+    "expired"
+  ],
+  "budget": {
+    "input": 600,
+    "reserved_output": 400
+  },
+  "added": {},
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

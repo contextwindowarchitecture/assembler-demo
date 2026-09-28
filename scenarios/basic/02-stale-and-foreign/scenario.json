@@ -1,0 +1,28 @@
+{
+  "id": "02-stale-and-foreign",
+  "step": 2,
+  "title": "Add an expired document and another tenant's",
+  "question": "What support does the Pro plan include?",
+  "description": "The retriever also returns a 2025 SLA whose expires has passed (it says Pro has phone support), a chunk from tenant globex that leaked through a shared index, and a refunds chunk scoring 0.41 against a threshold of 0.6. Each is excluded with the earliest applicable reason code.",
+  "proves": "Eligibility is the route's predicate, applied outside the model. The stale SLA never reaches the request, so the model cannot repeat it.",
+  "look_for": [
+    "expired",
+    "out_of_scope",
+    "below_threshold"
+  ],
+  "budget": {
+    "input": 600,
+    "reserved_output": 400
+  },
+  "added": {
+    "kb-search": [
+      "kb:support-sla-2025:v3#pro",
+      "kb:globex-support:v1#pro",
+      "kb:billing-faq:v2#refunds"
+    ]
+  },
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

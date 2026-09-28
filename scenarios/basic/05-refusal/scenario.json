@@ -1,0 +1,20 @@
+{
+  "id": "05-refusal",
+  "step": 5,
+  "title": "Lower it further until protected content cannot fit",
+  "question": "What support does the Pro plan include?",
+  "description": "budget.input is below what the instructions and the query need on their own. Assembly refuses with protected_content_over_budget: result is null, nothing is included, and the admission decisions stay in the trace.",
+  "proves": "Protected content is never truncated, and a refusal never becomes a model request.",
+  "look_for": [
+    "protected_content_over_budget"
+  ],
+  "budget": {
+    "input": 60,
+    "reserved_output": 400
+  },
+  "added": {},
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

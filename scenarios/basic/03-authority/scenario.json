@@ -1,0 +1,27 @@
+{
+  "id": "03-authority",
+  "step": 3,
+  "title": "Add a retrieval item that claims a governance slot",
+  "question": "What support does the Pro plan include?",
+  "description": "The retriever returns an agent note addressed to governance.instructions with governing authority and verified trust, an overview chunk that declares itself protected, and a forum post whose body closes the evidence tag and opens a system tag. The first two are excluded; the forum post is admitted as evidence and rendered escaped inside its wrapper.",
+  "proves": "A producer's kind bounds its slots whatever its items say, only the route can raise a tier, and injected markup is material, never structure.",
+  "look_for": [
+    "producer_slot_not_allowed",
+    "tier_upgrade_not_allowed"
+  ],
+  "budget": {
+    "input": 600,
+    "reserved_output": 400
+  },
+  "added": {
+    "kb-search": [
+      "kb:agent-notes:v1#override",
+      "kb:support-plans:v7#overview",
+      "kb:community-forum:v9#thread-4471"
+    ]
+  },
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

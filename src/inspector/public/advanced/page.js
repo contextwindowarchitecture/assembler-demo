@@ -4,6 +4,7 @@
 // "Run live" records a new run against a real model; "Replay" feeds every recorded snapshot through all three
 // assemblers.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
+import { renderDelta } from '../shared/delta.js';
 import { $, api, esc, postJson, reasonTextFor, stageNav, tag } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest } from '../shared/panels.js';
 
@@ -12,6 +13,12 @@ const STAGE = 'advanced';
 const page = {
   api,
   reasonText: () => '',
+  noun: 'turn',
+  /** The previous turn of the run, for the delta strip and the change chips; nothing on turn 1. */
+  previous: () => {
+    const turn = state.run?.turns.find(t => t.n === state.turn - 1);
+    return turn ? { label: `turn ${turn.n}`, snapshot: turn.snapshot, trace: turn.trace } : null;
+  },
   recordedAnswer: () => {
     const turn = currentTurn();
     if (!turn?.response) return null;
@@ -58,7 +65,7 @@ async function selectTurn(n) {
 function render() {
   renderHead(); renderRoutes(); renderSteps(); renderTimeline(); renderBadges(); renderInstruments();
   const result = state.response?.results[0] ?? null;
-  renderColumnHeads(page, result);
+  renderColumnHeads(page, result); renderDelta(page, result);
   renderCandidates(page, result); renderDecisions(page, result); renderRequest(page, result); renderAnswer(page, result); renderFoot();
 }
 

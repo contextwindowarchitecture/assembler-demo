@@ -1,7 +1,8 @@
 // The four columns every stage shows, as functions of a page: candidate context, CWA decisions, the outbound
 // request (with the SDK snippets), and the model answer. A page passes itself in; the panels read its state and
 // call back into it. They format; they never decide: every status, count and meter here is read from the trace.
-import { $, brief, esc, postJson, tag, when } from './format.js';
+import { statusChange } from './delta.js';
+import { $, brief, esc, postJson, tag } from './format.js';
 
 /** The result a page's columns show: the chosen assembler's, or the first judged one when all ran. */
 export function shownResult(response) {
@@ -78,6 +79,9 @@ export function renderCandidates(page, result) {
   if (!snapshot) { body.innerHTML = state.busy ? '<p class="spinner">loading…</p>' : ''; return; }
   const trace = result?.trace ?? null;
   const conflicts = new Map(snapshot.conflicts.flatMap(group => group.items.map(id => [id, group])));
+  // The step you came from, when the page kept one: a card whose status changed says what it was.
+  const previous = page.previous?.() ?? null;
+  const previousIds = previous ? new Set(previous.snapshot.batches.flatMap(b => b.items.map(i => i.id))) : null;
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
   const index = `<div class="pidx" aria-label="Producers">${snapshot.batches.map(batch =>
     `<button type="button" data-producer="${esc(batch.producer.id)}" title="scroll to this producer's batch">${esc(batch.producer.id)} ${batch.items.length}${batch.excluded.length ? `+${batch.excluded.length}` : ''}</button>`).join('')}</div>`;
@@ -87,6 +91,7 @@ export function renderCandidates(page, result) {
         <span class="meta">${plural(batch.items.length, 'item')}${batch.excluded.length ? `, ${batch.excluded.length} reported excluded` : ''}</span></div>
       ${batch.items.map(item => {
         const status = statusOf(item, trace);
+        const change = previous ? statusChange(previousIds.has(item.id) ? statusOf(item, previous.trace) : null, status, page.noun ?? 'step') : null;
         const scope = item.scope ? Object.entries(item.scope).map(([k, v]) => `${k}=${v}`).join(' ') : '';
         const group = conflicts.get(item.id);
         const facts = [`<span class="slot">${esc(item.slot)}</span>`, esc(item.authority), esc(item.trust), item.tier ? `<span title="the item claims this tier">tier ${esc(item.tier)}</span>` : '',
@@ -94,7 +99,7 @@ export function renderCandidates(page, result) {
         const tert = [`fresh ${brief(item.freshness)}`, item.expires ? `expires ${brief(item.expires)}` : '', scope, item.variants?.length ? plural(item.variants.length, 'variant') : '',
           item.source ? `source ${esc(item.source)}` : ''].filter(Boolean).join(' · ');
         return `<article class="item ${status.kind}">
-          <div class="status">${statusChip(status, reasonText)}${group ? tag(`conflict ${group.id}`, 'warn code', `${group.kind} group${group.fact ? ` on fact ${group.fact}` : ''}`) : ''}</div>
+          <div class="status">${statusChip(status, reasonText)}${change ? tag(change, 'line') : ''}${group ? tag(`conflict ${group.id}`, 'warn code', `${group.kind} group${group.fact ? ` on fact ${group.fact}` : ''}`) : ''}</div>
           <div class="id">${esc(item.id)}</div>
           <div class="facts">${facts}</div>
           <div class="tert">${tert}</div>

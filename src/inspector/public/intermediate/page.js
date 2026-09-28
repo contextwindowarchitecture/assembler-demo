@@ -2,6 +2,7 @@
 // replayed from the frozen batches, and a strip above the four shared columns shows how each ran. Everything shown
 // comes from the server: the producers' report, the snapshot, and the assemblers' own traces and payloads.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
+import { renderDelta } from '../shared/delta.js';
 import { $, api, esc, postJson, reasonTextFor, stageNav, tag, words } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest, shownResult } from '../shared/panels.js';
 
@@ -11,7 +12,10 @@ const RENDERERS = { fixture: 'fixture-xml/v1', messages: 'cwa-messages/v1' };
 const page = {
   api,
   reasonText: () => '',
+  /** The step the page showed before this one, for the delta strip and the change chips; nothing on the first step shown. */
+  previous: () => state.previous,
   state: {
+    previous: null,
     scenarios: [], assemblers: [], providers: [], producers: { available: false }, contract: null,
     scenario: null, variant: 'fixture', assembler: 'all', budget: null, provider: null, mode: 'replay',
     response: null, answers: {}, sending: null, busy: false, error: null,
@@ -40,6 +44,9 @@ async function assemble() {
 }
 
 function selectScenario(id) {
+  if (state.response && state.scenario && state.scenario !== id) {
+    state.previous = { label: `step ${current().meta.step}`, snapshot: state.response.snapshot, trace: shownResult(state.response)?.trace ?? null };
+  }
   state.scenario = id; state.budget = null;
   $('#budget').value = frozenBudget();
   location.hash = id;
@@ -52,7 +59,7 @@ function render() {
   $('#reset').disabled = state.mode === 'live';
   renderScenario(); renderBadges(); renderProducers(); renderInstruments();
   const result = shownResult(state.response);
-  renderColumnHeads(page, result);
+  renderColumnHeads(page, result); renderDelta(page, result);
   renderCandidates(page, result); renderDecisions(page, result); renderRequest(page, result); renderAnswer(page, result); renderFoot();
 }
 

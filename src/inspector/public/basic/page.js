@@ -2,6 +2,7 @@
 // Everything shown comes from /api/assemble: the frozen (or derived) snapshot and the assemblers' own traces and
 // payloads. This page owns its state and controls; the columns and the chrome are shared with the other stages.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
+import { renderDelta } from '../shared/delta.js';
 import { $, api, esc, postJson, reasonTextFor, stageNav, tag, words } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest, shownResult } from '../shared/panels.js';
 
@@ -11,7 +12,10 @@ const RENDERERS = { fixture: 'fixture-xml/v1', messages: 'cwa-messages/v1' };
 const page = {
   api,
   reasonText: () => '',
+  /** The step the page showed before this one, for the delta strip and the change chips; nothing on the first step shown. */
+  previous: () => state.previous,
   state: {
+    previous: null,
     scenarios: [], assemblers: [], providers: [], contract: null,
     scenario: null, variant: 'fixture', assembler: 'all', budget: null, provider: null,
     response: null, answers: {}, sending: null, busy: false, error: null,
@@ -41,6 +45,9 @@ async function assemble() {
 }
 
 function selectScenario(id) {
+  if (state.response && state.scenario && state.scenario !== id) {
+    state.previous = { label: `step ${current().meta.step}`, snapshot: state.response.snapshot, trace: shownResult(state.response)?.trace ?? null };
+  }
   state.scenario = id; state.budget = null;
   $('#budget').value = frozenBudget();
   location.hash = id;
@@ -51,7 +58,7 @@ function render() {
   for (const button of $('#steps').querySelectorAll('button')) button.classList.toggle('active', button.dataset.id === state.scenario);
   renderScenario(); renderBadges(); renderInstruments();
   const result = shownResult(state.response);
-  renderColumnHeads(page, result);
+  renderColumnHeads(page, result); renderDelta(page, result);
   renderCandidates(page, result); renderDecisions(page, result); renderRequest(page, result); renderAnswer(page, result); renderFoot();
 }
 

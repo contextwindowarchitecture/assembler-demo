@@ -11,7 +11,7 @@ Five steps, one question, about twelve minutes. Each step adds to the last: the 
 - Have a terminal ready with `npm run compare` for the closing.
 - Arrow keys switch steps. The budget field reassembles live. The `frozen` button returns to the committed snapshot.
 
-The screen, left to right, four numbered columns with an arrow between each pair: **1 Candidate context** (what the producers sent, colored by outcome) → **2 CWA decisions** (the trace, with a budget meter) → **3 Outbound request** (the payload, or "no model request") → **4 Model answer** (a live call, with the exact request beside it). Each column's header says what it holds: how many items, the trace's counts, the payload's size, whether anything was sent. The masthead's stage rail and the step pills say where you are; both stay on screen as you scroll.
+The screen, left to right, four numbered columns with an arrow between each pair: **1 Candidate context** (what the producers sent, colored by outcome) → **2 CWA decisions** (the trace, with a budget meter) → **3 Outbound request** (the payload, or "no model request") → **4 Model answer** (a live call, with the exact request beside it). Each column's header says what it holds: how many items, the trace's counts, the payload's size, whether anything was sent. The masthead's stage rail and the step pills say where you are; both stay on screen as you scroll. Under the header, a strip says what changed since the step you came from, and a candidate card that changed says what it was, so step in order and the strip narrates the script.
 
 ## Step 1: assemble a clean fixture
 
@@ -65,7 +65,7 @@ The screen, left to right, four numbered columns with an arrow between each pair
 
 **Say:** Same candidates, a third of the budget. Nothing was truncated. Droppable content went first: the user's state. Then the route's fitting order reduced compressible items: the Enterprise and Pro chunks took the summaries their producer supplied, both prior turns were omitted, since this route sheds history before evidence, and the lowest-ranked chunk, Free, was omitted.
 
-**Point at:** the *Compressed* table (from → to, the variant id) and the four `over_budget` rows. Every reduction is a trace row.
+**Point at:** the strip under the header: budget.input 600 → 170, the same fifteen candidates, included 10 → 6, compressed 0 → 2, excluded 6 → 10 with `over_budget` the one new code, input tokens 262 → 155. Then the *Compressed* table (from → to, the variant id) and the four `over_budget` rows, and the cards that say *was included*. Every reduction is a trace row.
 
 **Optional, live:** type `120` into `budget.input`. The header says *derived snapshot*, the badge says *no expectation*, and the decisions change. Type `600`, or click *frozen*, to come back.
 

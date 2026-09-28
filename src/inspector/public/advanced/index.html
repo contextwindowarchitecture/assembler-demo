@@ -10,8 +10,10 @@
 <body>
   <header class="top">
     <div class="masthead">
-      <a class="brand" href="/">CWA</a>
-      <span class="brand-sub">support-assistant demo</span>
+      <div class="brandrow">
+        <a class="brand" href="/"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>CWA</a>
+        <span class="brand-sub">support-assistant demo</span>
+      </div>
       <div id="stages"></div>
       <div class="masthead-right">
         <button id="talk" type="button" aria-pressed="false" title="larger type for a projector; folds the instruments behind one line">Talk mode</button>
@@ -27,16 +29,16 @@
   <div class="instruments" id="instruments">
     <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
     <div class="controls" id="controls">
-      <label>Recorded run
+      <label class="field">Recorded run
         <select id="run"></select>
       </label>
-      <label>Scenario
+      <label class="field">Scenario
         <select id="scenario"></select>
       </label>
-      <label>Route
+      <label class="field">Route
         <select id="route"></select>
       </label>
-      <label>Provider
+      <label class="field">Provider
         <select id="provider"></select>
       </label>
       <button class="primary" id="start" type="button" title="run the controller now against the chosen model and record it">Run live</button>

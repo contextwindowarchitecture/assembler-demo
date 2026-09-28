@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../src/harness/adapters.mjs';
-import { columnHeads, meterFor, statusOf } from '../src/inspector/public/shared/panels.js';
+import { columnHeads, meterFor, planeOf, statusOf } from '../src/inspector/public/shared/panels.js';
 import { resolveTheme, themeLabel } from '../src/inspector/public/shared/chrome.js';
 
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
@@ -69,6 +69,45 @@ test('the theme is the website\'s: an attribute on <html> the masthead toggles, 
   assert.equal(themeLabel('dark'), 'light');
 });
 
+test('the stylesheet carries the style guide\'s token block verbatim, and no colour outside it', () => {
+  const css = read('style.css');
+  const guide = fs.readFileSync(path.join(ROOT, 'STYLE.md'), 'utf8');
+  const block = guide.match(/```css\n(:root {\n[\s\S]*?\n})\n```/)[1];
+  assert.match(block, /--p-inter: oklch\(0\.76 0\.13 310\);\n}$/, 'the guide\'s block ends with the dark plane colours');
+  assert.ok(css.includes(block), 'style.css contains the token block from STYLE.md section 2, verbatim');
+  const rest = css.replace(block, '');
+  const literal = rest.match(/#[0-9a-fA-F]{3,8}(?![\w-])|\b(rgba?|hsla?|oklch|oklab|lab|lch)\(/);
+  assert.equal(literal, null, `a colour literal outside the token block: ${literal?.[0]} near "${rest.slice(Math.max(0, (literal?.index ?? 0) - 40), (literal?.index ?? 0) + 40)}"`);
+  const mixes = [...rest.matchAll(/color-mix\((?:[^()]|\([^()]*\))*\)/g)].map(m => m[0]);
+  assert.deepEqual([...new Set(mixes)].sort(), ['color-mix(in oklab, var(--bg) 88%, transparent)', 'color-mix(in oklab, var(--plane) 50%, transparent)'], 'the two permitted mixes only');
+});
+
+test('hairlines and squares, no motion, two typefaces: the rules a test can check', () => {
+  const css = read('style.css').replace(/@font-face\s*{[^}]*}/g, '');
+  for (const banned of ['box-shadow', 'transition', '@keyframes', 'animation', 'text-shadow', 'gradient']) assert.doesNotMatch(css, new RegExp(banned), `no ${banned}`);
+  const radii = [...css.matchAll(/border-radius:\s*([^;]+);/g)].map(m => m[1].trim());
+  assert.ok(radii.length > 0, 'the pill is used');
+  assert.deepEqual([...new Set(radii)], ['var(--pill)'], 'the only radius is the pill');
+  const families = [...css.matchAll(/font-family:\s*([^;]+);/g)].map(m => m[1].trim());
+  for (const family of new Set(families)) assert.ok(['var(--sans)', 'var(--mono)', 'inherit'].includes(family), `font-family ${family}: every family is one of the two tokens`);
+  assert.doesNotMatch(css, /!important/, 'nothing needs !important, since nothing is styled inline');
+  for (const file of ['index.html', 'basic/index.html', 'intermediate/index.html', 'advanced/index.html']) {
+    assert.doesNotMatch(read(file), /\sstyle="/, `${file} carries no inline style`);
+  }
+});
+
+test('planeOf names the plane a slot belongs to, by the part of its id before the dot', () => {
+  assert.equal(planeOf('governance.instructions'), 'gov');
+  assert.equal(planeOf('governance.output_contract'), 'gov');
+  assert.equal(planeOf('state.task'), 'state');
+  assert.equal(planeOf('evidence.knowledge'), 'evid');
+  assert.equal(planeOf('evidence.tool_results'), 'evid');
+  assert.equal(planeOf('interaction.query'), 'inter');
+  assert.equal(planeOf('interaction.memory'), 'inter');
+  assert.equal(planeOf('custom.slot'), null, 'a slot outside the four planes has no colour');
+  assert.equal(planeOf(undefined), null);
+});
+
 const trace = {
   refused: { bool: false, reason: null },
   included: [{ slot: 'governance.instructions', item_id: 'p', tokens: 51 }, { slot: 'evidence.knowledge', item_id: 'k', tokens: 30 }],
@@ -89,8 +128,14 @@ test('statusOf reads a candidate\'s outcome from the trace: an assembler exclusi
   assert.deepEqual(statusOf({ id: 'p' }, null), { kind: 'none' });
 });
 
-test('meterFor splits the budget into content placed as sent, content placed as a summary, and what is free', () => {
-  assert.deepEqual(meterFor(trace, 100), { used: 81, budget: 100, placed: 51, summarised: 30, free: 19 });
+test('meterFor splits the budget into content placed as sent, content placed as a summary, and what is free, one segment per included item in its plane', () => {
+  assert.deepEqual(meterFor(trace, 100), {
+    used: 81, budget: 100, placed: 51, summarised: 30, free: 19,
+    segments: [
+      { item_id: 'p', slot: 'governance.instructions', plane: 'gov', tokens: 51, compressed: false },
+      { item_id: 'k', slot: 'evidence.knowledge', plane: 'evid', tokens: 30, compressed: true },
+    ],
+  });
   assert.equal(meterFor(refused, 100), null, 'a refusal has no result to measure');
 });
 

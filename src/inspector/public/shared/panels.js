@@ -30,19 +30,29 @@ function statusChip(status, reasonText) {
   switch (status.kind) {
     case 'excluded': return tag(status.reason, 'bad code', reasonText(status.reason));
     case 'compressed': return tag(`compressed ${status.from} → ${status.to}`, 'info dot', `variant ${status.variant_id} (${status.method})`);
-    case 'included': return tag(`included · ${status.tokens} tokens`, 'ok dot');
+    case 'included': return tag(`included · ${status.tokens} tokens`, 'plane dot');
     case 'refused': return tag('admitted · assembly refused', 'gray dot');
     case 'unplaced': return tag('not placed', 'gray');
     default: return '';
   }
 }
 
-/** The budget meter: of the input tokens used, how many stand for content placed as a summary, and what is free. */
+const PLANES = { governance: 'gov', state: 'state', evidence: 'evid', interaction: 'inter' };
+
+/** The plane a slot belongs to, as the token suffix the stylesheet names it by (`--p-evid`): the part of the slot id before the dot. */
+export function planeOf(slot) {
+  return PLANES[String(slot ?? '').split('.')[0]] ?? null;
+}
+
+/** The budget meter: of the input tokens used, how many stand for content placed as a summary, and what is free; and
+ * one segment per included item, in placement order, coloured by its slot's plane, marked when it went in as a summary. */
 export function meterFor(trace, budget) {
   if (!trace?.result) return null;
-  const summarised = trace.compressed.reduce((sum, row) => sum + (trace.included.find(r => r.item_id === row.item_id)?.tokens ?? row.to), 0);
+  const compressed = new Set(trace.compressed.map(row => row.item_id));
+  const segments = trace.included.map(row => ({ item_id: row.item_id, slot: row.slot, plane: planeOf(row.slot), tokens: row.tokens, compressed: compressed.has(row.item_id) }));
+  const summarised = segments.filter(s => s.compressed).reduce((sum, s) => sum + s.tokens, 0);
   const used = trace.result.input_tokens;
-  return { used, budget, placed: used - summarised, summarised, free: Math.max(0, budget - used) };
+  return { used, budget, placed: used - summarised, summarised, free: Math.max(0, budget - used), segments };
 }
 
 /** What each column header says it holds, read from the response the columns show. */
@@ -94,12 +104,13 @@ export function renderCandidates(page, result) {
         const change = previous ? statusChange(previousIds.has(item.id) ? statusOf(item, previous.trace) : null, status, page.noun ?? 'step') : null;
         const scope = item.scope ? Object.entries(item.scope).map(([k, v]) => `${k}=${v}`).join(' ') : '';
         const group = conflicts.get(item.id);
+        const plane = planeOf(item.slot);
         const facts = [`<span class="slot">${esc(item.slot)}</span>`, esc(item.authority), esc(item.trust), item.tier ? `<span title="the item claims this tier">tier ${esc(item.tier)}</span>` : '',
           item.relevance !== undefined ? `rerank ${esc(item.relevance)}` : '', item.injection_risk ? esc(item.injection_risk) : ''].filter(Boolean).join('<span class="sep">·</span>');
         const tert = [`fresh ${brief(item.freshness)}`, item.expires ? `expires ${brief(item.expires)}` : '', scope, item.variants?.length ? plural(item.variants.length, 'variant') : '',
           item.source ? `source ${esc(item.source)}` : ''].filter(Boolean).join(' · ');
-        return `<article class="item ${status.kind}">
-          <div class="status">${statusChip(status, reasonText)}${change ? tag(change, 'line') : ''}${group ? tag(`conflict ${group.id}`, 'warn code', `${group.kind} group${group.fact ? ` on fact ${group.fact}` : ''}`) : ''}</div>
+        return `<article class="item ${status.kind}"${plane ? ` style="--plane: var(--p-${plane})"` : ''}>
+          <div class="status">${statusChip(status, reasonText)}${change ? tag(change, 'line') : ''}${group ? tag(`conflict ${group.id}`, 'conflict code', `${group.kind} group${group.fact ? ` on fact ${group.fact}` : ''}`) : ''}</div>
           <div class="id">${esc(item.id)}</div>
           <div class="facts">${facts}</div>
           <div class="tert">${tert}</div>
@@ -135,7 +146,7 @@ export function renderDecisions(page, result) {
         <div class="ofoot"><span>${esc(reasonText(trace.refused.reason))}</span></div>
         <div class="ofoot mono">result: null · nothing included · admission decisions kept${trace.recovery ? ` · recovery: ${esc(trace.recovery.action)}${trace.recovery.detail ? ` (${esc(trace.recovery.detail)})` : ''}` : ''}</div></div>`
     : `<div class="outcome ok"><div class="head"><span class="title">Assembled</span><span class="mono">${trace.result.input_tokens} of ${snapshot.budget.input} input tokens</span></div>
-        <div class="meter" title="${meter.used} used, ${meter.summarised} of them as summaries; ${meter.free} free"><span class="inc" style="width: ${pct(meter.placed)}%"></span><span class="cmp" style="width: ${pct(meter.summarised)}%"></span></div>
+        <div class="meter" title="${meter.used} used, ${meter.summarised} of them as summaries; ${meter.free} free">${meter.segments.map(s => `<i class="segment${s.compressed ? ' compressed' : ''}" style="flex-basis: ${pct(s.tokens)}%${s.plane ? `; --plane: var(--p-${s.plane})` : ''}" title="${esc(s.item_id)} · ${esc(s.slot)} · ${s.tokens} tokens${s.compressed ? ' as a summary' : ''}"></i>`).join('')}</div>
         <div class="ofoot"><span>${trace.included.length} included</span><span>${trace.compressed.length} compressed</span><span>${trace.excluded.length} excluded</span>${meter.summarised ? `<span>${meter.summarised} tokens as summaries</span>` : ''}<span class="right">hash <span class="mono">${esc(trace.result.hash.slice(0, 12))}…</span></span></div></div>`;
   const conflicts = trace.conflicts.length ? `<div class="sec">Conflicts</div><table><tr><th>group</th><th>kind</th><th>resolution</th><th>winner</th></tr>
     ${trace.conflicts.map(c => `<tr><td class="m">${esc(c.group_id)}</td><td>${esc(c.kind)}</td><td>${esc(c.resolution)} <span class="hint">${esc(c.decided_by)}</span></td><td class="m">${esc(c.winner ?? '—')}</td></tr>`).join('')}</table>` : '';
@@ -202,7 +213,7 @@ export function renderRequest(page, result) {
   const body = $('#request .body');
   if (!result) { body.innerHTML = ''; return; }
   if (result.outcome === 'refused') {
-    body.innerHTML = `<div class="norequest"><div class="big">No model request</div><p>The assembly was refused with <span class="mono">${esc(result.trace.refused.reason)}</span>, so there is no payload to send (R-17). Nothing reaches the model.</p><div class="mono" style="color: var(--bad)">payload: null</div></div>
+    body.innerHTML = `<div class="norequest"><div class="big">No model request</div><p>The assembly was refused with <span class="mono">${esc(result.trace.refused.reason)}</span>, so there is no payload to send (R-17). Nothing reaches the model.</p><div class="mono">payload: null</div></div>
       <p class="hint">The application gets a reason and decides: raise the budget, narrow retrieval, or stop.</p>`;
     return;
   }
@@ -213,7 +224,7 @@ export function renderRequest(page, result) {
     const toolName = text => { try { return JSON.parse(text).name ?? null; } catch { return null; } };
     body.innerHTML = `
       <div class="sec">system · ${ir.system.length}</div>
-      ${ir.system.map(e => `<div class="entry"><div class="id">${esc(e.id)}${e.conflict ? tag(`conflict ${e.conflict}`, 'warn code xs', 'surfaced: both instructions stay, marked') : ''}</div>${esc(e.text)}</div>`).join('') || '<p class="hint">none</p>'}
+      ${ir.system.map(e => `<div class="entry"><div class="id">${esc(e.id)}${e.conflict ? tag(`conflict ${e.conflict}`, 'conflict code xs', 'surfaced: both instructions stay, marked') : ''}</div>${esc(e.text)}</div>`).join('') || '<p class="hint">none</p>'}
       <div class="sec">tools · ${ir.tools.length}${ir.tools.length ? ' · from the grant' : ''}</div>
       ${ir.tools.length ? `<div class="entry"><div class="tools">${ir.tools.map(e => tag(toolName(e.text) ?? e.id, 'line code', e.id)).join('')}</div>${ir.tools.map(e => `<details><summary class="hint">${esc(e.id)}</summary><pre>${esc(e.text)}</pre></details>`).join('')}</div>` : '<p class="hint">none: no capabilities are granted on this route</p>'}
       <div class="sec">messages · ${ir.messages.length}${ir.messages.map(m => ` · role ${esc(m.role)}`).join('')}</div>

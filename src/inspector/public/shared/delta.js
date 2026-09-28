@@ -59,7 +59,7 @@ export function renderDelta(page, result) {
   const then = previous ? stepFacts(previous.snapshot, previous.trace) : null;
   if (!now || !then) { strip.innerHTML = ''; return; }
   const noun = page.noun ?? 'step';
-  strip.innerHTML = `<div class="since"><span class="eyebrow">Since ${esc(previous.label)}</span><span class="meta">${noun === 'turn' ? 'the previous inference' : 'the step you came from'}</span></div>`
+  strip.innerHTML = `<div class="since"><span class="kicker">Since ${esc(previous.label)}</span><span class="meta">${noun === 'turn' ? 'the previous inference' : 'the step you came from'}</span></div>`
     + deltaCells(then, now, noun).map(cell => `<div class="cell${cell.same ? ' same' : ''}"><span class="meta">${esc(cell.label)}</span>
       <span class="v">${cell.same ? `${esc(cell.after)}<span class="arr">· same</span>` : `${esc(cell.before)}<span class="arr">→</span>${esc(cell.after)}`}${(cell.codes ?? []).map(code => tag(code, 'bad code xs', page.reasonText(code))).join('')}</span></div>`).join('');
 }

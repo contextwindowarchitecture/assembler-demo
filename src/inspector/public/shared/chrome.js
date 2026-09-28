@@ -57,10 +57,21 @@ function initInstruments() {
   });
 }
 
+/** The pinned top block (masthead and step band) can grow when badges wrap or talk mode raises the band, so the
+ * column headers pin under its measured height rather than an assumed one: `--top-h` on <html>, kept current. */
+function initPinned() {
+  const top = $('.top');
+  if (!top || typeof ResizeObserver === 'undefined') return;
+  const measure = () => document.documentElement.style.setProperty('--top-h', `${top.offsetHeight}px`);
+  new ResizeObserver(measure).observe(top);
+  measure();
+}
+
 export function initChrome() {
   initTheme();
   initTalkMode();
   initInstruments();
+  initPinned();
 }
 
 /** The one line that stands for the instruments while they are folded. */

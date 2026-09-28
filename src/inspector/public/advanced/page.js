@@ -82,7 +82,7 @@ function renderHead() {
   const faults = Object.keys(run.faults ?? {}).length ? `<strong>Injected faults</strong><span class="mono">${esc(JSON.stringify(run.faults))}</span>` : '';
   $('#scenario-head').innerHTML = `
     <div class="lead">
-      <div class="eyebrow">${run.reference ? 'Reference run' : 'Live run'} · ${esc(run.route?.title ?? run.route?.id ?? 'incident-agent')} · ${STAGE} stage</div>
+      <div class="kicker">${run.reference ? 'Reference run' : 'Live run'} · ${esc(run.route?.title ?? run.route?.id ?? 'incident-agent')} · ${STAGE} stage</div>
       <h1>${esc(run.title)}</h1>
       <p class="question">“${esc(run.question)}”</p>
       <p>${esc(scenario.description ?? '')}</p>
@@ -91,7 +91,7 @@ function renderHead() {
         <strong>Proposed, not granted</strong>${run.capabilities.not_granted.map(t => `${tag(t.tool, 'gray code xs')}<span class="meta">${esc(t.why)}</span>`).join('') || '<span class="meta">none</span>'}${faults}</div>
     </div>
     <aside class="factsheet">
-      <div class="eyebrow">Run</div>
+      <div class="label">Run</div>
       <div class="kv">
         <span class="k">recorded</span><span class="v">${esc(run.started)}</span>
         <span class="k">route</span><span class="v">${esc(run.route?.id ?? 'incident-agent')} <span class="hint">· profile ${esc(run.route?.profile ?? '')}</span></span>
@@ -106,12 +106,12 @@ function renderHead() {
 function renderRoutes() {
   const routes = state.routes;
   if (!routes.length) { $('#routes').innerHTML = ''; return; }
-  $('#routes').innerHTML = `<details ${state.run ? '' : 'open'}><summary><span class="eyebrow">Routes</span>two placement profiles for the same tools and guard, compared independently</summary>
+  $('#routes').innerHTML = `<details ${state.run ? '' : 'open'}><summary><span class="kicker">Routes</span>two placement profiles for the same tools and guard, compared independently</summary>
     <div class="route-cards">${routes.map(route => {
       const runs = state.runs.filter(r => r.route === route.id);
       const active = state.run?.route?.id === route.id;
       return `<div class="route-card ${active ? 'active' : ''}">
-        <div class="head"><strong>${esc(route.title)}</strong>${tag(route.policy_version, 'line')}${tag(`provider ${route.provider}`, 'line')}${route.budget ? tag(`budget.input ${route.budget.input}`, 'line') : ''}${active ? tag('shown', 'ok xs') : ''}</div>
+        <div class="head"><strong>${esc(route.title)}</strong>${tag(route.policy_version, 'line code')}${tag(`provider ${route.provider}`, 'line')}${route.budget ? tag(`budget.input ${route.budget.input}`, 'line code') : ''}${active ? tag('shown', 'ok xs') : ''}</div>
         <p class="hint">${esc(route.summary)}</p>
         <div class="sec">placement, messages profile</div>
         <ol class="pipeline">${route.placement.map((p, i) => `<li><span class="num sm">${i + 1}</span><span>${esc(p.slot)} · ${esc(p.wrap)}</span></li>`).join('')}</ol>
@@ -143,14 +143,14 @@ function renderTimeline() {
   const run = state.run;
   if (!run) { $('#timeline').innerHTML = ''; return; }
   const replay = state.replay;
-  $('#timeline').innerHTML = `<div class="timeline-head"><span class="eyebrow">Turns</span><span class="meta">one inference each: its snapshot, its trace, the model's move, and what the guard decided</span></div>
+  $('#timeline').innerHTML = `<div class="timeline-head"><span class="kicker">Turns</span><span class="meta">one inference each: its snapshot, its trace, the model's move, and what the guard decided</span></div>
     <div class="turns">${run.turns.map(turn => {
     const rp = replay?.turns.find(t => t.n === turn.n);
-    const requests = turn.tool_requests.map(r => `<div class="tags">${tag(r.decision === 'approved' ? 'approved' : 'denied by the guard', r.decision === 'approved' ? 'ok xs' : 'bad xs', r.reason)}${r.executed ? tag(`observation ${r.observation} · ${r.ms} ms`, 'info xs') : ''}</div>
+    const requests = turn.tool_requests.map(r => `<div class="tags">${tag(r.decision === 'approved' ? 'approved' : 'denied by the guard', r.decision === 'approved' ? 'ok xs' : 'warn xs', r.reason)}${r.executed ? tag(`observation ${r.observation} · ${r.ms} ms`, 'info xs') : ''}</div>
       <div class="call">${esc(r.call.name)}(${esc(JSON.stringify(r.call.arguments))})</div>${r.decision === 'denied' ? `<div class="hint">${esc(r.reason)}; never executed</div>` : ''}`).join('');
     const outcome = turn.outcome === 'assembled' ? tag(`assembled · ${turn.trace.result.input_tokens} tokens`, 'ok xs') : turn.outcome === 'refused' ? tag(`refused · ${turn.trace.refused.reason}`, 'bad xs') : tag(turn.outcome, 'bad xs');
     const response = turn.response ? (turn.response.tool_calls.length ? `<div class="hint">${turn.response.tool_calls.length} tool request${turn.response.tool_calls.length === 1 ? '' : 's'} · ${turn.response.durationMs} ms</div>` : `<div class="hint">answer · ${turn.response.durationMs} ms</div>`) : turn.recovery ? `<div class="hint">recovery: ${esc(turn.recovery.action ?? 'none')}</div>` : '<div class="hint">no model call</div>';
-    const badge = rp ? (rp.agreement.agree && rp.results.every(r => r.outcome === 'passed') ? tag(`replay: ${rp.results.length} agree, match recorded`, 'ok xs') : tag('replay: DIFFERS', 'bad xs', rp.results.map(r => `${r.assembler}: ${r.outcome} ${r.detail ?? ''}`).join('\n'))) : '';
+    const badge = rp ? (rp.agreement.agree && rp.results.every(r => r.outcome === 'passed') ? tag(`replay: ${rp.results.length} agree, match recorded`, 'ok xs') : tag('replay: DIFFERS', 'fill xs', rp.results.map(r => `${r.assembler}: ${r.outcome} ${r.detail ?? ''}`).join('\n'))) : '';
     return `<button type="button" class="turn ${turn.n === state.turn ? 'active' : ''}" data-n="${turn.n}">
       <div class="turn-head"><strong>Turn ${turn.n}</strong> <span class="hint">${esc(turn.at)}</span></div>
       <div class="tags">${outcome}${badge}</div>${response}${requests}
@@ -167,7 +167,7 @@ function renderBadges() {
   else if (state.busy) badges.push(`<span class="chip">${esc(state.busy)}…</span>`);
   else if (state.replay) {
     const ok = state.replay.turns.every(t => t.agreement.agree && t.results.every(r => r.outcome === 'passed'));
-    badges.push(ok ? `<span class="chip ok dot">${state.replay.turns.length} inferences replayed · all three agree and match the recorded traces</span>` : '<span class="chip bad dot">replay differs from the record</span>');
+    badges.push(ok ? `<span class="chip ok dot">${state.replay.turns.length} inferences replayed · all three agree and match the recorded traces</span>` : '<span class="chip fill dot">replay differs from the record</span>');
   }
   if (state.error) badges.push(`<span class="chip bad dot">${esc(state.error)}</span>`);
   $('#agreement').outerHTML = `<span id="agreement" class="badges">${badges.join('')}</span>`;

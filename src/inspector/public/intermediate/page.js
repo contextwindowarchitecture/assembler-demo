@@ -80,19 +80,19 @@ function renderScenario() {
   const digest = trace?.context?.snapshot_digest;
   $('#scenario').innerHTML = `
     <div class="lead">
-      <div class="eyebrow">Step ${meta.step} of ${state.scenarios.length} · ${STAGE} stage</div>
+      <div class="kicker">Step ${meta.step} of ${state.scenarios.length} · ${STAGE} stage</div>
       <h1>${esc(meta.title)}</h1>
       <p class="question">“${esc(meta.question)}”</p>
       <p>${esc(meta.description)}</p>
       <div class="proves"><strong>Proves</strong><span>${esc(meta.proves)}</span>${meta.look_for.map(code => tag(code, 'bad code', page.reasonText(code))).join('')}</div>
     </div>
     <aside class="factsheet">
-      <div class="eyebrow">Snapshot</div>
+      <div class="label">Snapshot</div>
       <div class="kv">
         <span class="k">state</span><span class="v${derived || live ? ' derived' : ''}">${live ? 'live · the producers ran just now' : derived ? `derived · budget.input ${state.budget} (frozen ${meta.budget.input})` : 'frozen'}</span>
         <span class="k">budget.input</span><span class="v">${snapshot?.budget.input ?? meta.budget.input} <span class="hint">· reserved_output ${snapshot?.budget.reserved_output ?? meta.budget.reserved_output}</span></span>
         <span class="k">retrieval query</span><span class="v prose">${esc(meta.retrieval.query)} <span class="hint">· top_k ${meta.retrieval.top_k}</span></span>
-        <span class="k">declared conflicts</span><span class="v">${meta.conflicts.length ? meta.conflicts.map(id => tag(id, 'warn code xs')).join(' ') : '<span class="hint">none declared</span>'}</span>
+        <span class="k">declared conflicts</span><span class="v">${meta.conflicts.length ? meta.conflicts.map(id => tag(id, 'conflict code xs')).join(' ') : '<span class="hint">none declared</span>'}</span>
         <span class="k">renderer</span><span class="v">${esc(snapshot?.renderer ?? RENDERERS[state.variant])}</span>
         <span class="k">digest</span><span class="v">${esc(digest ? digest.slice(0, 16) + '…' : '—')}</span>
       </div>
@@ -106,12 +106,12 @@ function renderProducers() {
   if (!scenario) return;
   const report = state.response?.report ?? scenario.meta.producers ?? {};
   const live = Boolean(state.response?.live);
-  $('#producers').innerHTML = `<div class="producers-head"><span class="eyebrow">Producers</span>
+  $('#producers').innerHTML = `<div class="producers-head"><span class="kicker">Producers</span>
     <span class="meta">${live ? 'ran live just now' : 'frozen batches, as they ran when the step was written'} · one batch per producer, before any assembly</span>
     ${state.producers.available ? '' : '<span class="hint">the producers project is not present, so live mode is off</span>'}</div>
     <div class="producer-cards">${Object.entries(report).map(([id, run]) => `
       <div class="producer-card">
-        <div class="head"><span class="pid">${esc(id)}</span>${tag(run.kind, 'line')}${tag(run.framework, 'line')}</div>
+        <div class="head"><span class="pid">${esc(id)}</span>${tag(run.kind, 'line')}${tag(run.framework, 'line code')}</div>
         <ol class="pipeline">${(run.pipeline ?? []).map((step, i) => `<li><span class="num sm">${i + 1}</span><span>${esc(step)}</span></li>`).join('')}</ol>
         <div class="chips">${tag(`${run.emitted} item${run.emitted === 1 ? '' : 's'}`, 'ok')}${run.reported_excluded ? tag(`${run.reported_excluded} reported excluded`, 'gray') : ''}${run.ms !== undefined ? tag(`${run.ms} ms`, 'line') : ''}</div>
         ${run.retrieved ? `<details><summary>query: ${esc(run.query)} · ${run.retrieved.length} retrieved</summary><table><tr><th>chunk</th><th class="num">BM25</th></tr>${run.retrieved.map(hit => `<tr><td class="m">${esc(hit.id)}</td><td class="num">${hit.score}</td></tr>`).join('')}</table></details>` : ''}
@@ -128,18 +128,18 @@ function renderBadges() {
     if (results.length > 1) {
       badges.push(agreement.agree
         ? `<span class="chip ok dot" title="payload bytes and traces (without trace_id and timings) are identical">${judged} assemblers agree</span>`
-        : `<span class="chip bad dot" title="${esc(agreement.differences.map(d => `${d.assembler} vs ${d.against}: ${d.detail}`).join('\n'))}">assemblers DISAGREE</span>`);
+        : `<span class="chip fill dot" title="${esc(agreement.differences.map(d => `${d.assembler} vs ${d.against}: ${d.detail}`).join('\n'))}">assemblers DISAGREE</span>`);
     }
     if (replay) {
       badges.push(replay.matches
         ? '<span class="chip ok dot" title="the snapshot the producers built now has the digest of the frozen one">live = replay</span>'
-        : `<span class="chip bad dot" title="live ${esc(replay.live_digest ?? '?')} vs frozen ${esc(replay.frozen_digest ?? '?')}">live ≠ replay</span>`);
+        : `<span class="chip fill dot" title="live ${esc(replay.live_digest ?? '?')} vs frozen ${esc(replay.frozen_digest ?? '?')}">live ≠ replay</span>`);
     }
     if (expectation) {
       const failed = expectation.results.filter(r => r.outcome === 'failed');
       badges.push(failed.length === 0
         ? `<span class="chip ${expectation.reviewed ? 'ok' : 'warn'} dot" title="generated by ${esc(expectation.generated_by)}${expectation.reviewed ? ', reviewed' : ', not yet reviewed by a person'}">matches expectation${expectation.reviewed ? '' : ' · unreviewed'}</span>`
-        : `<span class="chip bad dot" title="${esc(failed.map(f => `${f.assembler}: ${f.detail}`).join('\n'))}">expectation NOT met</span>`);
+        : `<span class="chip fill dot" title="${esc(failed.map(f => `${f.assembler}: ${f.detail}`).join('\n'))}">expectation NOT met</span>`);
     } else if (state.response.derived) {
       badges.push('<span class="chip warn dot" title="a derived snapshot has no committed expectation">no expectation · derived</span>');
     }

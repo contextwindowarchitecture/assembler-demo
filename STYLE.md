@@ -219,7 +219,7 @@ The stage pages are full width: four columns need it. The landing page uses the 
 | Step header | `padding: 32px 32px 24px`, grid `minmax(0, 1fr) minmax(320px, 400px)`, `gap: 40px` |
 | Strips (producers, routes, turns) | `padding: 0 32px 24px` |
 | Delta strip | `margin: 0 32px 24px`, a hairline grid |
-| Columns | `margin: 0 32px 32px`, a hairline grid of four, headers sticky at `calc(var(--mast-h) + var(--band-h))` |
+| Columns | `margin: 0 32px 32px`, a hairline grid of four, headers sticky at `--top-h`, the measured height of the pinned block |
 | Column body | `padding: 18px`, a column of cards with `gap: 12px` |
 | Footer | `padding: 24px 32px`, 1px `--line` top border |
 | Landing hero | `padding: 96px 32px 72px` |
@@ -437,7 +437,7 @@ The pages are static files served by `src/inspector/server.mjs`; the markup is p
 
 - **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the masthead, the step band, the instruments, the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
 - **Classes, one stylesheet.** Every rule lives in `public/style.css` and selects by class; the shells carry no `style` attribute, and a test checks it. Class names are shared by every page, so a new class must not collide with an existing one.
-- **Two inline values only.** A candidate row sets `--plane` from its slot (`style="--plane: var(--p-evid)"`), and a meter segment sets its `flex-basis`. Both are computed from the snapshot or the trace at run time; nothing else is styled inline.
+- **Three inline values only.** A candidate row sets `--plane` from its slot (`style="--plane: var(--p-evid)"`), a meter segment sets its `flex-basis` and its plane, and `chrome.js` keeps `--top-h` on `<html>` at the measured height of the pinned top block, so the column headers pin under it however the badges wrap. The first two are computed from the snapshot or the trace at run time; nothing else is styled inline.
 - **Theme** is `data-theme` on `<html>`, `cwa-theme` in `localStorage`. A one-line script in each shell's head applies the stored choice before the first paint; `chrome.js` owns the masthead button `#theme` and its label. **Talk mode** is `data-talk`, `cwa-demo-talk`, the button `#talk`. The landing page runs `public/landing.js`, which only initialises this chrome.
 - **Responsive rules** are `@media (max-width: …)` blocks at the end of the stylesheet, selecting by class, without `!important`.
 - **The pages format; they never decide.** Every status, count, colour and meter segment is read from the trace or the snapshot. A plane comes from a slot id, an outcome from a trace row. No rule here may introduce logic the assemblers own (see `AGENTS.md`).

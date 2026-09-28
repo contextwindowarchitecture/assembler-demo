@@ -10,8 +10,10 @@
 <body>
   <header class="top">
     <div class="masthead">
-      <a class="brand" href="/">CWA</a>
-      <span class="brand-sub">support-assistant demo</span>
+      <div class="brandrow">
+        <a class="brand" href="/"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>CWA</a>
+        <span class="brand-sub">support-assistant demo</span>
+      </div>
       <div id="stages"></div>
       <div class="masthead-right">
         <button id="talk" type="button" aria-pressed="false" title="larger type for a projector; folds the instruments behind one line">Talk mode</button>
@@ -27,16 +29,16 @@
   <div class="instruments" id="instruments">
     <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
     <div class="controls" id="controls">
-      <label>Assembler
+      <label class="field">Assembler
         <select id="assembler"></select>
       </label>
-      <label>Rendering
+      <label class="field">Rendering
         <select id="variant">
           <option value="fixture">fixture-xml/v1 (compare)</option>
           <option value="messages">cwa-messages/v1 (model)</option>
         </select>
       </label>
-      <label>budget.input
+      <label class="field">budget.input
         <input id="budget" type="number" min="0" step="10" inputmode="numeric">
       </label>
       <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>

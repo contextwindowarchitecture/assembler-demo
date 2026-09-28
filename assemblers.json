@@ -1,0 +1,27 @@
+{
+  "$comment": "The adapter command for each assembler, relative to this directory. Each takes a snapshot's bytes on stdin and answers by exit code: 0 assembled or refused ({\"payload\": base64 | null, \"trace\": {...}} on stdout), 2 rejected before assembly, 3 tokenizer or renderer not provided. Set the environment variable named in `env` to a whole command line to override one.",
+  "python": {
+    "language": "Python",
+    "name": "cwa-assembler",
+    "checkout": "../cwa-assembler",
+    "command": ["uv", "run", "--quiet", "--project", "../cwa-assembler", "python", "adapters/python_adapter.py"],
+    "requires": ["../cwa-assembler/pyproject.toml"],
+    "env": "CWA_PYTHON_ADAPTER"
+  },
+  "typescript": {
+    "language": "TypeScript",
+    "name": "@contextwindowarchitecture/assembler",
+    "checkout": "../cwa-assembler-ts",
+    "command": ["node", "adapters/typescript_adapter.mjs"],
+    "requires": ["node_modules/@contextwindowarchitecture/assembler/dist/index.js"],
+    "env": "CWA_TYPESCRIPT_ADAPTER"
+  },
+  "go": {
+    "language": "Go",
+    "name": "github.com/contextwindowarchitecture/assembler-go",
+    "checkout": "../cwa-assembler-go",
+    "command": ["bin/cwa-adapter-go"],
+    "requires": ["bin/cwa-adapter-go"],
+    "env": "CWA_GO_ADAPTER"
+  }
+}

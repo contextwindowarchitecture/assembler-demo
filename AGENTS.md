@@ -35,7 +35,9 @@ npm run conformance              # the vendored conformance cases through every 
 npm run scenarios:build          # regenerate scenarios/*/snapshot*.json from scenarios/*/source
 npm run expect -- --from python  # regenerate expected payloads and traces from the reference assembler
 npm run compare                  # every scenario through every assembler, against expectations and each other
-npm run inspector                # http://localhost:8787
+npm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
 ```
 
 The sibling checkouts are expected at `../cwa-assembler` (Python, with its `.venv` or `uv`), `../cwa-assembler-ts` (built: `dist/` present) and `../cwa-assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
+
+`.env` is gitignored and holds provider settings and keys for one machine. Never commit it, never paste its values into a commit message, a document or a chat reply.

@@ -12,11 +12,11 @@ That view separates a producer error from an assembler error from an adapter err
 
 | Milestone | What it delivers | State |
 | --- | --- | --- |
-| M1 Harness | Adapters for the three assemblers, `run`, `compare`, `expect`, `conformance`; first-difference reports | in progress |
-| M2 Scenarios | The five basic-stage snapshots, generated from one source, with reviewed expectations | planned |
-| M3 Inspector | The four-column screen in a browser, with a budget control and assembler switch | planned |
-| M4 Live model | Provider adapter from `cwa-messages/v1` to a Messages API request; captured outbound request; answer column | planned |
-| M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | planned |
+| M1 Harness | Adapters for the three assemblers, `run`, `compare`, `expect`, `conformance`; first-difference reports | done |
+| M2 Scenarios | The five basic-stage snapshots, generated from one source, with expectations | done; expectations await review |
+| M3 Inspector | The four-column screen in a browser, with a budget control and assembler switch | done |
+| M4 Live model | Three providers (local OpenAI-compatible, Anthropic or compatible, OpenAI) from `cwa-messages/v1`; captured outbound request; answer column | done; verified against a local gpt-oss-20b through both API styles |
+| M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | done |
 | Intermediate | Competing sources under a constrained budget (retrieval, state, memory, history, conflicts, variants) | after basic |
 | Advanced | A bounded tool loop with authorization, checkpoints and replay | after intermediate |
 
@@ -30,7 +30,7 @@ These were made to start work. Each is cheap to reverse now and expensive later,
 4. **Scenarios are generated from one source and frozen.** `scenarios/basic/source/` holds the route policy, two profiles, the candidate items and each step's delta; `npm run scenarios:build` writes each step's `snapshot.json` (fixture tokenizer and renderer, for byte-exact comparison) and `snapshot.messages.json` (the same items rendered as `cwa-messages/v1`, for the live call). The generated files are committed, and a test fails when they are stale. Frozen inputs are the point of the brief: the same bytes go to all three assemblers.
 5. **Expectations are generated, then reviewed.** `npm run expect -- --from python` writes `expected.payload.txt` and `expected.trace.json` from the reference assembler. `scenario.json` records `expectations.generated_by` and `expectations.reviewed: false` until a person has read them against the spec. The compare report shows unreviewed expectations as such. Three matching assemblers can share a mistake; a reviewed expectation is the independent check the brief asks for.
 6. **The basic stage uses no tools and does not require evidence.** The route's `requires_evidence` stays off so step 4 can show what a route that does not require evidence lets through; the intermediate stage turns it on. Capabilities and MCP wait for the advanced stage.
-7. **The live model call is optional and off by default.** It runs only when a provider key is configured, only from a successful assembly, and the inspector shows the exact outbound request beside the answer.
+7. **The live model call is optional and needs a provider.** Three are selectable in the inspector: a local model through any OpenAI-compatible endpoint, the Anthropic Messages API (or an Anthropic-compatible server through `ANTHROPIC_BASE_URL`), and OpenAI. Each runs only from a successful assembly, and the inspector shows the exact outbound request beside the answer. `.env` holds the settings; a local model makes the talk independent of the network.
 
 ## Architecture
 
@@ -103,8 +103,8 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 
 ### M4 Live model
 
-- `src/provider/anthropic.mjs`: `cwa-messages/v1` payload to a Messages API request: `system` entries joined as the system prompt, `tools` entries as tool definitions (none in the basic stage), the single user message as is. The request is captured and shown before it is sent. Keys come from the environment only.
-- `POST /api/answer` on the server, refusing when the assembly refused.
+- `src/provider/chat-completions.mjs` (local and OpenAI) and `src/provider/anthropic.mjs`: `cwa-messages/v1` payload to a request: `system` entries as system text, `tools` entries as tool definitions (none in the basic stage), the single user message as is. The request is captured and shown beside the answer. Settings come from `.env` or the environment; `max_tokens` is the route's `reserved_output`.
+- `POST /api/answer` on the server, with a provider picker, send to one or to all, in the answer column.
 
 ### M5 Talk script
 
@@ -118,5 +118,5 @@ The harness, the scenario generator, the inspector and the provider adapter do n
 
 1. Are the reason codes and steps above the ones you want on stage, or should step 3 also show `untrusted_content_unmarked` (an evidence item a retriever forgot to mark)?
 2. Should step 5 stay `protected_content_over_budget`, or would `evidence_required` with its recovery action be the stronger closing beat for the basic stage? The brief puts `evidence_required` in the intermediate stage; this plan follows it.
-3. The live column needs a provider. The plan assumes the Anthropic Messages API with a key from the environment. Say if you want another provider first, or none for the talk.
-4. When is the talk? The notes file says a week out from 21 September. That decides whether M4 and M5 come before or after the intermediate stage.
+3. The expectations are generated by the Python reference and unreviewed. Reviewing the ten expected traces against the spec (about twenty minutes) turns the badge green and makes the comparison independent of any assembler.
+4. Which model on stage? The local gpt-oss-20b answers in three to seven seconds with the citation. `Send to all` with Anthropic or OpenAI configured shows the same request going to several models, if the room has network.

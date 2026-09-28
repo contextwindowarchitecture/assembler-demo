@@ -2,7 +2,7 @@
 
 A demo application for the Context Window Architecture (CWA) draft specification. It runs a support-assistant scenario through the three conformant assemblers (Python, TypeScript, Go), compares their payloads and traces, and shows every decision in an inspector. It is not an assembler: it never decides what goes into a context window. It freezes inputs, hands them to an assembler, and shows what came back.
 
-Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work stands, and [docs/DESIGN.md](docs/DESIGN.md) for how the pieces fit.
+Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work stands, [docs/DESIGN.md](docs/DESIGN.md) for how the pieces fit, and [STYLE.md](STYLE.md) before touching the inspector's pages or stylesheet: it is the website's visual language applied here, and a test checks what it can.
 
 ## Rules
 

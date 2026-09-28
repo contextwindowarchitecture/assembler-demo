@@ -175,7 +175,8 @@ The theme is an attribute, `data-theme="light"` or `"dark"`, on `<html>`. Every 
 | Button label | sans | `14px` (primary), `16px` (landing) | 600 | none | | | |
 | Kicker, accent | mono | `var(--fs-kicker)` | 400 | `0.14em` | | | uppercase, `color: var(--accent)`, `margin-bottom: 14px` or `16px` |
 | Label, muted | mono | `var(--fs-label)` | 400 | `0.12em` | | | uppercase, `color: var(--muted)`, `margin-bottom: 8px` to `14px` |
-| Chip, step pill, ghost button | mono | `var(--fs-label)` | 400 | `0.08em` | `1` | | uppercase; identifiers inside chips are `.code`: no uppercase, no tracking |
+| Chip | mono | `var(--fs-label)` | 400 | `0.08em` | `1` | | uppercase; identifiers inside chips are `.code`: no uppercase, no tracking |
+| Step pill, ghost button, producer index | mono | `var(--fs-label)` | 400 | `0.05em` | | | never uppercase: a step pill may carry a tool name, the index a producer id |
 | Identifier | mono | `var(--fs-mono)` | 600 | none | `1.5` | | item, producer and run ids; linked identifiers 400 in `--accent` |
 | Meta row, code, values | mono | `var(--fs-mono)` | 400 | none | `1.6` to `1.7` | | |
 | Column summary, footer | mono | `var(--fs-label)` | 400 | `0.04em` | `1.5` to `1.65` | | muted, no uppercase |
@@ -184,7 +185,7 @@ The theme is an attribute, `data-theme="light"` or `"dark"`, on `<html>`. Every 
 Rules that fall out of the table:
 
 - Display sizes are fluid `clamp()` values; everything 22px and under is a fixed pixel size, held in a token where talk mode raises it. Never use `rem` or `em` for size.
-- Tracking is negative on anything 16px and larger in sans (`-0.015em` on card titles to `-0.045em` on the landing headline) and positive on every uppercase mono label (`0.12em` muted, `0.14em` accent, `0.08em` in chips and pills). Body text has none.
+- Tracking is negative on anything 16px and larger in sans (`-0.015em` on card titles to `-0.045em` on the landing headline) and positive on every uppercase mono label (`0.12em` muted, `0.14em` accent, `0.08em` in chips) and lightly on ghost pills (`0.05em`). Body text has none.
 - Line-height drops as size rises: `1` for the step title, `1.02` for the no-request title, `1.35` for card titles, `1.55` to `1.6` for prose, up to `1.7` in code.
 - Every paragraph and multi-line title sets `text-wrap: pretty`; balanced wrapping (`balance`) is reserved for h1 and the landing headline.
 - Measure is set with `max-width` in `ch`: `70ch` for body, `64ch` for ledes, `13ch` to `20ch` for headlines.
@@ -265,9 +266,9 @@ The stylesheet ends with `@media (max-width: …)` rules that select by class. N
 
 | Max width | Rule |
 |---|---|
-| `1400px` | The four columns become two per row; column headers stop sticking and lose their arrows. The landing hero stacks and its pipeline grid halves |
-| `900px` | The step header, the producer and route grids and the landing stages become one column; every gutter tightens to `20px`; the brand's subtitle hides |
-| `800px` | The columns become one; the landing pipeline stacks |
+| `1400px` | The four columns become two per row; column headers stop sticking and lose their arrows. The landing hero stacks |
+| `900px` | The step header and the landing stages become one column; every gutter tightens to `20px`; the brand's subtitle hides. The producer, route and turn grids need no rule: they are `auto-fit` |
+| `800px` | The columns become one; the landing pipeline (a two-by-two grid) stacks |
 
 Layers: the masthead block sits at `z-index: 50`, column headers at `2`. Nothing else is layered.
 
@@ -290,7 +291,7 @@ Order left to right: the logo mark (the 2 by 2 plane grid) and the wordmark "CWA
 
 ### Step band and step pills
 
-The band is `--surface` with a 1px `--line` top border, `padding: 11px 32px`, the steps on the left and the badges on the right (`margin-left: auto`). A step is a small uppercase ghost pill (below) whose first token is its number; a 12px `--line` hairline joins each pair. The shown step is the inverse pill: `background: var(--fg); color: var(--bg); border-color: var(--fg)`. On the advanced page the pills are the turns, labelled by the tool the model asked for.
+The band is `--surface` with a 1px `--line` top border, `padding: 11px 32px`, the steps on the left and the badges on the right (`margin-left: auto`). A step is a ghost pill (below) whose first token is its number, never uppercased, since on the advanced page the pill carries the tool the model asked for; a 12px `--line` hairline joins each pair. The shown step is the inverse pill: `background: var(--fg); color: var(--bg); border-color: var(--fg)`. On the advanced page the pills are the turns, labelled by the tool the model asked for.
 
 ### Buttons
 
@@ -301,7 +302,7 @@ All buttons are pills. A `<button>` always sets `font-family` explicitly because
 | Primary (Send, Run live) | `font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--bg); background: var(--accent); border-radius: var(--pill); padding: 9px 18px; border: 0; cursor: pointer;` | `background: var(--fg)` |
 | Inverse (the active step) | as the ghost pill, with `background: var(--fg); color: var(--bg); border-color: var(--fg)` | unchanged |
 | Ghost (talk mode, theme, frozen, replay, copy, re-check) | `font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.05em; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: var(--pill); padding: 8px 14px; cursor: pointer;` | `color: var(--fg); border-color: var(--fg)` |
-| Ghost, small uppercase (steps, producer index) | the ghost with `letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 14px` | same as ghost |
+| Ghost pill (steps, producer index) | the ghost, identifiers kept as written; the producer index at `padding: 3px 8px` | same as ghost |
 | Large primary (landing) | primary at `font-size: 16px; padding: 15px 26px` | `background: var(--fg)` |
 
 Labels are sentence case: "Talk mode", "Run live", "Replay through all three", "Send to all". A disabled button is at `opacity: 0.5` with `cursor: not-allowed`; there is no loading or pressed style beyond `aria-pressed`, which the talk-mode button renders as the inverse pill.
@@ -351,7 +352,7 @@ One shape for badges, tags and statuses: a pill in mono. Colour is the outcome (
 - **Bordered panel:** `border: 1px solid var(--line); background: var(--bg);` with an optional header bar
   `display: flex; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line);` carrying a muted label. Code blocks, the payload viewer, the factsheet and each column are this panel; a column's header bar is its `<h2>`.
 - **Column header:** the panel header bar, sticky, `background: var(--bg)`, holding the arrow glyph "→" in mono muted (from the second column on), the column number in mono accent `var(--fs-label)` tracked, the title in `var(--fs-title)` 600 `-0.015em`, and under them the summary line in mono `var(--fs-label)` muted. On a refusal the request and answer columns' arrows, numbers and titles turn `--accent`.
-- **Hairline grid cell:** `background: var(--bg); padding: 24px 22px;` on the landing page, `16px 18px` in the strips; label, then a `var(--fs-title)` 600 title, then `var(--fs-sm)` muted copy. Clickable cells are `<a>` elements with `color: var(--fg)` and `:hover { background: var(--accent-soft); }`.
+- **Hairline grid cell:** `background: var(--bg); padding: 24px 22px;` for the landing stages, `22px 22px 20px` in the landing pipeline, `16px 18px` in the strips; label, then a `var(--fs-title)` 600 title, then `var(--fs-sm)` muted copy. Clickable cells are `<a>` elements with `color: var(--fg)` and `:hover { background: var(--accent-soft); }`.
 - **Candidate row:** `border: 1px solid var(--line); border-left: 3px solid var(--plane); background: var(--surface); padding: 10px 14px;` with the status chips, the id as an identifier, the facts in mono `var(--fs-label)` muted with the slot in `--fg`, the tertiary line, and the body behind a `<details>`. The outcome variants are in section 3.
 - **Card inside a column** (a system entry, a tool entry, an answer, a producer's batch): `border: 1px solid var(--line); background: var(--bg); padding: 12px 14px;`.
 

@@ -75,7 +75,7 @@ The tokenizer is `fixture-whitespace/v1` in both renderings, on purpose: it make
 
 ### The inspector
 
-`server.mjs` is `node:http`, static files and four JSON routes. It loads `.env` at startup (values in the file replace ambient ones) and reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart.
+`server.mjs` is `node:http`, static files and five JSON routes. Run as a program it loads `.env` first (values in the file replace ambient ones); imported by a test it does not, so a developer's `.env` cannot leak into the suite. It reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart.
 
 | Route | Does |
 | --- | --- |
@@ -84,6 +84,7 @@ The tokenizer is `fixture-whitespace/v1` in both renderings, on purpose: it make
 | `GET /api/scenarios/:id/:rendering/snapshot.json` | the frozen bytes |
 | `POST /api/assemble` | `{scenario, variant, assemblers?, budget?}` → the snapshot used, each result (payload as text), agreement, and the expectation judgement; a budget override derives a new snapshot, marked `derived`, with no expectation applied |
 | `POST /api/answer` | `{provider, payload, reserved_output}` → the answer with the exact request that produced it |
+| `POST /api/snippets` | `{payload, reserved_output}` → the request as SDK code, TypeScript and Python, per configured endpoint |
 
 The page (`public/app.js`) formats; it never decides. Each candidate's status comes from the shown assembler's trace: an assembler-stage `excluded` row, else a `compressed` row, else an `included` row, else, on a refusal, "admitted; assembly refused". Reason codes carry the registry text as a tooltip and are listed with it under the decisions, since a projector cannot hover.
 
@@ -99,7 +100,11 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 | a surfaced conflict (`conflict`) | the entry's text prefixed with a one-line mark | the same |
 | `max_tokens` | the route's `reserved_output` (`max_completion_tokens` for OpenAI) | the same |
 
-`local` and `openai` share `chat-completions.mjs`, plain HTTP. `anthropic.mjs` uses the official SDK; against the real API it sends adaptive thinking and server-side refusal fallbacks, and against a compatible server (a custom `ANTHROPIC_BASE_URL`) it sends neither unless asked, since a compatible server may not know them. The captured request is the object handed to the client, so what the inspector shows is what was sent.
+`local` and `openai` share `chat-completions.mjs`, which uses the official OpenAI SDK: the same client reaches OpenAI and any OpenAI-compatible local server through `baseURL`, and its typed errors are reported most specific first (its connection error extends its API error, so it is tested before the general case). `anthropic.mjs` uses the official Anthropic SDK; against the real API it sends adaptive thinking and server-side refusal fallbacks, and against a compatible server (a custom `ANTHROPIC_BASE_URL`) it sends neither unless asked, since a compatible server may not know them. The captured request is the object handed to the client, so what the inspector shows is what was sent. Tests inject the client, and the inspector's API test drives the real OpenAI SDK against a mock HTTP server.
+
+### Snippets
+
+`snippets.mjs` renders the assembled request as the code an application writes, in TypeScript and Python: how to get the payload (`assemble`, with the refusal branch), then the literal `client.messages.create(...)` and `client.chat.completions.create(...)` calls, one per configured endpoint. The object in each call is built by the same `toRequest` the providers use, so the snippet is the request, not an illustration; the tests extract the TypeScript object and compare it with the provider's request, and run `python3` to parse the Python. The inspector fetches them for every successful `cwa-messages/v1` assembly and shows them under the outbound request.
 
 ## Testing
 

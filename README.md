@@ -6,6 +6,8 @@ A support-assistant demo for the [Context Window Architecture](https://contextwi
 
 That view separates a producer error from an assembler error from an adapter error from a model error. The app never assembles anything itself: it freezes inputs, hands them to an assembler through the adapter protocol, compares what comes back byte for byte, and shows it.
 
+The last mile is the code people already write. The live answers go through the official Anthropic SDK (`@anthropic-ai/sdk`) and the official OpenAI SDK (`openai`, which also reaches any OpenAI-compatible local server through a `baseURL`), and the inspector shows the assembled request as the literal `client.messages.create(...)` or `client.chat.completions.create(...)` call, in TypeScript and Python, copy-pasteable: the object in the call is the request the provider sends, built by the same code. Frameworks enter at the boundary where they sit in a real application, one per stage: retrieval and memory frameworks as producers in the intermediate stage, MCP and an agent harness in the advanced stage (see [docs/PLAN.md](docs/PLAN.md)).
+
 ## Quick start
 
 ```sh
@@ -70,7 +72,7 @@ Comparison follows `conformance/README.md`: payloads byte for byte; traces field
 | `scenarios/basic/NN-step/` | Generated snapshots, `scenario.json`, and the expected payloads and traces |
 | `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `cli.mjs` |
 | `src/inspector/` | The server and the static page |
-| `src/provider/` | `local` (OpenAI-compatible), `anthropic` (Messages API or a compatible server), `openai` |
+| `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
 | `vendor/cwa/` | The published contract, pinned by `vendor/cwa.lock.json` |
 | `docs/` | [PLAN.md](docs/PLAN.md), [DESIGN.md](docs/DESIGN.md), [SCENARIOS.md](docs/SCENARIOS.md) |
 

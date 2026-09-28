@@ -15,7 +15,7 @@ That view separates a producer error from an assembler error from an adapter err
 | M1 Harness | Adapters for the three assemblers, `run`, `compare`, `expect`, `conformance`; first-difference reports | done |
 | M2 Scenarios | The five basic-stage snapshots, generated from one source, with expectations | done; expectations await review |
 | M3 Inspector | The four-column screen in a browser, with a budget control and assembler switch | done |
-| M4 Live model | Three providers (local OpenAI-compatible, Anthropic or compatible, OpenAI) from `cwa-messages/v1`; captured outbound request; answer column | done; verified against a local gpt-oss-20b through both API styles |
+| M4 Live model | Three providers through the official Anthropic and OpenAI SDKs (the local server through the OpenAI SDK's `baseURL`); captured outbound request; answer column; the request as SDK code in TypeScript and Python | done; verified against a local gpt-oss-20b through both API styles |
 | M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | done |
 | Intermediate | Competing sources under a constrained budget (retrieval, state, memory, history, conflicts, variants) | after basic |
 | Advanced | A bounded tool loop with authorization, checkpoints and replay | after intermediate |
@@ -31,6 +31,8 @@ These were made to start work. Each is cheap to reverse now and expensive later,
 5. **Expectations are generated, then reviewed.** `npm run expect -- --from python` writes `expected.payload.txt` and `expected.trace.json` from the reference assembler. `scenario.json` records `expectations.generated_by` and `expectations.reviewed: false` until a person has read them against the spec. The compare report shows unreviewed expectations as such. Three matching assemblers can share a mistake; a reviewed expectation is the independent check the brief asks for.
 6. **The basic stage uses no tools and does not require evidence.** The route's `requires_evidence` stays off so step 4 can show what a route that does not require evidence lets through; the intermediate stage turns it on. Capabilities and MCP wait for the advanced stage.
 7. **The live model call is optional and needs a provider.** Three are selectable in the inspector: a local model through any OpenAI-compatible endpoint, the Anthropic Messages API (or an Anthropic-compatible server through `ANTHROPIC_BASE_URL`), and OpenAI. Each runs only from a successful assembly, and the inspector shows the exact outbound request beside the answer. `.env` holds the settings; a local model makes the talk independent of the network.
+
+8. **Real-world connections, one per stage, at the boundary where each tool sits.** Basic: the official Anthropic and OpenAI SDKs are the last mile, and the inspector shows the assembled request as the literal SDK call in TypeScript and Python. Intermediate: LlamaIndex retrieval and postprocessing, and a LangChain memory store, as producers whose output becomes CWA batches. Advanced: MCP servers as tool producers, and an agent harness (DeepAgents or the Vercel AI SDK loop) around the assembler. Several frameworks at once would make failures hard to isolate, which the brief warns against.
 
 ## Architecture
 

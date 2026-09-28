@@ -50,7 +50,9 @@ The screen, left to right: **Candidate context** (what the producers sent, color
 
 **Point at:** the outbound request. The instructions are in the system channel; everything else, the prior turns included, is inside the one user message as a transcript. The forum post is there, admitted as evidence, with its `</evidence>` and `<system>` escaped. Injected markup is material, never structure.
 
-**Click:** *Send to all* in the answer column. While it runs, say that the request shown is the request sent, and that the model's answer is a separate evaluation from the assembler's correctness.
+**Point at:** *Use it in your code*, under the request. Switch between TypeScript and Python, and between the Anthropic SDK and the OpenAI SDK. The object in the call is this request: the assembler's payload is all an application needs, and the rest is the `create` call it already writes. The *Assemble* tab shows the three lines before it, with the refusal branch.
+
+**Click:** *Send to all* in the answer column. While it runs, say that the request shown is the request sent, through the official SDKs, and that the model's answer is a separate evaluation from the assembler's correctness.
 
 **Point at:** the answers, one per provider, each with the exact request under it. Look for the citation of `kb:support-plans:v7#pro` and for the absence of phone support.
 

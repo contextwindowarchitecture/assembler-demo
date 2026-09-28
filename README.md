@@ -10,6 +10,8 @@ The last mile is the code people already write. The live answers go through the 
 
 ## Quick start
 
+The project uses pnpm, pinned by `packageManager` in package.json. Install it once with `npm install -g pnpm`, or run `corepack enable` on a Node that bundles corepack and it fetches the pinned version on first use. Running `npm install` here stops on the `link:` dependency rather than leaving a mixed tree.
+
 ```sh
 pnpm install          # ajv, the Anthropic SDK, and a link to ../cwa-assembler-ts
 pnpm run setup        # builds the Go adapter into bin/ and checks the Python and TypeScript adapters

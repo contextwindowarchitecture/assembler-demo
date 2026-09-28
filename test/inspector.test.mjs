@@ -118,7 +118,7 @@ test('POST /api/answer sends a successful messages assembly to the local model o
   assert.equal(body.model, 'mock-llama');
   assert.match(body.text, /^Mock answer from mock-llama: .* evidence \[kb:community-forum:v9#thread-4471\] \[kb:support-plans:v7#enterprise\]/);
   assert.equal(body.request.url, `${process.env.CWA_DEMO_LOCAL_BASE_URL}/chat/completions`);
-  assert.equal(body.request.max_tokens, 400, 'max_tokens is the route\'s reserved_output');
+  assert.equal(body.request.max_tokens, assembled.body.snapshot.budget.reserved_output, 'max_tokens is the route\'s reserved_output');
   assert.equal(mock.requests.length, 1);
   const sent = mock.requests[0].body;
   assert.equal(sent.messages[0].role, 'system');

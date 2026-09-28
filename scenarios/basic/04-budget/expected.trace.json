@@ -5,7 +5,7 @@
   },
   "budget": {
     "input": 170,
-    "reserved_output": 400
+    "reserved_output": 1200
   },
   "result": {
     "input_tokens": 155,
@@ -145,7 +145,7 @@
     "route_policy_version": "demo-basic/v1",
     "tokenizer": "fixture-whitespace/v1",
     "renderer": "fixture-xml/v1",
-    "snapshot_digest": "5d0c18be12f9ad52ad6dae91451036f4886c99b7754c48fd103857831303a75f"
+    "snapshot_digest": "390d724f2a29780a6ec8e0bf1cdd7fcdc762df3a53cf2ded49ec92691d3dcd98"
   },
   "defaults_filled": [],
   "trace_id": "basic/04-budget:fixture"

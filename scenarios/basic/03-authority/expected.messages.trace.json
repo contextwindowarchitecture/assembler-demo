@@ -5,7 +5,7 @@
   },
   "budget": {
     "input": 600,
-    "reserved_output": 400
+    "reserved_output": 1200
   },
   "result": {
     "input_tokens": 261,
@@ -132,7 +132,7 @@
     "route_policy_version": "demo-basic/v1",
     "tokenizer": "fixture-whitespace/v1",
     "renderer": "cwa-messages/v1",
-    "snapshot_digest": "df9aedc1acaa5bd3ab8f1edd46aeabf5a0cea8994da0b243a3301af92de3cc81"
+    "snapshot_digest": "49aad46320817156c6673d1393383e70870c28b24c42c0d951144eedc401fdcc"
   },
   "defaults_filled": [],
   "trace_id": "basic/03-authority:messages"

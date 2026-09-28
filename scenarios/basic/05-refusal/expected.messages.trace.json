@@ -5,7 +5,7 @@
   },
   "budget": {
     "input": 60,
-    "reserved_output": 400
+    "reserved_output": 1200
   },
   "result": null,
   "included": [],
@@ -58,7 +58,7 @@
     "route_policy_version": "demo-basic/v1",
     "tokenizer": "fixture-whitespace/v1",
     "renderer": "cwa-messages/v1",
-    "snapshot_digest": "f01f27b026a831d4c1257b0ab4b3ff8e771b136918f82c880968aa0dcba39625"
+    "snapshot_digest": "ba497367ebc6041004bf9221d5f7ba55fc00842af559373e11fcc1974ec53310"
   },
   "defaults_filled": [],
   "trace_id": "basic/05-refusal:messages"

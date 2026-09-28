@@ -21,6 +21,8 @@
     "expect": "node src/harness/cli.mjs expect",
     "compare": "node src/harness/cli.mjs compare",
     "conformance": "node src/harness/cli.mjs conformance",
+    "live": "node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider all",
+    "test:live": "CWA_DEMO_LIVE=1 node --test test/live.test.mjs",
     "inspector": "node src/inspector/server.mjs"
   },
   "dependencies": {

@@ -1,9 +1,7 @@
-// A mock OpenAI-compatible server: GET /v1/models lists one model, POST /v1/chat/completions answers with a text
-// that echoes what it was sent, so a test can check the request reached it intact. Also runnable on its own for
-// developing the answer column without a model: node test/helpers/mock-chat-server.mjs [port]
+// A test fixture, and nothing else: a mock OpenAI-compatible server whose POST /v1/chat/completions echoes what it
+// was sent, so the inspector's API test can check that a request reached a server intact over HTTP. The app never
+// uses it; the inspector and the CLI talk only to the endpoints .env names.
 import http from 'node:http';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 export function createMockChatServer({ model = 'mock-model' } = {}) {
   const requests = [];
@@ -27,9 +25,4 @@ export function createMockChatServer({ model = 'mock-model' } = {}) {
   });
   server.requests = requests;
   return server;
-}
-
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const port = Number(process.argv[2] ?? 11434);
-  createMockChatServer().listen(port, '127.0.0.1', () => console.log(`mock OpenAI-compatible server: http://127.0.0.1:${port}/v1`));
 }

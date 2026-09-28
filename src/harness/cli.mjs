@@ -6,18 +6,23 @@
 //   cwa-demo compare [scenarios] [--assembler ...] [--json]
 //   cwa-demo expect --from <assembler> [scenarios]
 //   cwa-demo conformance [--assembler ...] [--dir vendor/cwa/conformance]
+//   cwa-demo answer <snapshot.messages.json> [--assembler python] [--provider local|anthropic|openai|all]
 import { existsSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { loadAssemblers, ROOT, runAll, select } from './adapters.mjs';
 import { loadConformance, loadScenarios } from './cases.mjs';
 import { agreement, comparable, compareResult } from './compare.mjs';
+import { loadDotEnv } from '../env.mjs';
+import { answer as ask, describeProviders } from '../provider/index.mjs';
 
 const USAGE = `usage:
   cwa-demo run <snapshot.json> [--assembler a,b] [--json]      one snapshot through the assemblers
   cwa-demo compare [scenarios] [--assembler a,b] [--json]      every scenario against its expectation and the others
   cwa-demo expect --from <assembler> [scenarios]                write expected payloads and traces from one assembler
   cwa-demo conformance [--assembler a,b] [--dir <conformance>]  the vendored conformance cases: the harness's self-check
+  cwa-demo answer <snapshot.messages.json> [--assembler a] [--provider p|all] [--json]
+                                                                assemble, then send the payload to a real model and print its answer
 `;
 
 function parseArgs(argv) {
@@ -25,7 +30,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--json') flags.json = true;
-    else if (arg === '--assembler' || arg === '--from' || arg === '--dir') flags[arg.slice(2)] = argv[++i];
+    else if (arg === '--assembler' || arg === '--from' || arg === '--dir' || arg === '--provider') flags[arg.slice(2)] = argv[++i];
     else if (arg.startsWith('--')) throw new Error(`unknown flag ${arg}`);
     else positional.push(arg);
   }
@@ -163,12 +168,54 @@ async function conformance({ flags }, assemblers) {
   return failures === 0 ? 0 : 1;
 }
 
-const COMMANDS = { run, compare, expect, conformance };
+/** Assemble one cwa-messages/v1 snapshot with one assembler, then send the payload to the chosen provider(s) and
+ * print each model's answer beside what it cost. A refused assembly sends nothing. */
+async function answer({ positional, flags }, assemblers) {
+  const [file] = positional;
+  if (!file) throw new Error('answer needs a snapshot file with the cwa-messages/v1 renderer');
+  const bytes = await readFile(file);
+  const snapshot = JSON.parse(bytes.toString('utf8'));
+  if (snapshot.renderer !== 'cwa-messages/v1') throw new Error(`${file} renders with ${snapshot.renderer}; a model needs cwa-messages/v1 (the snapshot.messages.json of a step)`);
+  const chosen = select(assemblers, flags.assembler);
+  const [assembler] = Object.values(chosen);
+  const [result] = await runAll({ [assembler.id]: assembler }, bytes);
+  console.log(`${pad(assembler.id, 11)} ${summarize(result)} (${result.durationMs} ms)`);
+  if (result.outcome !== 'assembled') { console.log('nothing is sent to a model: the assembly produced no payload'); return result.outcome === 'refused' ? 0 : 1; }
+  const providers = await describeProviders();
+  const wanted = flags.provider && flags.provider !== 'all' ? providers.filter(p => p.id === flags.provider) : providers.filter(p => p.configured);
+  if (wanted.length === 0) {
+    console.log(flags.provider ? `no provider ${flags.provider}; use ${providers.map(p => p.id).join(', ')}` : 'no provider is configured:');
+    for (const p of providers) console.log(`  ${pad(p.id, 10)} ${p.configured ? `configured: ${p.model}` : p.reason}`);
+    return 1;
+  }
+  let failures = 0;
+  const out = [];
+  for (const provider of wanted) {
+    if (!provider.configured) { console.log(`
+== ${provider.label}: not configured: ${provider.reason}`); failures++; continue; }
+    try {
+      const reply = await ask(result.payload.toString('utf8'), { provider: provider.id, maxTokens: snapshot.budget.reserved_output });
+      out.push(reply);
+      if (!flags.json) {
+        console.log(`
+== ${provider.label} · ${reply.model} at ${provider.base_url} · ${reply.durationMs} ms · stop ${reply.stop_reason}${reply.usage ? ` · ${reply.usage.input_tokens} in / ${reply.usage.output_tokens} out` : ''}`);
+        console.log(reply.text || `(no answer text${reply.reasoning ? `; reasoning: ${reply.reasoning.slice(0, 200)}` : ''})`);
+      }
+      if (!reply.text) failures++;
+    } catch (error) { failures++; console.log(`
+== ${provider.label}: ${error.message}`); }
+  }
+  if (flags.json) console.log(JSON.stringify(out, null, 2));
+  return failures === 0 ? 0 : 1;
+}
+
+const COMMANDS = { run, compare, expect, conformance, answer };
 
 async function main(argv) {
   const parsed = parseArgs(argv);
   const command = COMMANDS[parsed.command];
   if (!command) { console.error(USAGE); return 2; }
+  loadDotEnv();
   const assemblers = await loadAssemblers();
   return command(parsed, assemblers);
 }

@@ -8,7 +8,7 @@
   },
   "budget": {
     "input": 60,
-    "reserved_output": 400
+    "reserved_output": 1200
   },
   "profile": {
     "spec": "cwa/draft",

@@ -5,7 +5,7 @@
   },
   "budget": {
     "input": 60,
-    "reserved_output": 400
+    "reserved_output": 1200
   },
   "result": null,
   "included": [],
@@ -58,7 +58,7 @@
     "route_policy_version": "demo-basic/v1",
     "tokenizer": "fixture-whitespace/v1",
     "renderer": "fixture-xml/v1",
-    "snapshot_digest": "297b04885b3ec5bda8129817ffe002d216717e07aa3576a793a6542ae5225627"
+    "snapshot_digest": "f4daee7276f6e50183c6e1881fbe6cf736841b016ffe78f8b3a988355369a422"
   },
   "defaults_filled": [],
   "trace_id": "basic/05-refusal:fixture"

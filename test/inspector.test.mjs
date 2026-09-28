@@ -58,6 +58,9 @@ test('GET / is the landing page, each stage has its own page, and unknown paths 
   assert.match(await basic.text(), /Candidate context/);
   assert.equal((await fetch(base + '/basic/page.js')).status, 200);
   assert.equal((await fetch(base + '/shared/panels.js')).status, 200);
+  const font = await fetch(base + '/fonts/ibm-plex-sans.woff2');
+  assert.equal(font.status, 200, 'the vendored fonts are served');
+  assert.equal(font.headers.get('content-type'), 'font/woff2');
   assert.equal((await get('/nope.js')).status, 404);
   assert.equal((await fetch(base + '/../package.json')).status, 404);
 });

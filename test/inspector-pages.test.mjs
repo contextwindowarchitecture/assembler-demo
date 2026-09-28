@@ -31,6 +31,21 @@ test('the landing links every stage and names the four columns once', () => {
   }
 });
 
+test('the fonts are vendored: every face the stylesheet declares is a file under public/fonts, with its license, and no page loads from the network', () => {
+  const css = read('style.css');
+  const urls = [...css.matchAll(/@font-face[^}]*url\(["']?([^"')]+)["']?\)/g)].map(m => m[1]);
+  assert.ok(urls.length >= 6, `six faces vendored, found ${urls.length}`);
+  for (const url of urls) {
+    assert.match(url, /^\/fonts\/[\w.-]+\.woff2$/, url);
+    assert.ok(fs.existsSync(path.join(PUBLIC, url)), `${url} exists`);
+  }
+  assert.doesNotMatch(css, /@import|googleapis/, 'the stylesheet imports nothing');
+  for (const file of ['index.html', 'basic/index.html', 'intermediate/index.html', 'advanced/index.html']) {
+    assert.doesNotMatch(read(file), /<(link|script)[^>]+(href|src)="https?:/, `${file} loads no stylesheet or script from the network`);
+  }
+  for (const license of ['LICENSE-IBM-Plex.txt', 'LICENSE-Newsreader.txt']) assert.match(read(`fonts/${license}`), /SIL OPEN FONT LICENSE/);
+});
+
 const trace = {
   refused: { bool: false, reason: null },
   included: [{ slot: 'governance.instructions', item_id: 'p', tokens: 51 }, { slot: 'evidence.knowledge', item_id: 'k', tokens: 30 }],

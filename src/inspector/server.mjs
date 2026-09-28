@@ -20,7 +20,7 @@ import { snippets } from '../provider/snippets.mjs';
 const PORT = Number(process.env.PORT ?? (process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 8787));
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
 const SCENARIOS = path.join(ROOT, 'scenarios');
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json; charset=utf-8' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json; charset=utf-8', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8' };
 
 class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
 

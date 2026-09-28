@@ -96,6 +96,20 @@ test('hairlines and squares, no motion, two typefaces: the rules a test can chec
   }
 });
 
+test('every select sits in a .select wrapper, and the stylesheet draws its caret clear of the edge, in a token colour', () => {
+  const css = read('style.css');
+  assert.match(css, /\.select select\s*{[^}]*appearance: none/, 'the native caret is off');
+  assert.match(css, /\.select::after\s*{[^}]*var\(--muted\)/, 'the caret is drawn by the stylesheet in the muted token');
+  const files = ['basic/index.html', 'intermediate/index.html', 'advanced/index.html', 'shared/panels.js'];
+  for (const file of files) {
+    const text = read(file);
+    const selects = (text.match(/<select\b/g) ?? []).length;
+    const wrapped = (text.match(/<span class="select"><select\b/g) ?? []).length;
+    assert.ok(selects > 0, `${file} has a select`);
+    assert.equal(wrapped, selects, `${file}: every select is wrapped`);
+  }
+});
+
 test('planeOf names the plane a slot belongs to, by the part of its id before the dot', () => {
   assert.equal(planeOf('governance.instructions'), 'gov');
   assert.equal(planeOf('governance.output_contract'), 'gov');

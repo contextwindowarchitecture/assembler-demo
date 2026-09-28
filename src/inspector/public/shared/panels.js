@@ -293,7 +293,7 @@ export function renderAnswer(page, result) {
     ? `<div class="empty"><div class="big">No answer yet</div><div class="hint">${configured.length ? 'Send puts this exact request through the official SDK. The answer appears here with the captured request beneath it, so what you read is what was sent.' : 'No provider is configured: see the providers below for the variable each one needs, then re-check.'}</div></div>` : '';
   body.innerHTML = `
     <div class="sendrow">
-      <select id="provider" ${configured.length ? '' : 'disabled'}>${options}</select>
+      <span class="select"><select id="provider" ${configured.length ? '' : 'disabled'}>${options}</select></span>
       <button class="primary" id="send" ${!configured.length || state.sending ? 'disabled' : ''}>Send</button>
       <button id="send-all" ${configured.length < 2 || state.sending ? 'disabled' : ''} title="the same request to every configured provider">Send to all</button>
       <button id="recheck" title="ask again which providers are configured, for example after starting a local model server">re-check</button>

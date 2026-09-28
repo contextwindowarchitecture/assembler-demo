@@ -90,6 +90,12 @@ a.btn:hover { background: var(--fg); color: var(--bg); }
 
 /* Form controls: square hairline boxes in mono, with a label above (STYLE.md section 10). */
 select, input { font-family: var(--mono); font-size: var(--fs-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); height: var(--control-sm); padding: 0 10px; }
+/* A select sits in a .select wrapper: the native caret is off, and the wrapper draws a chevron 12px in from the edge. */
+.select { position: relative; display: inline-flex; }
+.select select { appearance: none; padding-right: 30px; width: 100%; }
+.select::after { content: ""; position: absolute; right: 13px; top: calc(50% - 5px); width: 6px; height: 6px; border-right: 1px solid var(--muted); border-bottom: 1px solid var(--muted); transform: rotate(45deg); pointer-events: none; }
+.select:hover select { border-color: var(--fg); }
+.select:hover::after { border-color: var(--fg); }
 .field { display: inline-flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 input#budget { width: 7em; }
 
@@ -250,7 +256,7 @@ pre { margin: 0; white-space: pre-wrap; word-break: break-word; border: 1px soli
 .seg button:hover { color: var(--fg); }
 .seg button[aria-pressed="true"] { background: transparent; color: var(--fg); border-bottom-color: var(--accent); }
 .sendrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.sendrow select { flex: 1 1 auto; min-width: 0; max-width: 100%; }
+.sendrow .select { flex: 1 1 auto; min-width: 0; max-width: 100%; }
 .sendrow .right { margin-left: auto; }
 .snippet-code { max-height: 460px; }
 .empty { border: 1px dashed var(--line); background: var(--surface); padding: 22px 16px; display: flex; flex-direction: column; gap: 6px; }

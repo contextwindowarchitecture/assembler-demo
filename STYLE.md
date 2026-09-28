@@ -309,7 +309,7 @@ Labels are sentence case: "Talk mode", "Run live", "Replay through all three", "
 
 ### Form controls
 
-Selects and number inputs (the website has none) are square hairline boxes: `font-family: var(--mono); font-size: var(--fs-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); height: var(--control-sm); padding: 0 10px;`. Their label sits above them as a muted uppercase mono label in a `.field` wrapper. Focus is a `2px` `--accent` outline, on every control.
+Selects and number inputs (the website has none) are square hairline boxes: `font-family: var(--mono); font-size: var(--fs-mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); height: var(--control-sm); padding: 0 10px;`. Every select sits in a `.select` wrapper: the native appearance is off, the select keeps `30px` of right padding, and the wrapper's `::after` draws a 6px chevron in `--muted` 12px in from the edge, turning `--fg` with the border on hover. Their label sits above them as a muted uppercase mono label in a `.field` wrapper. Focus is a `2px` `--accent` outline, on every control.
 
 ### Links
 

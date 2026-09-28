@@ -30,19 +30,19 @@
     <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
     <div class="controls" id="controls">
       <label class="field">Producers
-        <select id="mode">
+        <span class="select"><select id="mode">
           <option value="replay">replay the frozen batches</option>
           <option value="live">run live now</option>
-        </select>
+        </select></span>
       </label>
       <label class="field">Assembler
-        <select id="assembler"></select>
+        <span class="select"><select id="assembler"></select></span>
       </label>
       <label class="field">Rendering
-        <select id="variant">
+        <span class="select"><select id="variant">
           <option value="fixture">fixture-xml/v1 (compare)</option>
           <option value="messages">cwa-messages/v1 (model)</option>
-        </select>
+        </select></span>
       </label>
       <label class="field">budget.input
         <input id="budget" type="number" min="0" step="10" inputmode="numeric">

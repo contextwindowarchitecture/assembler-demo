@@ -1,0 +1,10 @@
+{
+  "$comment": "Supplied variants for the longer evidence chunks, keyed by chunk id, written before freezing (R-18). A real system batch-generates these offline and stores them beside the chunks.",
+  "kb:acme:support-plans:v7#0": "Pro: 24x5 email and chat support, four-business-hour first response, 20 tickets a month, one escalation a month, monthly office hours. No phone support or account manager; those are Enterprise features.",
+  "kb:acme:support-plans:v7#1": "Enterprise: 24x7 phone, chat and email, one-hour severity-1 response, named account manager, unlimited tickets, quarterly reviews.",
+  "kb:acme:sla:v3#0": "Severity 1 outage, 2 major feature down, 3 degraded with workaround, 4 question; the severity chosen sets the response target.",
+  "kb:acme:sla:v3#1": "Enterprise: severity 1 in one hour, severity 2 in four, 24x7. Pro: any severity within four business hours. Free: no target. Counted from ticket creation.",
+  "kb:acme:support-hours:v2#0": "Pro: 24x5 email and chat, four-business-hour response, 20 tickets and one escalation a month, office hours; no phone or account manager; closed on listed public holidays.",
+  "kb:acme:onboarding-guide:v4#1": "Pro: 24x5 email and chat support, four-business-hour first response, 20 tickets a month, one escalation a month, monthly office hours. No phone support or account manager.",
+  "kb:acme:escalation-policy:v2#0": "Pro may escalate one open ticket a month to a senior engineer; Enterprise any ticket via the account manager. Escalation changes who works the ticket, not the target."
+}

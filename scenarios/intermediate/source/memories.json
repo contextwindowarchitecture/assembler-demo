@@ -1,0 +1,9 @@
+{
+  "$comment": "The memory store. Each memory names the turn it came from (source turn:...), when it was true and when it must be revalidated. The producer suppresses expired memories and reports them without their body (R-14). It filters by tenant only, so a memory of another user of the same tenant reaches admission, which excludes it as out_of_scope: the producer's leak, the assembler's catch.",
+  "memories": [
+    { "id": "mem:u_1042:tone", "tenant": "acme", "user": "u_1042", "source": "turn:s_71#4", "freshness": "2026-09-20T16:12:00Z", "expires": "2026-10-20T16:12:00Z", "body": "User prefers short answers with a bullet list." },
+    { "id": "mem:u_1042:plan-free", "tenant": "acme", "user": "u_1042", "source": "turn:s_64#2", "freshness": "2026-08-30T10:05:00Z", "expires": "2026-11-30T10:05:00Z", "body": "User said their workspace is on the Free plan." },
+    { "id": "mem:u_1042:region", "tenant": "acme", "user": "u_1042", "source": "turn:s_64#5", "freshness": "2026-06-30T10:05:00Z", "expires": "2026-09-01T10:05:00Z", "body": "User asked about moving the workspace to the US region." },
+    { "id": "mem:u_77:tone", "tenant": "acme", "user": "u_77", "source": "turn:s_12#1", "freshness": "2026-09-25T12:00:00Z", "expires": "2026-12-25T12:00:00Z", "body": "User wants replies in French." }
+  ]
+}

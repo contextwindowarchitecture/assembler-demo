@@ -1,0 +1,11 @@
+{
+  "$comment": "The policy registry's instructions. The two citation instructions contradict each other on purpose: step 4 declares them as an instruction conflict group, and the route surfaces it.",
+  "items": [
+    { "id": "policy:entitlement-assistant:v2", "source": "policy-registry:entitlement-assistant", "source_version": "v2", "freshness": "2026-09-20T09:00:00Z", "conflict_policy": "governs",
+      "body": "You are the support assistant for Acme Cloud. Answer from the evidence, the user's account state and the conversation. State what the user's plan includes and what it does not. If the evidence does not cover the question, say so and offer to open a ticket. Never promise a response time the evidence does not state." },
+    { "id": "policy:cite-ids:v1", "source": "policy-registry:cite-ids", "source_version": "v1", "freshness": "2026-09-01T09:00:00Z", "conflict_policy": "governs",
+      "body": "Cite each evidence id you rely on in square brackets." },
+    { "id": "policy:plain-language:v1", "source": "policy-registry:plain-language", "source_version": "v1", "freshness": "2026-09-15T09:00:00Z", "conflict_policy": "governs",
+      "body": "Write for a customer: never mention internal document identifiers." }
+  ]
+}

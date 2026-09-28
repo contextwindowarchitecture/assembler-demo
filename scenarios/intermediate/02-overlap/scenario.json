@@ -1,0 +1,124 @@
+{
+  "id": "02-overlap",
+  "step": 2,
+  "title": "Widen retrieval: source diversity and another tenant's document",
+  "question": "Given my account and our previous conversation, what support am I entitled to?",
+  "description": "With ten hits, three chunks of the current support plans come back (Pro, Enterprise, Free), the escalation policy, the glossary, and a Globex document that leaked through the shared index. The route keeps at most two chunks per source, so the lowest-ranked support-plans chunk is capped; the Globex chunk is out of scope.",
+  "proves": "Source diversity is a route rule, not a retriever heuristic, and it counts the items that survived admission and deduplication. A shared index is fine when scope is enforced at admission.",
+  "look_for": [
+    "source_diversity_cap",
+    "out_of_scope"
+  ],
+  "budget": {
+    "input": 900,
+    "reserved_output": 1200
+  },
+  "retrieval": {
+    "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+    "top_k": 10
+  },
+  "memory": {
+    "leak_other_user": false
+  },
+  "conflicts": [],
+  "producers": {
+    "policy-registry": {
+      "kind": "policy",
+      "framework": "policy.json",
+      "pipeline": [
+        "the route's instructions, verified"
+      ],
+      "emitted": 3,
+      "reported_excluded": 0
+    },
+    "state-svc": {
+      "kind": "state",
+      "framework": "accounts.json",
+      "pipeline": [
+        "read the workspace row for the user",
+        "one state.user item, one state.task item"
+      ],
+      "emitted": 2,
+      "reported_excluded": 0
+    },
+    "kb-search": {
+      "kind": "retrieval",
+      "framework": "LlamaIndex",
+      "pipeline": [
+        "40 nodes from 30 documents",
+        "BM25Retriever(similarity_top_k=10)",
+        "NearDuplicatePostprocessor(threshold=0.85)",
+        "CWA batch: relevance = score / 6, capped at 1; source = document; variants from summaries.json"
+      ],
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "retrieved": [
+        {
+          "id": "kb:acme:support-plans:v7#0",
+          "score": 5.713
+        },
+        {
+          "id": "kb:acme:onboarding-guide:v4#1",
+          "score": 5.713
+        },
+        {
+          "id": "kb:acme:support-hours:v2#0",
+          "score": 5.433
+        },
+        {
+          "id": "kb:acme:support-plans:v6#0",
+          "score": 5.395
+        },
+        {
+          "id": "kb:acme:escalation-policy:v2#0",
+          "score": 3.903
+        },
+        {
+          "id": "kb:acme:support-plans:v7#1",
+          "score": 3.173
+        },
+        {
+          "id": "kb:globex:support-plans:v2#0",
+          "score": 3.154
+        },
+        {
+          "id": "kb:acme:support-plans:v7#2",
+          "score": 3.138
+        },
+        {
+          "id": "kb:acme:glossary:v2#0",
+          "score": 3.026
+        },
+        {
+          "id": "kb:acme:support-plans:v6#1",
+          "score": 2.914
+        }
+      ],
+      "emitted": 9,
+      "reported_excluded": 1
+    },
+    "memory-svc": {
+      "kind": "memory",
+      "framework": "memories.json",
+      "pipeline": [
+        "filter by tenant and user",
+        "suppress expired memories and report them without their body"
+      ],
+      "emitted": 2,
+      "reported_excluded": 1
+    },
+    "conversation": {
+      "kind": "interaction",
+      "framework": "history.json",
+      "pipeline": [
+        "every prior turn as history with its supplied summary variant",
+        "the live query"
+      ],
+      "emitted": 5,
+      "reported_excluded": 0
+    }
+  },
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

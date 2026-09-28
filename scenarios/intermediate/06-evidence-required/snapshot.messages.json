@@ -1,0 +1,587 @@
+{
+  "assembly_time": "2026-09-28T15:00:00Z",
+  "scope": {
+    "tenant": "acme",
+    "user": "u_1042",
+    "session": "s_91",
+    "task": "entitlement_question"
+  },
+  "budget": {
+    "input": 900,
+    "reserved_output": 1200
+  },
+  "profile": {
+    "spec": "cwa/draft",
+    "id": "support-entitlement-messages",
+    "version": 1,
+    "route": "support-entitlement",
+    "model_family": null,
+    "route_policy_version": "support-entitlement/v1",
+    "placement": [
+      {
+        "slot": "governance.instructions",
+        "wrap": "system"
+      },
+      {
+        "slot": "state.user",
+        "wrap": "xml:user_profile"
+      },
+      {
+        "slot": "state.task",
+        "wrap": "xml:task"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "wrap": "xml:evidence"
+      },
+      {
+        "slot": "interaction.memory",
+        "wrap": "xml:memory"
+      },
+      {
+        "slot": "interaction.history",
+        "wrap": "xml:history"
+      },
+      {
+        "slot": "interaction.query",
+        "wrap": "xml:query"
+      }
+    ],
+    "evaluation": {
+      "status": "unevaluated",
+      "suite": null,
+      "date": null,
+      "result": null,
+      "artifact": null
+    }
+  },
+  "route_policy": {
+    "route": "support-entitlement",
+    "version": "support-entitlement/v1",
+    "clock_skew_seconds": 5,
+    "requires_evidence": true,
+    "on_unresolved_instruction": "surface",
+    "producers": {
+      "policy-registry": {
+        "kind": "policy",
+        "slots": [
+          "governance.instructions"
+        ]
+      },
+      "state-svc": {
+        "kind": "state",
+        "slots": [
+          "state.user",
+          "state.task"
+        ]
+      },
+      "kb-search": {
+        "kind": "retrieval",
+        "slots": [
+          "evidence.knowledge"
+        ]
+      },
+      "memory-svc": {
+        "kind": "memory",
+        "slots": [
+          "interaction.memory"
+        ]
+      },
+      "conversation": {
+        "kind": "interaction",
+        "slots": [
+          "interaction.history",
+          "interaction.query"
+        ]
+      }
+    },
+    "slots": {
+      "state.user": {
+        "max_age_seconds": 300,
+        "required_scope": [
+          "tenant",
+          "user"
+        ]
+      },
+      "state.task": {
+        "max_age_seconds": 300,
+        "required_scope": [
+          "tenant",
+          "task"
+        ]
+      },
+      "evidence.knowledge": {
+        "min_relevance": 0.3,
+        "min_included": 1,
+        "required_scope": [
+          "tenant"
+        ],
+        "order_by": [
+          "-relevance",
+          "-freshness"
+        ],
+        "dedupe": "exact",
+        "max_per_source": 2
+      },
+      "interaction.memory": {
+        "source_prefix": "turn:",
+        "required_scope": [
+          "tenant",
+          "user"
+        ]
+      },
+      "interaction.history": {
+        "priority": -1,
+        "order_by": [
+          "-freshness"
+        ]
+      }
+    },
+    "fitting_order": [
+      {
+        "slot": "interaction.history",
+        "action": "compress"
+      },
+      {
+        "slot": "evidence.knowledge",
+        "action": "compress"
+      },
+      {
+        "slot": "interaction.history",
+        "action": "omit"
+      }
+    ],
+    "facts": {
+      "plan": {
+        "precedence": [
+          "state-svc",
+          "memory-svc"
+        ],
+        "scope": [
+          "tenant",
+          "user"
+        ],
+        "on_unresolved": "refuse"
+      }
+    },
+    "tier_upgrades": {
+      "state.user": "protected"
+    }
+  },
+  "tokenizer": "fixture-whitespace/v1",
+  "renderer": "cwa-messages/v1",
+  "batches": [
+    {
+      "producer": {
+        "id": "policy-registry",
+        "kind": "policy"
+      },
+      "items": [
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "governs",
+          "lineage": "verbatim",
+          "eligibility": "route-policy",
+          "injection_risk": "none",
+          "id": "policy:entitlement-assistant:v2",
+          "slot": "governance.instructions",
+          "source": "policy-registry:entitlement-assistant",
+          "source_version": "v2",
+          "authority": "governing",
+          "trust": "verified",
+          "freshness": "2026-09-20T09:00:00Z",
+          "body": "You are the support assistant for Acme Cloud. Answer from the evidence, the user's account state and the conversation. State what the user's plan includes and what it does not. If the evidence does not cover the question, say so and offer to open a ticket. Never promise a response time the evidence does not state."
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "governs",
+          "lineage": "verbatim",
+          "eligibility": "route-policy",
+          "injection_risk": "none",
+          "id": "policy:cite-ids:v1",
+          "slot": "governance.instructions",
+          "source": "policy-registry:cite-ids",
+          "source_version": "v1",
+          "authority": "governing",
+          "trust": "verified",
+          "freshness": "2026-09-01T09:00:00Z",
+          "body": "Cite each evidence id you rely on in square brackets."
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "governs",
+          "lineage": "verbatim",
+          "eligibility": "route-policy",
+          "injection_risk": "none",
+          "id": "policy:plain-language:v1",
+          "slot": "governance.instructions",
+          "source": "policy-registry:plain-language",
+          "source_version": "v1",
+          "authority": "governing",
+          "trust": "verified",
+          "freshness": "2026-09-15T09:00:00Z",
+          "body": "Write for a customer: never mention internal document identifiers."
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "producer": {
+        "id": "state-svc",
+        "kind": "state"
+      },
+      "items": [
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "governs",
+          "lineage": "extracted",
+          "eligibility": "support-entitlement/v1: tenant and user of the request; observed within 300 s",
+          "injection_risk": "none",
+          "id": "user:u_1042:plan",
+          "slot": "state.user",
+          "source": "accounts-db:workspaces",
+          "source_version": "2026-09-28T14:59:40Z",
+          "authority": "state",
+          "trust": "verified",
+          "freshness": "2026-09-28T14:59:40Z",
+          "scope": {
+            "tenant": "acme",
+            "user": "u_1042"
+          },
+          "body": "plan=pro; seats=12; region=eu; renewal=2027-03-01"
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "governs",
+          "lineage": "extracted",
+          "eligibility": "support-entitlement/v1: tenant and task of the request; observed within 300 s",
+          "injection_risk": "none",
+          "id": "task:entitlement_question",
+          "slot": "state.task",
+          "source": "app:task",
+          "source_version": "1",
+          "authority": "state",
+          "trust": "verified",
+          "freshness": "2026-09-28T15:00:00Z",
+          "scope": {
+            "tenant": "acme",
+            "task": "entitlement_question"
+          },
+          "body": "task=entitlement_question; channel=in-app chat"
+        }
+      ],
+      "excluded": []
+    },
+    {
+      "producer": {
+        "id": "kb-search",
+        "kind": "retrieval"
+      },
+      "items": [
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)",
+          "injection_risk": "untrusted_content",
+          "id": "kb:acme:office-hours:v1#0",
+          "slot": "evidence.knowledge",
+          "source": "kb:acme:office-hours",
+          "source_version": "v1",
+          "authority": "reference_only",
+          "trust": "unverified",
+          "freshness": "2026-06-01T12:00:00Z",
+          "scope": {
+            "tenant": "acme"
+          },
+          "relevance": 0.243,
+          "body": "Office hours. Pro and Enterprise customers can join the monthly office-hours video call on the first Thursday of each month at 16:00 UTC. A product manager and two support engineers answer questions live. The call is recorded and the recording is posted to the customer portal within two business days."
+        },
+        {
+          "token_budget": null,
+          "variants": [
+            {
+              "id": "kb:acme:support-plans:v7#0~summary",
+              "method": "summarised",
+              "lineage": "summarised",
+              "body": "Pro: 24x5 email and chat support, four-business-hour first response, 20 tickets a month, one escalation a month, monthly office hours. No phone support or account manager; those are Enterprise features."
+            }
+          ],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)",
+          "injection_risk": "untrusted_content",
+          "id": "kb:acme:support-plans:v7#0",
+          "slot": "evidence.knowledge",
+          "source": "kb:acme:support-plans",
+          "source_version": "v7",
+          "authority": "reference_only",
+          "trust": "unverified",
+          "freshness": "2026-09-14T08:00:00Z",
+          "scope": {
+            "tenant": "acme"
+          },
+          "relevance": 0.157,
+          "body": "Pro plan support. Pro includes email and in-app chat support 24 hours a day, Monday to Friday, with a first-response target of four business hours. Pro customers can open up to 20 tickets per month, escalate one ticket per month to a senior engineer, and join the monthly office-hours call. Phone support and a named account manager are not included in Pro; they are Enterprise features.",
+          "expires": "2026-12-31T00:00:00Z"
+        },
+        {
+          "token_budget": null,
+          "variants": [
+            {
+              "id": "kb:acme:onboarding-guide:v4#1~summary",
+              "method": "summarised",
+              "lineage": "summarised",
+              "body": "Pro: 24x5 email and chat support, four-business-hour first response, 20 tickets a month, one escalation a month, monthly office hours. No phone support or account manager."
+            }
+          ],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)",
+          "injection_risk": "untrusted_content",
+          "id": "kb:acme:onboarding-guide:v4#1",
+          "slot": "evidence.knowledge",
+          "source": "kb:acme:onboarding-guide",
+          "source_version": "v4",
+          "authority": "reference_only",
+          "trust": "unverified",
+          "freshness": "2026-09-12T08:00:00Z",
+          "scope": {
+            "tenant": "acme"
+          },
+          "relevance": 0.157,
+          "body": "Pro plan support. Pro includes email and in-app chat support 24 hours a day, Monday to Friday, with a first-response target of four business hours. Pro customers can open up to 20 tickets per month, escalate one ticket per month to a senior engineer, and join the monthly office-hours call. Phone support and a named account manager are not included in Pro; they are Enterprise features."
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)",
+          "injection_risk": "untrusted_content",
+          "id": "kb:acme:release-notes-2026-09:v1#0",
+          "slot": "evidence.knowledge",
+          "source": "kb:acme:release-notes-2026-09",
+          "source_version": "v1",
+          "authority": "reference_only",
+          "trust": "unverified",
+          "freshness": "2026-09-20T08:00:00Z",
+          "scope": {
+            "tenant": "acme"
+          },
+          "relevance": 0.14,
+          "body": "September 2026. In-app chat support is now available to Pro workspaces in every region. The ticket page shows the response target for the selected severity. Office-hours recordings are posted to the portal automatically."
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)",
+          "injection_risk": "untrusted_content",
+          "id": "kb:acme:audit-logs:v2#0",
+          "slot": "evidence.knowledge",
+          "source": "kb:acme:audit-logs",
+          "source_version": "v2",
+          "authority": "reference_only",
+          "trust": "unverified",
+          "freshness": "2026-07-25T08:00:00Z",
+          "scope": {
+            "tenant": "acme"
+          },
+          "relevance": 0.099,
+          "body": "Audit logs. Pro retains audit logs for 90 days and Enterprise for two years. Logs can be exported as CSV or streamed to a SIEM on Enterprise."
+        }
+      ],
+      "excluded": [
+        {
+          "item_id": "kb:acme:support-hours:v2#0",
+          "reason": "duplicate_content",
+          "stage": "producer",
+          "duplicate_of": "kb:acme:support-plans:v7#0"
+        }
+      ]
+    },
+    {
+      "producer": {
+        "id": "memory-svc",
+        "kind": "memory"
+      },
+      "items": [
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "defers",
+          "lineage": "summarised",
+          "eligibility": "support-entitlement/v1: tenant and user of the request; not expired; source turn:",
+          "injection_risk": "untrusted_content",
+          "id": "mem:u_1042:tone",
+          "slot": "interaction.memory",
+          "source": "turn:s_71#4",
+          "source_version": "1",
+          "authority": "generated",
+          "trust": "unverified",
+          "freshness": "2026-09-20T16:12:00Z",
+          "expires": "2026-10-20T16:12:00Z",
+          "scope": {
+            "tenant": "acme",
+            "user": "u_1042"
+          },
+          "body": "User prefers short answers with a bullet list."
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "defers",
+          "lineage": "summarised",
+          "eligibility": "support-entitlement/v1: tenant and user of the request; not expired; source turn:",
+          "injection_risk": "untrusted_content",
+          "id": "mem:u_1042:plan-free",
+          "slot": "interaction.memory",
+          "source": "turn:s_64#2",
+          "source_version": "1",
+          "authority": "generated",
+          "trust": "unverified",
+          "freshness": "2026-08-30T10:05:00Z",
+          "expires": "2026-11-30T10:05:00Z",
+          "scope": {
+            "tenant": "acme",
+            "user": "u_1042"
+          },
+          "body": "User said their workspace is on the Free plan."
+        }
+      ],
+      "excluded": [
+        {
+          "item_id": "mem:u_1042:region",
+          "reason": "expired",
+          "stage": "producer"
+        }
+      ]
+    },
+    {
+      "producer": {
+        "id": "conversation",
+        "kind": "interaction"
+      },
+      "items": [
+        {
+          "token_budget": null,
+          "variants": [
+            {
+              "id": "turn:s_91#1~summary",
+              "method": "summarised",
+              "lineage": "summarised",
+              "body": "User upgraded from Free to Pro in September, 12 seats, EU; wants to brief the team on support changes."
+            }
+          ],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "route-policy",
+          "injection_risk": "untrusted_content",
+          "id": "turn:s_91#1",
+          "slot": "interaction.history",
+          "source": "conversation:s_91#1",
+          "source_version": "1",
+          "authority": "user",
+          "trust": "unverified",
+          "freshness": "2026-09-28T14:52:10Z",
+          "body": "Hi. We upgraded our Acme Cloud workspace from Free to Pro at the start of September, twelve seats, EU region. I want to understand what that changes for support before I brief my team."
+        },
+        {
+          "token_budget": null,
+          "variants": [
+            {
+              "id": "turn:s_91#2~summary",
+              "method": "summarised",
+              "lineage": "summarised",
+              "body": "Assistant offered to explain Pro support and asked which area matters most."
+            }
+          ],
+          "conflict_policy": "defers",
+          "lineage": "generated",
+          "eligibility": "route-policy",
+          "injection_risk": "untrusted_content",
+          "id": "turn:s_91#2",
+          "slot": "interaction.history",
+          "source": "conversation:s_91#2",
+          "source_version": "1",
+          "authority": "untrusted",
+          "trust": "unverified",
+          "freshness": "2026-09-28T14:52:40Z",
+          "body": "Congratulations on the upgrade. I can walk you through what Pro includes for support. Is there a particular area you care about most: response times, phone support, or ticket limits?"
+        },
+        {
+          "token_budget": null,
+          "variants": [
+            {
+              "id": "turn:s_91#3~summary",
+              "method": "summarised",
+              "lineage": "summarised",
+              "body": "User cares about response times and night-time phone support; an engineer is in Sydney."
+            }
+          ],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "route-policy",
+          "injection_risk": "untrusted_content",
+          "id": "turn:s_91#3",
+          "slot": "interaction.history",
+          "source": "conversation:s_91#3",
+          "source_version": "1",
+          "authority": "user",
+          "trust": "unverified",
+          "freshness": "2026-09-28T14:55:05Z",
+          "body": "Mostly response times and whether we can call someone when something breaks at night. One of our engineers is in Sydney."
+        },
+        {
+          "token_budget": null,
+          "variants": [
+            {
+              "id": "turn:s_91#4~summary",
+              "method": "summarised",
+              "lineage": "summarised",
+              "body": "Assistant said it would check the account and the current documentation."
+            }
+          ],
+          "conflict_policy": "defers",
+          "lineage": "generated",
+          "eligibility": "route-policy",
+          "injection_risk": "untrusted_content",
+          "id": "turn:s_91#4",
+          "slot": "interaction.history",
+          "source": "conversation:s_91#4",
+          "source_version": "1",
+          "authority": "untrusted",
+          "trust": "unverified",
+          "freshness": "2026-09-28T14:55:30Z",
+          "body": "Understood. Let me check your account and the current support documentation so I can give you the entitlement for your plan rather than a general answer."
+        },
+        {
+          "token_budget": null,
+          "variants": [],
+          "conflict_policy": "defers",
+          "lineage": "verbatim",
+          "eligibility": "route-policy",
+          "injection_risk": "untrusted_content",
+          "id": "turn:s_91#5",
+          "slot": "interaction.query",
+          "source": "conversation:s_91#5",
+          "source_version": "1",
+          "authority": "user",
+          "trust": "unverified",
+          "freshness": "2026-09-28T14:59:50Z",
+          "body": "Can I bring my dog to the office?"
+        }
+      ],
+      "excluded": []
+    }
+  ],
+  "conflicts": []
+}

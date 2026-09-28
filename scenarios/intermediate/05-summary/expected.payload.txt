@@ -1,0 +1,45 @@
+<instructions id="policy:cite-ids:v1" conflict="g-cite">
+Cite each evidence id you rely on in square brackets.
+</instructions>
+<instructions id="policy:entitlement-assistant:v2">
+You are the support assistant for Acme Cloud. Answer from the evidence, the user's account state and the conversation. State what the user's plan includes and what it does not. If the evidence does not cover the question, say so and offer to open a ticket. Never promise a response time the evidence does not state.
+</instructions>
+<instructions id="policy:plain-language:v1" conflict="g-cite">
+Write for a customer: never mention internal document identifiers.
+</instructions>
+<user_profile id="user:u_1042:plan">
+plan=pro; seats=12; region=eu; renewal=2027-03-01
+</user_profile>
+<task id="task:entitlement_question">
+task=entitlement_question; channel=in-app chat
+</task>
+<evidence id="kb:acme:escalation-policy:v2#0">
+Pro may escalate one open ticket a month to a senior engineer; Enterprise any ticket via the account manager. Escalation changes who works the ticket, not the target.
+</evidence>
+<evidence id="kb:acme:glossary:v2#0">
+Glossary. First-response target: the time within which support first replies to a ticket. Escalation: reassigning a ticket to a senior engineer. Workspace: the unit of billing, membership and support entitlement.
+</evidence>
+<evidence id="kb:acme:support-plans:v7#0">
+Pro: 24x5 email and chat support, four-business-hour first response, 20 tickets a month, one escalation a month, monthly office hours. No phone support or account manager; those are Enterprise features.
+</evidence>
+<evidence id="kb:acme:support-plans:v7#1">
+Enterprise: 24x7 phone, chat and email, one-hour severity-1 response, named account manager, unlimited tickets, quarterly reviews.
+</evidence>
+<memory id="mem:u_1042:tone">
+User prefers short answers with a bullet list.
+</memory>
+<history id="turn:s_91#1">
+User upgraded from Free to Pro in September, 12 seats, EU; wants to brief the team on support changes.
+</history>
+<history id="turn:s_91#2">
+Assistant offered to explain Pro support and asked which area matters most.
+</history>
+<history id="turn:s_91#3">
+User cares about response times and night-time phone support; an engineer is in Sydney.
+</history>
+<history id="turn:s_91#4">
+Assistant said it would check the account and the current documentation.
+</history>
+<query id="turn:s_91#5">
+Given my account and our previous conversation, what support am I entitled to?
+</query>

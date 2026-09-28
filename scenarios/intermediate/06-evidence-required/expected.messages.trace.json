@@ -1,0 +1,74 @@
+{
+  "profile": {
+    "id": "support-entitlement-messages",
+    "version": 1
+  },
+  "budget": {
+    "input": 900,
+    "reserved_output": 1200
+  },
+  "result": null,
+  "included": [],
+  "compressed": [],
+  "excluded": [
+    {
+      "item_id": "kb:acme:support-hours:v2#0",
+      "reason": "duplicate_content",
+      "stage": "producer",
+      "duplicate_of": "kb:acme:support-plans:v7#0"
+    },
+    {
+      "item_id": "mem:u_1042:region",
+      "reason": "expired",
+      "stage": "producer"
+    },
+    {
+      "item_id": "kb:acme:audit-logs:v2#0",
+      "reason": "below_threshold",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:acme:office-hours:v1#0",
+      "reason": "below_threshold",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:acme:onboarding-guide:v4#1",
+      "reason": "below_threshold",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:acme:release-notes-2026-09:v1#0",
+      "reason": "below_threshold",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:acme:support-plans:v7#0",
+      "reason": "below_threshold",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    }
+  ],
+  "conflicts": [],
+  "refused": {
+    "bool": true,
+    "reason": "evidence_required"
+  },
+  "context": {
+    "spec": "cwa/draft",
+    "assembly_time": "2026-09-28T15:00:00Z",
+    "route_policy_version": "support-entitlement/v1",
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "cwa-messages/v1",
+    "snapshot_digest": "37593f8d6edd89f804c0be9a79c296cf85d6b9790c04648512e8af336eeabbd5"
+  },
+  "defaults_filled": [],
+  "recovery": {
+    "action": "request_context"
+  },
+  "trace_id": "06-evidence-required:messages"
+}

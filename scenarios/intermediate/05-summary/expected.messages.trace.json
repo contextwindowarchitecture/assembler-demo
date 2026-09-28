@@ -1,0 +1,272 @@
+{
+  "profile": {
+    "id": "support-entitlement-messages",
+    "version": 1
+  },
+  "budget": {
+    "input": 330,
+    "reserved_output": 1200
+  },
+  "result": {
+    "input_tokens": 303,
+    "hash": "6114af20021a24451938caa217581f084ac7da1fb18f3be05a308b94ca451ae5"
+  },
+  "included": [
+    {
+      "slot": "governance.instructions",
+      "item_id": "policy:cite-ids:v1",
+      "tokens": 10,
+      "source_version": "v1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "governance.instructions",
+      "item_id": "policy:entitlement-assistant:v2",
+      "tokens": 56,
+      "source_version": "v2",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "governance.instructions",
+      "item_id": "policy:plain-language:v1",
+      "tokens": 9,
+      "source_version": "v1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "state.user",
+      "item_id": "user:u_1042:plan",
+      "tokens": 4,
+      "source_version": "2026-09-28T14:59:40Z",
+      "eligibility": "support-entitlement/v1: tenant and user of the request; observed within 300 s"
+    },
+    {
+      "slot": "state.task",
+      "item_id": "task:entitlement_question",
+      "tokens": 3,
+      "source_version": "1",
+      "eligibility": "support-entitlement/v1: tenant and task of the request; observed within 300 s"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:escalation-policy:v2#0",
+      "tokens": 28,
+      "source_version": "v2",
+      "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:glossary:v2#0",
+      "tokens": 30,
+      "source_version": "v2",
+      "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:support-plans:v7#0",
+      "tokens": 30,
+      "source_version": "v7",
+      "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:support-plans:v7#1",
+      "tokens": 16,
+      "source_version": "v7",
+      "eligibility": "support-entitlement/v1: tenant of the request; rerank at least 0.3 (BM25 score / 6, capped at 1)"
+    },
+    {
+      "slot": "interaction.memory",
+      "item_id": "mem:u_1042:tone",
+      "tokens": 8,
+      "source_version": "1",
+      "eligibility": "support-entitlement/v1: tenant and user of the request; not expired; source turn:"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#1",
+      "tokens": 19,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#2",
+      "tokens": 12,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#3",
+      "tokens": 14,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#4",
+      "tokens": 11,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    },
+    {
+      "slot": "interaction.query",
+      "item_id": "turn:s_91#5",
+      "tokens": 13,
+      "source_version": "1",
+      "eligibility": "route-policy"
+    }
+  ],
+  "compressed": [
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:escalation-policy:v2#0",
+      "from": 52,
+      "to": 28,
+      "method": "summarised",
+      "variant_id": "kb:acme:escalation-policy:v2#0~summary"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:support-plans:v7#0",
+      "from": 66,
+      "to": 30,
+      "method": "summarised",
+      "variant_id": "kb:acme:support-plans:v7#0~summary"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "item_id": "kb:acme:support-plans:v7#1",
+      "from": 30,
+      "to": 16,
+      "method": "summarised",
+      "variant_id": "kb:acme:support-plans:v7#1~summary"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#1",
+      "from": 34,
+      "to": 19,
+      "method": "summarised",
+      "variant_id": "turn:s_91#1~summary"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#2",
+      "from": 30,
+      "to": 12,
+      "method": "summarised",
+      "variant_id": "turn:s_91#2~summary"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#3",
+      "from": 21,
+      "to": 14,
+      "method": "summarised",
+      "variant_id": "turn:s_91#3~summary"
+    },
+    {
+      "slot": "interaction.history",
+      "item_id": "turn:s_91#4",
+      "from": 26,
+      "to": 11,
+      "method": "summarised",
+      "variant_id": "turn:s_91#4~summary"
+    }
+  ],
+  "excluded": [
+    {
+      "item_id": "kb:acme:support-hours:v2#0",
+      "reason": "duplicate_content",
+      "stage": "producer",
+      "duplicate_of": "kb:acme:support-plans:v7#0"
+    },
+    {
+      "item_id": "mem:u_1042:region",
+      "reason": "expired",
+      "stage": "producer"
+    },
+    {
+      "item_id": "kb:acme:support-plans:v6#0",
+      "reason": "expired",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:acme:support-plans:v6#1",
+      "reason": "expired",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "kb:globex:support-plans:v2#0",
+      "reason": "out_of_scope",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    },
+    {
+      "item_id": "mem:u_77:tone",
+      "reason": "out_of_scope",
+      "stage": "assembler",
+      "slot": "interaction.memory"
+    },
+    {
+      "item_id": "mem:u_1042:plan-free",
+      "reason": "conflict_lost",
+      "stage": "assembler",
+      "slot": "interaction.memory"
+    },
+    {
+      "item_id": "kb:acme:onboarding-guide:v4#1",
+      "reason": "duplicate_content",
+      "stage": "assembler",
+      "slot": "evidence.knowledge",
+      "duplicate_of": "kb:acme:support-plans:v7#0"
+    },
+    {
+      "item_id": "kb:acme:support-plans:v7#2",
+      "reason": "source_diversity_cap",
+      "stage": "assembler",
+      "slot": "evidence.knowledge"
+    }
+  ],
+  "conflicts": [
+    {
+      "group_id": "g-cite",
+      "kind": "instruction",
+      "items": [
+        "policy:cite-ids:v1",
+        "policy:plain-language:v1"
+      ],
+      "decided_by": "escalated",
+      "resolution": "surfaced"
+    },
+    {
+      "group_id": "g-plan",
+      "kind": "fact",
+      "items": [
+        "mem:u_1042:plan-free",
+        "user:u_1042:plan"
+      ],
+      "decided_by": "policy",
+      "resolution": "resolved",
+      "winner": "user:u_1042:plan"
+    }
+  ],
+  "refused": {
+    "bool": false,
+    "reason": null
+  },
+  "context": {
+    "spec": "cwa/draft",
+    "assembly_time": "2026-09-28T15:00:00Z",
+    "route_policy_version": "support-entitlement/v1",
+    "tokenizer": "fixture-whitespace/v1",
+    "renderer": "cwa-messages/v1",
+    "snapshot_digest": "efa5f3f8cd6aa4363afe094f8305451611bd9e6b11af6eedd51381f287cd05a4"
+  },
+  "defaults_filled": [],
+  "trace_id": "05-summary:messages"
+}

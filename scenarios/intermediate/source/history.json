@@ -1,0 +1,11 @@
+{
+  "$comment": "This session's prior turns and the live query. Every prior turn carries a supplied summary, precomputed before freezing (R-18), so budget pressure can replace a turn with its summary instead of dropping it.",
+  "session": "s_91",
+  "turns": [
+    { "id": "turn:s_91#1", "role": "user", "at": "2026-09-28T14:52:10Z", "body": "Hi. We upgraded our Acme Cloud workspace from Free to Pro at the start of September, twelve seats, EU region. I want to understand what that changes for support before I brief my team.", "summary": "User upgraded from Free to Pro in September, 12 seats, EU; wants to brief the team on support changes." },
+    { "id": "turn:s_91#2", "role": "assistant", "at": "2026-09-28T14:52:40Z", "body": "Congratulations on the upgrade. I can walk you through what Pro includes for support. Is there a particular area you care about most: response times, phone support, or ticket limits?", "summary": "Assistant offered to explain Pro support and asked which area matters most." },
+    { "id": "turn:s_91#3", "role": "user", "at": "2026-09-28T14:55:05Z", "body": "Mostly response times and whether we can call someone when something breaks at night. One of our engineers is in Sydney.", "summary": "User cares about response times and night-time phone support; an engineer is in Sydney." },
+    { "id": "turn:s_91#4", "role": "assistant", "at": "2026-09-28T14:55:30Z", "body": "Understood. Let me check your account and the current support documentation so I can give you the entitlement for your plan rather than a general answer.", "summary": "Assistant said it would check the account and the current documentation." }
+  ],
+  "query": { "id": "turn:s_91#5", "at": "2026-09-28T14:59:50Z", "body": "Given my account and our previous conversation, what support am I entitled to?" }
+}

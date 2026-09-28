@@ -1,0 +1,108 @@
+{
+  "id": "06-evidence-required",
+  "step": 6,
+  "title": "Remove usable evidence: the route refuses",
+  "question": "Can I bring my dog to the office?",
+  "description": "The user asks something the corpus does not cover. Retrieval still returns its top chunks, but every score is below the route's threshold, so no evidence is admitted. The route requires evidence, so assembly refuses with evidence_required and a recovery action: request_context, because nothing was omitted for budget.",
+  "proves": "Never answer from nothing (R-12). The refusal names what to do next, and no request reaches the model.",
+  "look_for": [
+    "below_threshold",
+    "evidence_required"
+  ],
+  "budget": {
+    "input": 900,
+    "reserved_output": 1200
+  },
+  "retrieval": {
+    "query": "Can I bring my dog to the office?",
+    "top_k": 6
+  },
+  "memory": {
+    "leak_other_user": false
+  },
+  "conflicts": [],
+  "producers": {
+    "policy-registry": {
+      "kind": "policy",
+      "framework": "policy.json",
+      "pipeline": [
+        "the route's instructions, verified"
+      ],
+      "emitted": 3,
+      "reported_excluded": 0
+    },
+    "state-svc": {
+      "kind": "state",
+      "framework": "accounts.json",
+      "pipeline": [
+        "read the workspace row for the user",
+        "one state.user item, one state.task item"
+      ],
+      "emitted": 2,
+      "reported_excluded": 0
+    },
+    "kb-search": {
+      "kind": "retrieval",
+      "framework": "LlamaIndex",
+      "pipeline": [
+        "40 nodes from 30 documents",
+        "BM25Retriever(similarity_top_k=6)",
+        "NearDuplicatePostprocessor(threshold=0.85)",
+        "CWA batch: relevance = score / 6, capped at 1; source = document; variants from summaries.json"
+      ],
+      "query": "Can I bring my dog to the office?",
+      "retrieved": [
+        {
+          "id": "kb:acme:office-hours:v1#0",
+          "score": 1.455
+        },
+        {
+          "id": "kb:acme:support-plans:v7#0",
+          "score": 0.943
+        },
+        {
+          "id": "kb:acme:onboarding-guide:v4#1",
+          "score": 0.943
+        },
+        {
+          "id": "kb:acme:support-hours:v2#0",
+          "score": 0.869
+        },
+        {
+          "id": "kb:acme:release-notes-2026-09:v1#0",
+          "score": 0.842
+        },
+        {
+          "id": "kb:acme:audit-logs:v2#0",
+          "score": 0.596
+        }
+      ],
+      "emitted": 5,
+      "reported_excluded": 1
+    },
+    "memory-svc": {
+      "kind": "memory",
+      "framework": "memories.json",
+      "pipeline": [
+        "filter by tenant and user",
+        "suppress expired memories and report them without their body"
+      ],
+      "emitted": 2,
+      "reported_excluded": 1
+    },
+    "conversation": {
+      "kind": "interaction",
+      "framework": "history.json",
+      "pipeline": [
+        "every prior turn as history with its supplied summary variant",
+        "the live query"
+      ],
+      "emitted": 5,
+      "reported_excluded": 0
+    }
+  },
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

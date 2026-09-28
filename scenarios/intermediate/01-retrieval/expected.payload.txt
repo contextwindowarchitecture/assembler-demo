@@ -1,0 +1,39 @@
+<instructions id="policy:cite-ids:v1">
+Cite each evidence id you rely on in square brackets.
+</instructions>
+<instructions id="policy:entitlement-assistant:v2">
+You are the support assistant for Acme Cloud. Answer from the evidence, the user's account state and the conversation. State what the user's plan includes and what it does not. If the evidence does not cover the question, say so and offer to open a ticket. Never promise a response time the evidence does not state.
+</instructions>
+<instructions id="policy:plain-language:v1">
+Write for a customer: never mention internal document identifiers.
+</instructions>
+<user_profile id="user:u_1042:plan">
+plan=pro; seats=12; region=eu; renewal=2027-03-01
+</user_profile>
+<task id="task:entitlement_question">
+task=entitlement_question; channel=in-app chat
+</task>
+<evidence id="kb:acme:support-plans:v7#0">
+Pro plan support. Pro includes email and in-app chat support 24 hours a day, Monday to Friday, with a first-response target of four business hours. Pro customers can open up to 20 tickets per month, escalate one ticket per month to a senior engineer, and join the monthly office-hours call. Phone support and a named account manager are not included in Pro; they are Enterprise features.
+</evidence>
+<memory id="mem:u_1042:plan-free">
+User said their workspace is on the Free plan.
+</memory>
+<memory id="mem:u_1042:tone">
+User prefers short answers with a bullet list.
+</memory>
+<history id="turn:s_91#1">
+Hi. We upgraded our Acme Cloud workspace from Free to Pro at the start of September, twelve seats, EU region. I want to understand what that changes for support before I brief my team.
+</history>
+<history id="turn:s_91#2">
+Congratulations on the upgrade. I can walk you through what Pro includes for support. Is there a particular area you care about most: response times, phone support, or ticket limits?
+</history>
+<history id="turn:s_91#3">
+Mostly response times and whether we can call someone when something breaks at night. One of our engineers is in Sydney.
+</history>
+<history id="turn:s_91#4">
+Understood. Let me check your account and the current support documentation so I can give you the entitlement for your plan rather than a general answer.
+</history>
+<query id="turn:s_91#5">
+Given my account and our previous conversation, what support am I entitled to?
+</query>

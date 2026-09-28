@@ -1,0 +1,113 @@
+{
+  "route": "support-entitlement",
+  "version": "support-entitlement/v1",
+  "clock_skew_seconds": 5,
+  "requires_evidence": true,
+  "on_unresolved_instruction": "surface",
+  "producers": {
+    "policy-registry": {
+      "kind": "policy",
+      "slots": [
+        "governance.instructions"
+      ]
+    },
+    "state-svc": {
+      "kind": "state",
+      "slots": [
+        "state.user",
+        "state.task"
+      ]
+    },
+    "kb-search": {
+      "kind": "retrieval",
+      "slots": [
+        "evidence.knowledge"
+      ]
+    },
+    "memory-svc": {
+      "kind": "memory",
+      "slots": [
+        "interaction.memory"
+      ]
+    },
+    "conversation": {
+      "kind": "interaction",
+      "slots": [
+        "interaction.history",
+        "interaction.query"
+      ]
+    }
+  },
+  "slots": {
+    "state.user": {
+      "max_age_seconds": 300,
+      "required_scope": [
+        "tenant",
+        "user"
+      ]
+    },
+    "state.task": {
+      "max_age_seconds": 300,
+      "required_scope": [
+        "tenant",
+        "task"
+      ]
+    },
+    "evidence.knowledge": {
+      "min_relevance": 0.3,
+      "min_included": 1,
+      "required_scope": [
+        "tenant"
+      ],
+      "order_by": [
+        "-relevance",
+        "-freshness"
+      ],
+      "dedupe": "exact",
+      "max_per_source": 2
+    },
+    "interaction.memory": {
+      "source_prefix": "turn:",
+      "required_scope": [
+        "tenant",
+        "user"
+      ]
+    },
+    "interaction.history": {
+      "priority": -1,
+      "order_by": [
+        "-freshness"
+      ]
+    }
+  },
+  "fitting_order": [
+    {
+      "slot": "interaction.history",
+      "action": "compress"
+    },
+    {
+      "slot": "evidence.knowledge",
+      "action": "compress"
+    },
+    {
+      "slot": "interaction.history",
+      "action": "omit"
+    }
+  ],
+  "facts": {
+    "plan": {
+      "precedence": [
+        "state-svc",
+        "memory-svc"
+      ],
+      "scope": [
+        "tenant",
+        "user"
+      ],
+      "on_unresolved": "refuse"
+    }
+  },
+  "tier_upgrades": {
+    "state.user": "protected"
+  }
+}

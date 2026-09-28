@@ -1,0 +1,180 @@
+[
+  {
+    "id": "01-retrieval",
+    "step": 1,
+    "title": "Retrieve: current, outdated, and a copy",
+    "question": "Given my account and our previous conversation, what support am I entitled to?",
+    "description": "LlamaIndex retrieves over 31 support documents in a shared index and the top chunks become a CWA batch. The four best hits are the current Pro paragraph (support plans v7), the onboarding guide's word-for-word copy of it, the support-hours page's near-copy, and the 2025 edition (v6), whose expires has passed. The retriever drops the near-copy itself and reports it with the chunk it kept; the assembler excludes the exact copy, since the route asks for exact deduplication, and the expired edition. The account service, the memory store and the conversation each hand over their batch.",
+    "proves": "Retrieval output is candidate context, not context: what the retriever returns still passes admission. Near-duplicates are the retriever's (R-13), exact duplicates the assembler's (R-24), and each leaves a trace row. Live production and replay of the captured batches give the same digest.",
+    "look_for": [
+      "expired",
+      "duplicate_content"
+    ],
+    "budget": {
+      "input": 900,
+      "reserved_output": 1200
+    },
+    "retrieval": {
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "top_k": 4
+    },
+    "memory": {
+      "leak_other_user": false
+    },
+    "conflicts": []
+  },
+  {
+    "id": "02-overlap",
+    "step": 2,
+    "title": "Widen retrieval: source diversity and another tenant's document",
+    "question": "Given my account and our previous conversation, what support am I entitled to?",
+    "description": "With ten hits, three chunks of the current support plans come back (Pro, Enterprise, Free), the escalation policy, the glossary, and a Globex document that leaked through the shared index. The route keeps at most two chunks per source, so the lowest-ranked support-plans chunk is capped; the Globex chunk is out of scope.",
+    "proves": "Source diversity is a route rule, not a retriever heuristic, and it counts the items that survived admission and deduplication. A shared index is fine when scope is enforced at admission.",
+    "look_for": [
+      "source_diversity_cap",
+      "out_of_scope"
+    ],
+    "budget": {
+      "input": 900,
+      "reserved_output": 1200
+    },
+    "retrieval": {
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "top_k": 10
+    },
+    "memory": {
+      "leak_other_user": false
+    },
+    "conflicts": []
+  },
+  {
+    "id": "03-memory",
+    "step": 3,
+    "title": "An expired memory and another user's",
+    "question": "Given my account and our previous conversation, what support am I entitled to?",
+    "description": "The memory store holds a memory whose expires has passed; the producer suppresses it and reports it without its body. It also filters by tenant only, so a memory of another user of the same tenant reaches the assembler, which excludes it as out_of_scope.",
+    "proves": "Memory lifetime is enforced by the producer and visible in the trace (R-9, R-14); scope is enforced again at admission, whatever the producer did.",
+    "look_for": [
+      "expired",
+      "out_of_scope"
+    ],
+    "budget": {
+      "input": 900,
+      "reserved_output": 1200
+    },
+    "retrieval": {
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "top_k": 10
+    },
+    "memory": {
+      "leak_other_user": true
+    },
+    "conflicts": []
+  },
+  {
+    "id": "04-conflict",
+    "step": 4,
+    "title": "Account state disagrees with a remembered plan",
+    "question": "Given my account and our previous conversation, what support am I entitled to?",
+    "description": "The account database says the workspace is on Pro; a memory from August says the user was on Free. The application declares a fact conflict group on `plan`, and the route's precedence puts the state service before the memory store, so the memory loses. Two instructions also contradict each other on citing document ids; both govern, so the group escalates and the route surfaces it: both stay, marked as conflicting in the payload.",
+    "proves": "Conflicts are declared upstream and resolved by versioned policy, never by reading prose or by trust (R-6, R-11). The trace records every group and its resolution.",
+    "look_for": [
+      "conflict_lost"
+    ],
+    "budget": {
+      "input": 900,
+      "reserved_output": 1200
+    },
+    "retrieval": {
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "top_k": 10
+    },
+    "memory": {
+      "leak_other_user": true
+    },
+    "conflicts": [
+      {
+        "id": "g-plan",
+        "kind": "fact",
+        "fact": "plan",
+        "items": [
+          "user:u_1042:plan",
+          "mem:u_1042:plan-free"
+        ]
+      },
+      {
+        "id": "g-cite",
+        "kind": "instruction",
+        "items": [
+          "policy:cite-ids:v1",
+          "policy:plain-language:v1"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "05-summary",
+    "step": 5,
+    "title": "Reduce the budget: supplied summaries replace longer content",
+    "question": "Given my account and our previous conversation, what support am I entitled to?",
+    "description": "The same candidates with budget.input lowered from 900 to 330. The route protects state.user, so the user's plan cannot be dropped. The route's fitting order compresses history first: every prior turn takes the summary its producer supplied. Then evidence chunks take theirs: the escalation policy, the Pro paragraph and the Enterprise paragraph. Nothing is omitted and nothing is summarised during assembly; every variant was written before the snapshot was frozen (R-18).",
+    "proves": "Compression is selection among supplied variants, recorded per item with its variant id, in the order the route declares. A route protects what must never be shed.",
+    "look_for": [
+      "duplicate_content"
+    ],
+    "budget": {
+      "input": 330,
+      "reserved_output": 1200
+    },
+    "retrieval": {
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "top_k": 10
+    },
+    "memory": {
+      "leak_other_user": true
+    },
+    "conflicts": [
+      {
+        "id": "g-plan",
+        "kind": "fact",
+        "fact": "plan",
+        "items": [
+          "user:u_1042:plan",
+          "mem:u_1042:plan-free"
+        ]
+      },
+      {
+        "id": "g-cite",
+        "kind": "instruction",
+        "items": [
+          "policy:cite-ids:v1",
+          "policy:plain-language:v1"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "06-evidence-required",
+    "step": 6,
+    "title": "Remove usable evidence: the route refuses",
+    "question": "Can I bring my dog to the office?",
+    "description": "The user asks something the corpus does not cover. Retrieval still returns its top chunks, but every score is below the route's threshold, so no evidence is admitted. The route requires evidence, so assembly refuses with evidence_required and a recovery action: request_context, because nothing was omitted for budget.",
+    "proves": "Never answer from nothing (R-12). The refusal names what to do next, and no request reaches the model.",
+    "look_for": [
+      "below_threshold",
+      "evidence_required"
+    ],
+    "budget": {
+      "input": 900,
+      "reserved_output": 1200
+    },
+    "retrieval": {
+      "query": "Can I bring my dog to the office?",
+      "top_k": 6
+    },
+    "memory": {
+      "leak_other_user": false
+    },
+    "conflicts": []
+  }
+]

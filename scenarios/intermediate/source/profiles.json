@@ -1,0 +1,28 @@
+{
+  "fixture": {
+    "spec": "cwa/draft", "id": "support-entitlement-fixture", "version": 1, "route": "support-entitlement", "model_family": null, "route_policy_version": "support-entitlement/v1",
+    "placement": [
+      { "slot": "governance.instructions", "wrap": "xml:instructions" },
+      { "slot": "state.user", "wrap": "xml:user_profile" },
+      { "slot": "state.task", "wrap": "xml:task" },
+      { "slot": "evidence.knowledge", "wrap": "xml:evidence" },
+      { "slot": "interaction.memory", "wrap": "xml:memory" },
+      { "slot": "interaction.history", "wrap": "xml:history" },
+      { "slot": "interaction.query", "wrap": "xml:query" }
+    ],
+    "evaluation": { "status": "unevaluated", "suite": null, "date": null, "result": null, "artifact": null }
+  },
+  "messages": {
+    "spec": "cwa/draft", "id": "support-entitlement-messages", "version": 1, "route": "support-entitlement", "model_family": null, "route_policy_version": "support-entitlement/v1",
+    "placement": [
+      { "slot": "governance.instructions", "wrap": "system" },
+      { "slot": "state.user", "wrap": "xml:user_profile" },
+      { "slot": "state.task", "wrap": "xml:task" },
+      { "slot": "evidence.knowledge", "wrap": "xml:evidence" },
+      { "slot": "interaction.memory", "wrap": "xml:memory" },
+      { "slot": "interaction.history", "wrap": "xml:history" },
+      { "slot": "interaction.query", "wrap": "xml:query" }
+    ],
+    "evaluation": { "status": "unevaluated", "suite": null, "date": null, "result": null, "artifact": null }
+  }
+}

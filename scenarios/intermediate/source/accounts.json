@@ -1,0 +1,5 @@
+{
+  "$comment": "The account database the state producer reads. `observed` is when the row was read; the route admits state observed within 300 seconds of assembly.",
+  "u_1042": { "tenant": "acme", "plan": "pro", "seats": 12, "region": "eu", "renewal": "2027-03-01", "observed": "2026-09-28T14:59:40Z", "source_version": "2026-09-28T14:59:40Z" },
+  "u_77": { "tenant": "acme", "plan": "free", "seats": 2, "region": "us", "renewal": null, "observed": "2026-09-28T14:59:40Z", "source_version": "2026-09-28T14:59:40Z" }
+}

@@ -1,0 +1,14 @@
+{
+  "$comment": "What every step of the intermediate stage shares. The producers run before assembly with this clock; the snapshot they freeze carries it, so live production and replay give the same digest. The tokenizer is the conformance fixture, for a portable comparison; reserved_output leaves a reasoning model room to think and answer.",
+  "assembly_time": "2026-09-28T15:00:00Z",
+  "scope": { "tenant": "acme", "user": "u_1042", "session": "s_91", "task": "entitlement_question" },
+  "tokenizer": "fixture-whitespace/v1",
+  "renderers": { "fixture": "fixture-xml/v1", "messages": "cwa-messages/v1" },
+  "route_policy_version": "support-entitlement/v1",
+  "retrieval": {
+    "$comment": "The retriever's declared score scale: relevance is the BM25 score divided by `scale`, capped at 1. The scale is the producer's; the threshold is the route's (R-13).",
+    "top_k": 8,
+    "scale": 6.0,
+    "near_duplicate_jaccard": 0.85
+  }
+}

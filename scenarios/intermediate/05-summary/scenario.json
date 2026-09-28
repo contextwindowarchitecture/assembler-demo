@@ -1,0 +1,126 @@
+{
+  "id": "05-summary",
+  "step": 5,
+  "title": "Reduce the budget: supplied summaries replace longer content",
+  "question": "Given my account and our previous conversation, what support am I entitled to?",
+  "description": "The same candidates with budget.input lowered from 900 to 330. The route protects state.user, so the user's plan cannot be dropped. The route's fitting order compresses history first: every prior turn takes the summary its producer supplied. Then evidence chunks take theirs: the escalation policy, the Pro paragraph and the Enterprise paragraph. Nothing is omitted and nothing is summarised during assembly; every variant was written before the snapshot was frozen (R-18).",
+  "proves": "Compression is selection among supplied variants, recorded per item with its variant id, in the order the route declares. A route protects what must never be shed.",
+  "look_for": [
+    "duplicate_content"
+  ],
+  "budget": {
+    "input": 330,
+    "reserved_output": 1200
+  },
+  "retrieval": {
+    "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+    "top_k": 10
+  },
+  "memory": {
+    "leak_other_user": true
+  },
+  "conflicts": [
+    "g-plan",
+    "g-cite"
+  ],
+  "producers": {
+    "policy-registry": {
+      "kind": "policy",
+      "framework": "policy.json",
+      "pipeline": [
+        "the route's instructions, verified"
+      ],
+      "emitted": 3,
+      "reported_excluded": 0
+    },
+    "state-svc": {
+      "kind": "state",
+      "framework": "accounts.json",
+      "pipeline": [
+        "read the workspace row for the user",
+        "one state.user item, one state.task item"
+      ],
+      "emitted": 2,
+      "reported_excluded": 0
+    },
+    "kb-search": {
+      "kind": "retrieval",
+      "framework": "LlamaIndex",
+      "pipeline": [
+        "40 nodes from 30 documents",
+        "BM25Retriever(similarity_top_k=10)",
+        "NearDuplicatePostprocessor(threshold=0.85)",
+        "CWA batch: relevance = score / 6, capped at 1; source = document; variants from summaries.json"
+      ],
+      "query": "Pro plan support: what is included, response time, phone support, tickets per month, escalation, office hours",
+      "retrieved": [
+        {
+          "id": "kb:acme:support-plans:v7#0",
+          "score": 5.713
+        },
+        {
+          "id": "kb:acme:onboarding-guide:v4#1",
+          "score": 5.713
+        },
+        {
+          "id": "kb:acme:support-hours:v2#0",
+          "score": 5.433
+        },
+        {
+          "id": "kb:acme:support-plans:v6#0",
+          "score": 5.395
+        },
+        {
+          "id": "kb:acme:escalation-policy:v2#0",
+          "score": 3.903
+        },
+        {
+          "id": "kb:acme:support-plans:v7#1",
+          "score": 3.173
+        },
+        {
+          "id": "kb:globex:support-plans:v2#0",
+          "score": 3.154
+        },
+        {
+          "id": "kb:acme:support-plans:v7#2",
+          "score": 3.138
+        },
+        {
+          "id": "kb:acme:glossary:v2#0",
+          "score": 3.026
+        },
+        {
+          "id": "kb:acme:support-plans:v6#1",
+          "score": 2.914
+        }
+      ],
+      "emitted": 9,
+      "reported_excluded": 1
+    },
+    "memory-svc": {
+      "kind": "memory",
+      "framework": "memories.json",
+      "pipeline": [
+        "filter by tenant",
+        "suppress expired memories and report them without their body"
+      ],
+      "emitted": 3,
+      "reported_excluded": 1
+    },
+    "conversation": {
+      "kind": "interaction",
+      "framework": "history.json",
+      "pipeline": [
+        "every prior turn as history with its supplied summary variant",
+        "the live query"
+      ],
+      "emitted": 5,
+      "reported_excluded": 0
+    }
+  },
+  "expectations": {
+    "generated_by": "python",
+    "reviewed": false
+  }
+}

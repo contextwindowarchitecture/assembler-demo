@@ -223,6 +223,7 @@ The stage pages are full width: four columns need it. The landing page uses the 
 | Columns | `margin: 0 32px 32px`, a hairline grid of four, headers sticky at `--top-h`, the measured height of the pinned block (masthead, step band, instruments) |
 | Column body | `padding: 18px`, a column of cards with `gap: 12px` |
 | Footer | `padding: 24px 32px`, 1px `--line` top border |
+| Glossary panel | `width: 400px`, fixed at `right: 0` from `--top-h` to the bottom of the viewport, `--bg` with a 1px `--line` left border; full width below 900px |
 | Landing hero | `padding: 96px 32px 72px` |
 | Landing section | `padding: 72px 32px 88px`, 1px `--line` top border |
 
@@ -236,7 +237,9 @@ flowchart TB
   D["Delta strip · hairline grid · what changed since the step you came from"]
   C["Four columns · hairline grid · headers pinned under the band"]
   F["Footer · mono 12px muted"]
+  G["Glossary · fixed on the right under the pinned block · opened by the masthead button, Esc closes"]
   M --> B --> I --> S --> X --> D --> C --> F
+  M -.-> G
 ```
 
 The landing page replaces everything under the masthead with a hero (kicker, headline, lede, the primary button, and the four columns named once in a hairline grid), one surface section with the three stages as clickable hairline cells, and the footer.
@@ -270,7 +273,7 @@ The stylesheet ends with `@media (max-width: …)` rules that select by class. N
 | `900px` | The step header and the landing stages become one column; every gutter tightens to `20px`; the brand's subtitle hides. The producer, route and turn grids need no rule: they are `auto-fit` |
 | `800px` | The columns become one; the landing pipeline (a two-by-two grid) stacks |
 
-Layers: the masthead block sits at `z-index: 50`, column headers at `2`. Nothing else is layered.
+Layers: the masthead block sits at `z-index: 50`, the glossary panel at `40`, column headers at `2`. Nothing else is layered.
 
 ## 6. Components
 
@@ -283,7 +286,7 @@ Snippets are the rules in `style.css`; hover states are ordinary `:hover` rules.
 .masthead { height: var(--mast-h); display: flex; align-items: center; gap: 28px; padding: 0 32px; }
 ```
 
-Order left to right: the logo mark (the 2 by 2 plane grid) and the wordmark "CWA" (`font-weight: 700; letter-spacing: -0.02em; font-size: 16px`, `--fg`) with "support-assistant demo" beside it in `14px` muted, the stage rail, a spacer (`margin-left: auto`), the talk-mode ghost button, the theme ghost button.
+Order left to right: the logo mark (the 2 by 2 plane grid) and the wordmark "CWA" (`font-weight: 700; letter-spacing: -0.02em; font-size: 16px`, `--fg`) with "support-assistant demo" beside it in `14px` muted, the stage rail, a spacer (`margin-left: auto`), the talk-mode ghost button, the theme ghost button, the glossary ghost button.
 
 ### Stage rail
 
@@ -301,11 +304,11 @@ All buttons are pills. A `<button>` always sets `font-family` explicitly because
 |---|---|---|
 | Primary (Send, Run live) | `font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--bg); background: var(--accent); border-radius: var(--pill); padding: 9px 18px; border: 0; cursor: pointer;` | `background: var(--fg)` |
 | Inverse (the active step) | as the ghost pill, with `background: var(--fg); color: var(--bg); border-color: var(--fg)` | unchanged |
-| Ghost (talk mode, theme, frozen, replay, copy, re-check) | `font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.05em; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: var(--pill); padding: 8px 14px; cursor: pointer;` | `color: var(--fg); border-color: var(--fg)` |
+| Ghost (talk mode, theme, glossary, frozen, replay, copy, re-check) | `font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.05em; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: var(--pill); padding: 8px 14px; cursor: pointer;` | `color: var(--fg); border-color: var(--fg)` |
 | Ghost pill (steps, producer index) | the ghost, identifiers kept as written; the producer index at `padding: 3px 8px` | same as ghost |
 | Large primary (landing) | primary at `font-size: 16px; padding: 15px 26px` | `background: var(--fg)` |
 
-Labels are sentence case: "Talk mode", "Run live", "Replay through all three", "Send to all". A disabled button is at `opacity: 0.5` with `cursor: not-allowed`; there is no loading or pressed style beyond `aria-pressed`, which the talk-mode button renders as the inverse pill.
+Labels are sentence case: "Talk mode", "Run live", "Replay through all three", "Send to all". The theme and glossary buttons are the exception, in the website's lowercase mono: "dark", "glossary". A disabled button is at `opacity: 0.5` with `cursor: not-allowed`; there is no loading or pressed style beyond `aria-pressed`, which the talk-mode button renders as the inverse pill.
 
 ### Form controls
 
@@ -376,6 +379,10 @@ An 8px bar, `background: var(--line)`, square, inside the emphasis panel: one se
 
 A hairline grid under the step header: the first cell carries the kicker "Since step 1" and a muted meta line ("the step you came from"); every other cell carries a muted label and a value in the delta style, `before → after` when it changed, `after · same` in `--muted` when it did not, and on the excluded cell the reason codes new to this step as `.bad.code.xs` chips.
 
+### The glossary panel
+
+Every page carries `<aside class="glossary" id="glossary" hidden>` right after the pinned block, opened by the masthead button `#glossary-toggle` (a ghost pill reading "glossary", lowercase like the theme button beside it) and closed by its Close button, the toggle again, or Esc. It is fixed on the right under the pinned block (`top: var(--top-h)`, `width: 400px`, `z-index: 40`, `--bg`, a 1px `--line` left border), so the step stays where it is. The head bar is the panel header (`padding: 12px 18px`, a bottom hairline): the muted label "Glossary", a text input that filters as you type, and the Close ghost button. The body is a scrolling column of entries under the muted section labels "The spec" and "This demo": each `.term` is the term in the card-title style with its aliases beside it in mono muted, its identifiers as `.mono` in `--fg`, the definition in `var(--fs-sm)`, and a mono line of the requirements it rests on (`R-n`, muted) and see-also links (accent, ending in the arrow). Entries are separated by hairlines; the one a see-also link opened is `.term.hit`, the emphasis border. When a reason code is asked for, a `.reason` card in the note callout style heads the body: the code as an accent identifier, the rule and kind in mono, the registry text. The entries are data in `public/shared/terms.js`; `public/shared/glossary.js` renders and wires the panel, and `chrome.js` initialises it with the rest of the chrome.
+
 ### Tabs
 
 A row of text links in mono `var(--fs-label)`: the active tab is `color: var(--fg); border-bottom: 2px solid var(--accent); padding-bottom: 2px;` and inactive tabs are `--muted`, hovering to `--fg`. The snippet language and endpoint switches, and the segmented controls generally, are tabs, not pills.
@@ -436,13 +443,13 @@ Selection is `--accent` on `--bg`. Interactive elements set `cursor: pointer`. F
 
 The pages are static files served by `src/inspector/server.mjs`; the markup is produced at run time by template strings in the page modules.
 
-- **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the pinned header (the masthead, the step band and the instruments), the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
+- **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the pinned header (the masthead, the step band and the instruments), the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/glossary.js` the glossary panel and `public/shared/terms.js` its entries, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
 - **Classes, one stylesheet.** Every rule lives in `public/style.css` and selects by class; the shells carry no `style` attribute, and a test checks it. Class names are shared by every page, so a new class must not collide with an existing one.
 - **Three inline values only.** A candidate row sets `--plane` from its slot (`style="--plane: var(--p-evid)"`), a meter segment sets its `flex-basis` and its plane, and `chrome.js` keeps `--top-h` on `<html>` at the measured height of the pinned top block, so the column headers pin under it however the badges wrap. The first two are computed from the snapshot or the trace at run time; nothing else is styled inline.
 - **Theme** is `data-theme` on `<html>`, `cwa-theme` in `localStorage`. A one-line script in each shell's head applies the stored choice before the first paint; `chrome.js` owns the masthead button `#theme` and its label. **Talk mode** is `data-talk`, `cwa-demo-talk`, the button `#talk`. The landing page runs `public/landing.js`, which only initialises this chrome.
 - **Responsive rules** are `@media (max-width: …)` blocks at the end of the stylesheet, selecting by class, without `!important`.
 - **The pages format; they never decide.** Every status, count, colour and meter segment is read from the trace or the snapshot. A plane comes from a slot id, an outcome from a trace row. No rule here may introduce logic the assemblers own (see `AGENTS.md`).
-- **Verification:** run the `inspector` launch configuration (`pnpm run inspector`, port 8787) rather than opening files, because the pages fetch from the server. Check both themes with the toggle, talk mode on and off, 1024px and 1440px widths, and a refusal step (basic step 5). Then run `pnpm test`: `test/inspector-pages.test.mjs` checks that the token block in section 2 appears verbatim in the stylesheet, that no colour literal appears outside it, that nothing declares a shadow, a transition, an animation or a radius other than the pill, that only the two families are used and their files are vendored with their licences, that no page loads anything from the network, that the shells carry no inline style, and that every page carries the theme toggle.
+- **Verification:** run the `inspector` launch configuration (`pnpm run inspector`, port 8787) rather than opening files, because the pages fetch from the server. Check both themes with the toggle, talk mode on and off, 1024px and 1440px widths, and a refusal step (basic step 5). Then run `pnpm test`: `test/inspector-pages.test.mjs` checks that the token block in section 2 appears verbatim in the stylesheet, that no colour literal appears outside it, that nothing declares a shadow, a transition, an animation or a radius other than the pill, that only the two families are used and their files are vendored with their licences, that no page loads anything from the network, that the shells carry no inline style, that every page carries the theme toggle, and that every page carries the glossary button right of it and the panel outside the pinned block.
 
 ```mermaid
 flowchart LR
@@ -467,8 +474,8 @@ These are how the inspector differs from the website on purpose. They are record
 
 ## 11. Checklist for a new page or section
 
-1. Copy a stage shell (`public/basic/index.html`): the stylesheet link, the masthead with the logo mark, the stage rail, the talk-mode and theme buttons, the step band, the instruments, the section elements and the four columns. Set the `<title>` as "CWA demo · name".
-2. Keep the ids the shared chrome and panels render into: `stages`, `agreement`, `talk`, `theme`, `instruments`, `instruments-toggle`, `instruments-summary`, `candidates`, `decisions`, `request`, `answer`, `foot`; the page test lists them.
+1. Copy a stage shell (`public/basic/index.html`): the stylesheet link, the masthead with the logo mark, the stage rail, the talk-mode, theme and glossary buttons, the step band, the instruments, the glossary panel after the header, the section elements and the four columns. Set the `<title>` as "CWA demo · name".
+2. Keep the ids the shared chrome and panels render into: `stages`, `agreement`, `talk`, `theme`, `instruments`, `instruments-toggle`, `instruments-summary`, `glossary-toggle`, `glossary`, `glossary-filter`, `glossary-close`, `glossary-body`, `candidates`, `decisions`, `request`, `answer`, `foot`; the page test lists them.
 3. Open the page with a kicker, a fluid h1 with `text-wrap: balance`, the question as a muted lede at `64ch`, and the factsheet as a bordered panel of key-value rows.
 4. Put one accent kicker above each strip; use muted mono labels for everything inside a column.
 5. Prefer a hairline grid to separate cards; keep cells square, filled with `--bg`, and hover clickable ones to `--accent-soft`.

@@ -18,6 +18,7 @@
       <div class="masthead-right">
         <button id="talk" type="button" aria-pressed="false" title="larger type for a projector; folds the instruments behind one line">Talk mode</button>
         <button id="theme" type="button" aria-label="Toggle color theme" title="light or dark; remembered per browser">dark</button>
+        <button id="glossary-toggle" type="button" aria-expanded="false" aria-controls="glossary" title="what the words mean; Esc closes">glossary</button>
       </div>
     </div>
     <div class="stepband">
@@ -44,6 +45,15 @@
       </div>
     </div>
   </header>
+
+  <aside class="glossary" id="glossary" hidden aria-labelledby="glossary-title">
+    <div class="glossary-head">
+      <span class="label" id="glossary-title">Glossary</span>
+      <input id="glossary-filter" type="text" placeholder="filter" aria-label="Filter the glossary" autocomplete="off" spellcheck="false">
+      <button id="glossary-close" type="button">Close</button>
+    </div>
+    <div class="glossary-body" id="glossary-body"></div>
+  </aside>
 
 
   <section class="scenario" id="scenario"></section>

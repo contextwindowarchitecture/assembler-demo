@@ -195,3 +195,18 @@ test('columnHeads says, per column, what it holds', () => {
   assert.deepEqual(columnHeads({ snapshot: null, result: null, variant: 'fixture', answers: {} }), ['', '', '', '']);
   assert.equal(columnHeads({ snapshot, result: { outcome: 'rejected', detail: 'bad', trace: null }, variant: 'fixture', answers: {} })[1], 'rejected');
 });
+
+test('every page carries the glossary: a lowercase masthead button right of the theme toggle, and a panel outside the pinned block', () => {
+  for (const file of ['index.html', 'basic/index.html', 'intermediate/index.html', 'advanced/index.html']) {
+    const html = read(file);
+    for (const id of ['glossary-toggle', 'glossary', 'glossary-filter', 'glossary-close', 'glossary-body']) assert.match(html, new RegExp(`id="${id}"`), `${file}: #${id}`);
+    const right = html.match(/<div class="masthead-right">([\s\S]*?)<\/div>/)?.[1] ?? '';
+    assert.match(right, /id="theme"[\s\S]*<button id="glossary-toggle"[^>]*>glossary<\/button>/, `${file}: the glossary button follows the theme button, lowercase like it`);
+    const top = html.match(/<header class="top">([\s\S]*?)<\/header>/)?.[1] ?? '';
+    assert.doesNotMatch(top, /id="glossary"/, `${file}: the panel is not in the pinned block, whose measured height the columns pin under`);
+    assert.match(html, /<aside class="glossary" id="glossary" hidden/, `${file}: the panel starts closed`);
+  }
+  const css = read('style.css');
+  assert.match(css, /\.glossary\s*{[^}]*position: fixed/, 'the panel is fixed over the page');
+  assert.match(css, /\.glossary\s*{[^}]*z-index: 40/, 'under the pinned block (50), above the column headers (2)');
+});

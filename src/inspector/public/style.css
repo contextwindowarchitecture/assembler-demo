@@ -276,6 +276,31 @@ pre { margin: 0; white-space: pre-wrap; word-break: break-word; border: 1px soli
 .answer .body ul, .entry ul { padding-left: 18px; margin: 4px 0; font-size: var(--fs-sm); line-height: 1.6; color: var(--muted); }
 .foot { border-top: 1px solid var(--line); padding: 24px 32px; display: flex; flex-wrap: wrap; gap: 24px; font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); line-height: 1.65; }
 
+/* The glossary: a panel on the right, fixed under the pinned block, opened by the masthead button; the page stays where
+   it is. Layered under the pinned block (50) and above the column headers (2). */
+.glossary { position: fixed; top: var(--top-h, var(--mast-h)); right: 0; bottom: 0; width: 400px; max-width: 100%; z-index: 40; background: var(--bg); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.glossary[hidden] { display: none; }
+.glossary-head { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.glossary-head .label { margin: 0; white-space: nowrap; }
+.glossary-head input { flex: 1 1 auto; min-width: 0; }
+.glossary-head button { border-radius: var(--pill); }
+.glossary-body { overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.glossary-body .sec { margin: 6px 0 0; }
+.glossary-body .sec:first-child { margin-top: 0; }
+.term { display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--line); scroll-margin-top: 12px; }
+.term.hit { border: 1px solid var(--fg); padding: 12px 14px; }
+.term .t { font-size: var(--fs-title); font-weight: 600; letter-spacing: -0.015em; line-height: 1.35; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.term .t .also { font-family: var(--mono); font-size: var(--fs-label); font-weight: 400; letter-spacing: 0; color: var(--muted); }
+.term .ids { display: flex; gap: 6px; flex-wrap: wrap; }
+.term .ids .mono { color: var(--fg); }
+.term p { font-size: var(--fs-sm); line-height: 1.55; }
+.term .see { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: baseline; font-family: var(--mono); font-size: var(--fs-label); }
+.term .see .rule { color: var(--muted); }
+.glossary .reason { border: 1px solid var(--accent); background: var(--accent-soft); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-sm); }
+.glossary .reason .c { font-family: var(--mono); font-size: var(--fs-mono); font-weight: 600; color: var(--accent); overflow-wrap: anywhere; }
+.glossary .reason .r { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
+.glossary .reason .r b { color: var(--fg); font-weight: 600; }
+
 /* The stage strips: the intermediate producers, the advanced routes and turns. */
 .producers-strip, .routes, .timeline { padding: 0 32px 24px; display: flex; flex-direction: column; gap: 10px; }
 .producers-head, .timeline-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
@@ -350,6 +375,7 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
   .delta, .columns { margin-left: 20px; margin-right: 20px; }
   .landing .container, .landing .hero-section .container { padding-left: 20px; padding-right: 20px; }
   .brand-sub { display: none; }
+  .glossary { width: 100%; }
 }
 @media (max-width: 800px) {
   .columns { grid-template-columns: 1fr; }

@@ -1,6 +1,8 @@
-// The chrome every page shares: the theme toggle, the talk-mode toggle and the instruments row it folds.
+// The chrome every page shares: the theme toggle, the talk-mode toggle, the instruments row it folds and the
+// glossary panel.
 // Presentation only: nothing here reads a snapshot or a trace.
 import { $ } from './format.js';
+import { initGlossary } from './glossary.js';
 
 const TALK_KEY = 'cwa-demo-talk';
 const THEME_KEY = 'cwa-theme';
@@ -94,6 +96,7 @@ export function initChrome() {
   initInstruments();
   initPinned();
   initSteppers();
+  initGlossary();
 }
 
 /** The one line that stands for the instruments while they are folded. */

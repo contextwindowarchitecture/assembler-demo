@@ -20,7 +20,7 @@ export const TERMS = [
   },
   {
     term: 'snapshot', kind: 'spec',
-    text: 'The immutable input to one assembly: every producer\'s batch, the declared conflict groups, the route policy, the profile, the budget, the assembly time, the tokenizer and the renderer. Identical snapshots give identical bytes, and the trace records the snapshot\'s digest.',
+    text: 'The immutable input to one assembly: every producer\'s batch, the declared conflict groups, the request\'s scope, the route policy, the profile, the budget, the assembly time, the tokenizer, the renderer, and the capability grant when the route offers tools. Identical snapshots give identical bytes, and the trace records the snapshot\'s digest.',
     see: ['batch', 'route', 'profile', 'budget', 'snapshot digest'], rules: ['R-22', 'R-23'],
   },
   {
@@ -66,7 +66,7 @@ export const TERMS = [
   },
   {
     term: 'producer', kind: 'spec',
-    text: 'A component that sends a batch of candidate items: a retriever, a memory store, a state service, an MCP adapter, a capability policy, the conversation. Its identity and kind come from the route policy and the application\'s authentication, never from item fields; a producer the route does not list is excluded with producer_not_authenticated.',
+    text: 'A component that sends a batch of candidate items, of one of seven kinds: policy, state, retrieval, memory, mcp, capability_policy or interaction (the conversation). Its identity and kind come from the route policy and the application\'s authentication, never from item fields; a producer the route does not list is excluded with producer_not_authenticated.',
     see: ['batch', 'route'], rules: ['R-9', 'R-13', 'R-14', 'R-15'],
   },
   {
@@ -76,7 +76,7 @@ export const TERMS = [
   },
   {
     term: 'route', aliases: ['route policy'], kind: 'spec',
-    text: 'The application\'s versioned policy for one kind of request: which producers it lists and with what kind, the rules per slot (min_relevance, max_age_seconds, required_scope, source_prefix, dedupe, supersede, max_per_source, max_tokens, min_tokens, tier upgrades), the fact policies for declared conflicts, what to do when a conflict cannot be resolved, whether a parser consumes the answer, and the budget. The profile names the route and its policy version.',
+    text: 'The application\'s versioned policy for one kind of request: which producers it lists and with what kind, the rules per slot (min_relevance, max_age_seconds, required_scope, source_prefix, dedupe, supersede, max_per_source, max_tokens, min_tokens, tier upgrades), the fact policies for declared conflicts, what to do when an instruction conflict cannot be resolved, whether a parser consumes the answer, whether evidence is required and how much (min_included), and the order fitting sheds in. The profile names the route and its policy version.',
     see: ['profile', 'conflict group', 'budget'], rules: ['R-3', 'R-11', 'R-20'],
   },
   {
@@ -156,7 +156,7 @@ export const TERMS = [
   },
   {
     term: 'fitting', aliases: ['budget pressure', 'shedding'], kind: 'spec',
-    text: 'Making the payload fit budget.input. Item and slot caps apply first, whether or not the payload fits. Then, under pressure, the assembler sheds in tier order: droppable items are omitted, then compressible items take a variant or are omitted in the route\'s fitting order, each omission traced as over_budget. Protected items are never touched: if they alone do not fit, the assembly is refused.',
+    text: 'Making the payload fit budget.input. Item and slot caps apply first, whether or not the payload fits. Then, under pressure, the assembler sheds in tier order: droppable items are omitted, then compressible items take a variant or are omitted in the route\'s fitting order, each omission traced as over_budget; a slot the route holds at a min_tokens floor is not reduced below it. Protected items are never touched: if they alone do not fit, the assembly is refused.',
     see: ['tier', 'budget', 'refusal'], rules: ['R-16', 'R-17'],
   },
   {
@@ -176,7 +176,7 @@ export const TERMS = [
   },
   {
     term: 'renderer', aliases: ['fixture-xml/v1', 'cwa-messages/v1'], kind: 'spec',
-    text: 'The declared output format. fixture-xml/v1 is the conformance renderer: one text the three assemblers must reproduce byte for byte. cwa-messages/v1 is the request IR a provider sends: system entries, tools, and the user message, which the inspector shows as the literal SDK call.',
+    text: 'The declared output format. fixture-xml/v1 is the fixture renderer most conformance cases use: one text the three assemblers must reproduce byte for byte. cwa-messages/v1 is the request IR a provider sends: system entries, tools, and the user message, which the inspector shows as the literal SDK call.',
     see: ['rendering', 'payload', 'provider'],
   },
   {
@@ -201,7 +201,7 @@ export const TERMS = [
   },
   {
     term: 'refusal', aliases: ['refused'], kind: 'spec',
-    text: 'The outcome for a valid snapshot the assembler will not render: protected content that cannot fit, a required slot with no admitted item, a floor that cannot be kept, an unresolved conflict, or too little evidence. No payload; the trace keeps every earlier decision, sets refused.bool with the reason, and may record recovery.action. In the inspector the request and answer columns turn the accent and nothing is sent.',
+    text: 'The outcome for a valid snapshot the assembler will not render: protected content that cannot fit, a required slot with no admitted item, a protected item whose slot the profile does not place, a floor that cannot be kept, an unresolved conflict, or too little evidence. No payload; the trace keeps every earlier decision, sets refused.bool with the reason, and may record recovery.action. In the inspector the request and answer columns turn the accent and nothing is sent.',
     see: ['rejection', 'fitting'], rules: ['R-4', 'R-11', 'R-12', 'R-17'],
   },
   {
@@ -216,7 +216,7 @@ export const TERMS = [
   },
   {
     term: 'protected content', kind: 'spec',
-    text: 'Items in the protected tier: the instructions, the output contract, the query, the task state, and whatever else the route raises. They render whole or not at all; item metadata cannot lower them, and fitting never truncates or omits them. When they alone exceed the budget the assembly is refused with protected_content_over_budget.',
+    text: 'Items in the protected tier: by default the instructions, the capabilities, the output contract, the task state and the query, plus whatever the route raises. They render whole or not at all; item metadata cannot lower them, and fitting never truncates or omits them. When they alone exceed the budget the assembly is refused with protected_content_over_budget.',
     see: ['tier', 'refusal'], rules: ['R-16', 'R-17'],
   },
   {
@@ -226,7 +226,7 @@ export const TERMS = [
   },
   {
     term: 'observation', kind: 'spec',
-    text: 'What a tool returned, entered as an evidence.tool_results item whose source names the call and its arguments and whose authority is observation. Evidence, not permission to act. With supersede: source on the slot, the latest observation of the same call stays and the earlier ones are traced as superseded.',
+    text: 'What a tool returned, entered as an evidence.tool_results item whose source names the call and its arguments and whose authority is observation. Evidence, not permission to act. With supersede: source on the slot, the latest observation from the same producer with the same source stays and the earlier ones are traced as superseded; in this demo the source names the call.',
     see: ['capability', 'resolution'], rules: ['R-15', 'R-25'],
   },
   {
@@ -328,7 +328,7 @@ export const TERMS = [
   },
   {
     term: 'harness', kind: 'demo',
-    text: 'The comparison runner behind the inspector and the command line: it runs a snapshot through every available assembler, judges each result against the expectation as the conformance runner would, and reports agreement. compare, expect and conformance are its commands.',
+    text: 'The comparison runner behind the inspector and the command line: it runs a snapshot through every available assembler, judges each result against the expectation as the conformance runner would, and reports agreement. Its commands are run, compare, expect, conformance, agent and replay.',
     see: ['adapter', 'agreement', 'conformance'],
   },
   {

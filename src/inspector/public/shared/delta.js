@@ -1,6 +1,6 @@
 // What changed since the step (or turn) you came from: two snapshots and two traces in, a strip of cells and a
 // chip per candidate out. A pure comparison of what the assemblers decided; nothing here decides anything.
-import { $, esc, tag } from './format.js';
+import { $, esc, reasonChip, tag } from './format.js';
 
 const count = (snapshot, slot) => snapshot.batches.reduce((n, b) => n + b.items.filter(i => i.slot === slot).length, 0);
 
@@ -61,5 +61,5 @@ export function renderDelta(page, result) {
   const noun = page.noun ?? 'step';
   strip.innerHTML = `<div class="since"><span class="kicker">Since ${esc(previous.label)}</span><span class="meta">${noun === 'turn' ? 'the previous inference' : 'the step you came from'}</span></div>`
     + deltaCells(then, now, noun).map(cell => `<div class="cell${cell.same ? ' same' : ''}"><span class="meta">${esc(cell.label)}</span>
-      <span class="v">${cell.same ? `${esc(cell.after)}<span class="arr">· same</span>` : `${esc(cell.before)}<span class="arr">→</span>${esc(cell.after)}`}${(cell.codes ?? []).map(code => tag(code, 'bad code xs', page.reasonText(code))).join('')}</span></div>`).join('');
+      <span class="v">${cell.same ? `${esc(cell.after)}<span class="arr">· same</span>` : `${esc(cell.before)}<span class="arr">→</span>${esc(cell.after)}`}${(cell.codes ?? []).map(code => reasonChip(code, 'bad code xs', page.reasonText(code))).join('')}</span></div>`).join('');
 }

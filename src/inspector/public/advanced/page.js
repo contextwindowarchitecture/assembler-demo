@@ -5,7 +5,7 @@
 // assemblers.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
 import { renderDelta } from '../shared/delta.js';
-import { $, api, esc, postJson, reasonTextFor, stageNav, tag } from '../shared/format.js';
+import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest } from '../shared/panels.js';
 
 const STAGE = 'advanced';
@@ -86,7 +86,7 @@ function renderHead() {
       <h1>${esc(run.title)}</h1>
       <p class="question">“${esc(run.question)}”</p>
       <p>${esc(scenario.description ?? '')}</p>
-      <div class="proves"><strong>Proves</strong><span>${esc(scenario.proves ?? '')}</span>${(scenario.look_for ?? []).map(code => tag(code, 'bad code', page.reasonText(code))).join('')}</div>
+      <div class="proves"><strong>Proves</strong><span>${esc(scenario.proves ?? '')}</span>${(scenario.look_for ?? []).map(code => reasonChip(code, 'bad code', page.reasonText(code))).join('')}</div>
       <div class="granted"><strong>Granted</strong>${run.capabilities.granted.map(id => tag(id, 'ok code xs')).join('')}
         <strong>Proposed, not granted</strong>${run.capabilities.not_granted.map(t => `${tag(t.tool, 'gray code xs')}<span class="meta">${esc(t.why)}</span>`).join('') || '<span class="meta">none</span>'}${faults}</div>
     </div>

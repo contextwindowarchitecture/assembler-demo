@@ -2,7 +2,7 @@
 // request (with the SDK snippets), and the model answer. A page passes itself in; the panels read its state and
 // call back into it. They format; they never decide: every status, count and meter here is read from the trace.
 import { statusChange } from './delta.js';
-import { $, brief, esc, postJson, tag } from './format.js';
+import { $, brief, esc, postJson, reasonChip, tag } from './format.js';
 
 /** The result a page's columns show: the chosen assembler's, or the first judged one when all ran. */
 export function shownResult(response) {
@@ -28,7 +28,7 @@ export function statusOf(item, trace) {
 
 function statusChip(status, reasonText) {
   switch (status.kind) {
-    case 'excluded': return tag(status.reason, 'bad code', reasonText(status.reason));
+    case 'excluded': return reasonChip(status.reason, 'bad code', reasonText(status.reason));
     case 'compressed': return tag(`compressed ${status.from} → ${status.to}`, 'info dot', `variant ${status.variant_id} (${status.method})`);
     case 'included': return tag(`included · ${status.tokens} tokens`, 'plane dot');
     case 'refused': return tag('admitted · assembly refused', 'gray dot');
@@ -119,7 +119,7 @@ export function renderCandidates(page, result) {
         </article>`;
       }).join('')}
       ${batch.excluded.map(row => `<article class="item producer-excluded">
-        <div class="status">${tag(`${row.reason} · producer`, 'gray code', reasonText(row.reason))}${row.duplicate_of ? `<span class="meta">duplicate of ${esc(row.duplicate_of)}</span>` : ''}${row.superseded_by ? `<span class="meta">superseded by ${esc(row.superseded_by)}</span>` : ''}</div>
+        <div class="status">${reasonChip(`${row.reason} · producer`, 'gray code', reasonText(row.reason), row.reason)}${row.duplicate_of ? `<span class="meta">duplicate of ${esc(row.duplicate_of)}</span>` : ''}${row.superseded_by ? `<span class="meta">superseded by ${esc(row.superseded_by)}</span>` : ''}</div>
         <div class="id">${esc(row.item_id)}</div>
         <div class="tert">reported by the producer; body never sent</div></article>`).join('')}
     </div>`).join('');
@@ -153,7 +153,7 @@ export function renderDecisions(page, result) {
   const compressed = trace.compressed.length ? `<div class="sec">Compressed</div><table><tr><th>item · variant</th><th class="num">from → to</th></tr>
     ${trace.compressed.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags hint">${esc(row.variant_id)} · ${esc(row.method)}</div></td><td class="num">${row.from} → ${row.to}</td></tr>`).join('')}</table>` : '';
   const excluded = trace.excluded.length ? `<div class="sec">Excluded</div><table><tr><th>item · reason · stage</th></tr>
-    ${trace.excluded.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags">${tag(row.reason, row.stage === 'producer' ? 'gray code' : 'bad code', reasonText(row.reason))}<span class="hint">${esc(row.stage)}${row.duplicate_of ? ` · of ${esc(row.duplicate_of)}` : ''}${row.superseded_by ? ` · by ${esc(row.superseded_by)}` : ''}</span></div></td></tr>`).join('')}</table>`
+    ${trace.excluded.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags">${reasonChip(row.reason, row.stage === 'producer' ? 'gray code' : 'bad code', reasonText(row.reason))}<span class="hint">${esc(row.stage)}${row.duplicate_of ? ` · of ${esc(row.duplicate_of)}` : ''}${row.superseded_by ? ` · by ${esc(row.superseded_by)}` : ''}</span></div></td></tr>`).join('')}</table>`
     : '<div class="sec">Excluded</div><p class="hint">nothing</p>';
   const included = trace.included.length ? `<div class="sec">Included (placement order)</div><table><tr><th>item · slot</th><th class="num">tokens</th></tr>
     ${trace.included.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags hint">${esc(row.slot)}</div></td><td class="num">${row.tokens}</td></tr>`).join('')}</table>` : '';

@@ -3,7 +3,7 @@
 // payloads. This page owns its state and controls; the columns and the chrome are shared with the other stages.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
 import { renderDelta } from '../shared/delta.js';
-import { $, api, esc, postJson, reasonTextFor, stageNav, tag, words } from '../shared/format.js';
+import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag, words } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest, shownResult } from '../shared/panels.js';
 
 const STAGE = 'basic';
@@ -82,7 +82,7 @@ function renderScenario() {
       <h1>${esc(meta.title)}</h1>
       <p class="question">“${esc(meta.question)}”</p>
       <p>${esc(meta.description)}</p>
-      <div class="proves"><strong>Proves</strong><span>${esc(meta.proves)}</span>${meta.look_for.map(code => tag(code, 'bad code', page.reasonText(code))).join('')}</div>
+      <div class="proves"><strong>Proves</strong><span>${esc(meta.proves)}</span>${meta.look_for.map(code => reasonChip(code, 'bad code', page.reasonText(code))).join('')}</div>
     </div>
     <aside class="factsheet">
       <div class="label">Snapshot</div>

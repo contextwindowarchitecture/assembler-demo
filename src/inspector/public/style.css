@@ -158,6 +158,10 @@ input#budget { width: 7em; }
 .chip.conflict { color: var(--fg); border-color: var(--fg); }
 .chip.xs { font-size: 10.5px; padding: 2px 6px; }
 .chip.xs.code { font-size: var(--fs-label); }
+/* A reason code is a chip that is a button: it opens the glossary at the code. The chip's size, not the control's; it hovers
+   as a clickable cell does. */
+button.chip { height: auto; }
+button.chip:hover { background: var(--accent-soft); }
 
 /* The step header: what this step is, and the snapshot's facts. */
 .scenario { padding: 32px 32px 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 40px; align-items: start; }

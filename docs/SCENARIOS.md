@@ -7,7 +7,7 @@ Five steps, one question, about twelve minutes. Each step adds to the last: the 
 - Start the local model server and check it lists the model: `curl -H "Authorization: Bearer $KEY" http://127.0.0.1:8000/v1/models`.
 - `.env` names the provider (see `.env.example`). `pnpm run inspector`, open `http://localhost:8787` at full width (the four columns need about 1400 px), and pick the OS theme the projector reads best; the page follows it.
 - Click *Talk mode* in the masthead: larger type, the instruments folded behind one line (click the line to open them), and the tertiary details hidden from the candidate cards. The browser remembers it.
-- The *glossary* button beside the theme toggle opens every term the spec and the demo use in a panel on the right; type to filter, Esc to close. The step stays where it is.
+- The *glossary* button beside the theme toggle opens every term the spec and the demo use in a panel on the right; type to filter, Esc to close. The step stays where it is. Click any reason code, on a candidate, in the decisions or in the delta strip, to open it at that code.
 - `pnpm test` once. It runs the 74 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
 - Have a terminal ready with `pnpm run compare` for the closing.
 - Arrow keys switch steps. The budget field reassembles live. The `frozen` button returns to the committed snapshot.

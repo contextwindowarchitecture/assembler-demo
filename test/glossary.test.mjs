@@ -8,6 +8,7 @@ import { test } from 'node:test';
 import { ROOT } from '../src/harness/adapters.mjs';
 import { TERMS, slugOf } from '../src/inspector/public/shared/terms.js';
 import { filterTerms, reasonEntry, renderGlossary } from '../src/inspector/public/shared/glossary.js';
+import { reasonChip } from '../src/inspector/public/shared/format.js';
 
 const contract = (() => {
   const read = name => JSON.parse(readFileSync(path.join(ROOT, 'vendor', 'cwa', 'contract', name), 'utf8'));
@@ -83,4 +84,21 @@ test('renderGlossary gives every entry an anchor, groups spec before demo, escap
   assert.ok(withReason.indexOf('expired') < withReason.indexOf('id="term-a-b"'), 'the reason card comes first');
   assert.match(withReason, new RegExp(contract.reasons.expired.rule));
   assert.equal(renderGlossary([]), '<p class="hint">no term matches</p>');
+});
+
+test('a reason code on the page is a chip that opens the glossary at it: a button carrying data-reason, built by reasonChip wherever a code is drawn', () => {
+  assert.equal(reasonChip('expired', 'bad code', 'R-9: gone'), '<button type="button" class="chip bad code" data-reason="expired" title="R-9: gone">expired</button>');
+  assert.equal(reasonChip('duplicate_content · producer', 'gray code', '', 'duplicate_content'), '<button type="button" class="chip gray code" data-reason="duplicate_content">duplicate_content · producer</button>', 'the code the chip opens can differ from its text');
+  assert.match(reasonChip('a<b', 'bad code', 'x"y'), /data-reason="a&lt;b" title="x&quot;y">a&lt;b</, 'escaped');
+  const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
+  for (const file of ['shared/panels.js', 'shared/delta.js', 'basic/page.js', 'intermediate/page.js', 'advanced/page.js']) {
+    const src = readFileSync(path.join(PUBLIC, file), 'utf8');
+    assert.doesNotMatch(src, /tag\([^)]*reasonText\(/, `${file}: a chip carrying the registry text is a reason code, and never a plain chip`);
+    assert.match(src, /reasonChip\(/, `${file}: reason codes are drawn by reasonChip`);
+  }
+  const css = readFileSync(path.join(PUBLIC, 'style.css'), 'utf8');
+  assert.match(css, /button\.chip\s*{[^}]*height: auto/, 'a chip that is a button keeps the chip\'s size, not the control height');
+  assert.match(css, /button\.chip:hover\s*{[^}]*var\(--accent-soft\)/, 'and hovers like a clickable cell');
+  const glossary = readFileSync(path.join(PUBLIC, 'shared', 'glossary.js'), 'utf8');
+  assert.match(glossary, /closest\('\[data-reason\]'\)/, 'the glossary listens for any element carrying data-reason');
 });

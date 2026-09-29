@@ -3,6 +3,8 @@ export const $ = selector => document.querySelector(selector);
 export const esc = value => String(value ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /** A chip: the one shape badges, tags and statuses share. `cls` picks the outcome color (ok, info, bad, warn, gray, line). */
 export const tag = (text, cls = '', title = '') => `<span class="chip ${cls}"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</span>`;
+/** A reason code as a chip that opens the glossary at it: a button carrying `data-reason`. The code defaults to the text. */
+export const reasonChip = (text, cls = '', title = '', code = text) => `<button type="button" class="chip ${cls}" data-reason="${esc(code)}"${title ? ` title="${esc(title)}"` : ''}>${esc(text)}</button>`;
 export const short = value => String(value).replace(/^\d+-/, '');
 /** A step id as its pill reads it: `02-stale-and-foreign` is "stale and foreign". */
 export const words = value => short(value).replace(/-/g, ' ');

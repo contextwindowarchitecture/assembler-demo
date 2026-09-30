@@ -99,6 +99,18 @@ node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.j
 
 Comparison follows `conformance/README.md`: payloads byte for byte; traces field for field without `trace_id` and `timings`; the JSON pointer of the first difference; an unsupported tokenizer or renderer is skipped, never passed. Three matching assemblers can share a mistake, so the committed expectation is the independent check.
 
+## In a container
+
+`Containerfile` builds one image with the inspector and the three assemblers. The build context is not this repository alone, since the assemblers are sibling checkouts: `deploy/stage-context.sh` lays the four working trees out side by side, each as git lists it (tracked and untracked files, nothing ignored, never `.env`), and the image is built from that. Inside, the four keep the same layout under `/opt/cwa`, so `assemblers.json` holds as it does here.
+
+```sh
+deploy/stage-context.sh /tmp/cwa-context
+podman build -f /tmp/cwa-context/cwa-demo-app/Containerfile -t cwa-demo-app /tmp/cwa-context
+podman run --rm -p 8787:8787 --env-file .env cwa-demo-app     # http://localhost:8787, providers from .env
+```
+
+The image starts the inspector with `--host 0.0.0.0` (it listens on loopback otherwise) and reads the provider settings from the environment; a model URL must be reachable from the container, so a server on this machine's `localhost` is not. The inspector has no login: whoever reaches it can run the assemblers and, with a provider configured, spend its tokens.
+
 ## Layout
 
 | Path | What it is |
@@ -116,6 +128,7 @@ Comparison follows `conformance/README.md`: payloads byte for byte; traces field
 | `src/inspector/` | The server; `public/` holds the landing page, a page per stage and the shared columns |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
 | `vendor/cwa/` | The published contract, pinned by `vendor/cwa.lock.json` |
+| `Containerfile`, `deploy/` | The image (inspector and three assemblers), `stage-context.sh` for its build context, and the OpenShift deployment |
 | `docs/` | [PLAN.md](docs/PLAN.md), [DESIGN.md](docs/DESIGN.md), [SCENARIOS.md](docs/SCENARIOS.md) |
 
 See [AGENTS.md](AGENTS.md) for the working rules.

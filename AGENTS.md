@@ -43,6 +43,8 @@ pnpm run compare                  # every scenario through every assembler, agai
 pnpm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
 pnpm run live                     # step 3 through the assemblers, then to every configured provider: real model answers on the terminal
 pnpm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
+deploy/stage-context.sh /tmp/cwa-context                                     # the container build context: this repo and the three checkouts, nothing ignored
+podman build -f /tmp/cwa-context/cwa-demo-app/Containerfile -t cwa-demo-app /tmp/cwa-context   # the image; see the Containerfile
 ```
 
 pnpm is the package manager: `packageManager` in package.json pins its version, and the TypeScript assembler is a `link:` dependency, so a rebuild in `../cwa-assembler-ts` reaches this app without a reinstall. Don't run `npm install` here: it writes its own lockfile and a different layout, and `test/toolchain.test.mjs` will say so.

@@ -3,7 +3,7 @@
 // payloads. This page owns its state and controls; the columns and the chrome are shared with the other stages.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
 import { renderDelta } from '../shared/delta.js';
-import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag, words } from '../shared/format.js';
+import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag, url, words } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest, shownResult } from '../shared/panels.js';
 
 const STAGE = 'basic';
@@ -95,7 +95,7 @@ function renderScenario() {
         <span class="k">route policy</span><span class="v">${esc(trace.context.route_policy_version)}</span>` : ''}
         <span class="k">digest</span><span class="v">${esc(digest ? digest.slice(0, 16) + '…' : '—')}</span>
       </div>
-      <a href="/api/scenarios/${encodeURIComponent(scenario.id)}/${state.variant}/snapshot.json" target="_blank">frozen snapshot.json</a>
+      <a href="${url(`/api/scenarios/${encodeURIComponent(scenario.id)}/${state.variant}/snapshot.json`)}" target="_blank">frozen snapshot.json</a>
     </aside>`;
 }
 

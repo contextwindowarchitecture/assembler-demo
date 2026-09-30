@@ -4,20 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CWA demo</title>
-  <link rel="stylesheet" href="/style.css">
+  <!-- Behind a path prefix (a Route path), the prefix typed without its slash would resolve every relative link one level up. -->
+  <script>if (!location.pathname.endsWith('/')) location.replace(`${location.pathname}/${location.search}${location.hash}`);</script>
+  <link rel="stylesheet" href="style.css">
   <script>try { document.documentElement.dataset.theme = localStorage.getItem('cwa-theme') === 'dark' ? 'dark' : 'light'; } catch { document.documentElement.dataset.theme = 'light'; }</script>
 </head>
 <body>
   <header class="top">
     <div class="masthead">
       <div class="brandrow">
-        <a class="brand" href="/"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>CWA</a>
+        <a class="brand" href="./"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>CWA</a>
         <span class="brand-sub">support-assistant demo</span>
       </div>
       <nav class="stages" aria-label="Stages">
-        <a href="/basic/" class="stage"><span class="num">1</span>Basic</a>
-        <a href="/intermediate/" class="stage"><span class="num">2</span>Intermediate</a>
-        <a href="/advanced/" class="stage"><span class="num">3</span>Advanced</a>
+        <a href="basic/" class="stage"><span class="num">1</span>Basic</a>
+        <a href="intermediate/" class="stage"><span class="num">2</span>Intermediate</a>
+        <a href="advanced/" class="stage"><span class="num">3</span>Advanced</a>
       </nav>
       <div class="masthead-right">
         <button id="talk" type="button" aria-pressed="false" title="larger type for a projector">Talk mode</button>
@@ -44,7 +46,7 @@
           <h1>What did CWA assemble, and why?</h1>
           <p class="lede">One support question runs through the Python, TypeScript and Go assemblers on the same frozen inputs. The app never assembles anything itself: it freezes inputs, hands them to an assembler, compares what comes back byte for byte, and shows every decision on one screen.</p>
           <div class="cta">
-            <a class="btn" href="/basic/">Start with the basic stage <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M7 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a>
+            <a class="btn" href="basic/">Start with the basic stage <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M7 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a>
             <span class="hint">about twelve minutes per stage</span>
           </div>
         </div>
@@ -65,7 +67,7 @@
       <div class="container">
         <div class="kicker">Three stages</div>
         <div class="stage-cells">
-          <a class="stage-card" href="/basic/">
+          <a class="stage-card" href="basic/">
             <div class="label">Stage 1 · frozen fixtures · 5 steps</div>
             <h2><span class="num">1</span>Basic</h2>
             <p class="question">“What support does the Pro plan include?”</p>
@@ -73,7 +75,7 @@
             <div class="codes"><span class="chip bad code">expired</span><span class="chip bad code">out_of_scope</span><span class="chip bad code">producer_slot_not_allowed</span><span class="chip bad code">over_budget</span><span class="chip bad code">protected_content_over_budget</span></div>
             <p class="hint">Proves admission, authority boundaries, budgeting, rendering and reproducibility across three assemblers.</p>
           </a>
-          <a class="stage-card" href="/intermediate/">
+          <a class="stage-card" href="intermediate/">
             <div class="label">Stage 2 · real producers · 6 steps</div>
             <h2><span class="num">2</span>Intermediate</h2>
             <p class="question">“Given my account and our previous conversation, what support am I entitled to?”</p>
@@ -81,7 +83,7 @@
             <div class="codes"><span class="chip bad code">duplicate_content</span><span class="chip bad code">source_diversity_cap</span><span class="chip bad code">conflict_lost</span><span class="chip bad code">evidence_required</span></div>
             <p class="hint">Proves declared conflicts, deduplication, source diversity, supplied summaries and the route's required-evidence behaviour.</p>
           </a>
-          <a class="stage-card" href="/advanced/">
+          <a class="stage-card" href="advanced/">
             <div class="label">Stage 3 · a bounded tool loop · recorded runs, two routes</div>
             <h2><span class="num">3</span>Advanced</h2>
             <p class="question">“Check my entitlement, investigate this incident, and draft the next action.”</p>
@@ -102,6 +104,6 @@
       <span><span class="mono">pnpm run compare</span> for the closing: every step, every assembler, passed and agreeing.</span>
     </span>
   </footer>
-  <script type="module" src="/landing.js"></script>
+  <script type="module" src="landing.js"></script>
 </body>
 </html>

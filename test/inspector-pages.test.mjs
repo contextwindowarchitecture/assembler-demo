@@ -8,6 +8,8 @@ import { test } from 'node:test';
 import { ROOT } from '../src/harness/adapters.mjs';
 import { columnHeads, meterFor, planeOf, statusOf } from '../src/inspector/public/shared/panels.js';
 import { resolveTheme, stepperHit, themeLabel } from '../src/inspector/public/shared/chrome.js';
+import { ROOT as APP_ROOT, stageNav, url } from '../src/inspector/public/shared/format.js';
+import { pathToFileURL } from 'node:url';
 
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
 const read = file => fs.readFileSync(path.join(PUBLIC, file), 'utf8');
@@ -28,7 +30,7 @@ test('every stage page carries the elements the scripts and the shared chrome re
 
 test('the landing links every stage and names the four columns once', () => {
   const html = read('index.html');
-  for (const href of ['/basic/', '/intermediate/', '/advanced/']) assert.match(html, new RegExp(`href="${href}"`));
+  for (const href of ['basic/', 'intermediate/', 'advanced/']) assert.match(html, new RegExp(`href="${href}"`));
   for (const id of ['talk', 'theme']) assert.match(html, new RegExp(`id="${id}"`), `the landing carries the same masthead buttons: #${id}`);
   for (const column of ['Candidate context', 'CWA decisions', 'Outbound request', 'Model answer']) {
     assert.equal((html.match(new RegExp(column, 'g')) ?? []).length, 1, `${column} appears once, in the pipeline`);
@@ -42,11 +44,11 @@ test('the fonts are vendored: the two faces the guide names, each a file under p
     url: m[1].match(/url\(["']?([^"')]+)["']?\)/)[1],
   }));
   assert.deepEqual([...new Set(faces.map(f => f.family))].sort(), ['IBM Plex Mono', 'Space Grotesk'], 'Space Grotesk for reading, IBM Plex Mono for labels and code, nothing else');
-  for (const { url } of faces) {
-    assert.match(url, /^\/fonts\/[\w.-]+\.woff2$/, url);
-    assert.ok(fs.existsSync(path.join(PUBLIC, url)), `${url} exists`);
+  for (const { url: file } of faces) {
+    assert.match(file, /^fonts\/[\w.-]+\.woff2$/, file);
+    assert.ok(fs.existsSync(path.join(PUBLIC, file)), `${file} exists`);
   }
-  const vendored = fs.readdirSync(path.join(PUBLIC, 'fonts')).filter(f => f.endsWith('.woff2')).map(f => `/fonts/${f}`).sort();
+  const vendored = fs.readdirSync(path.join(PUBLIC, 'fonts')).filter(f => f.endsWith('.woff2')).map(f => `fonts/${f}`).sort();
   assert.deepEqual(vendored, [...new Set(faces.map(f => f.url))].sort(), 'every vendored file is declared, and nothing else is vendored');
   assert.doesNotMatch(css, /@import|googleapis/, 'the stylesheet imports nothing');
   for (const file of ['index.html', 'basic/index.html', 'intermediate/index.html', 'advanced/index.html']) {
@@ -209,4 +211,19 @@ test('every page carries the glossary: a lowercase masthead button right of the 
   const css = read('style.css');
   assert.match(css, /\.glossary\s*{[^}]*position: fixed/, 'the panel is fixed over the page');
   assert.match(css, /\.glossary\s*{[^}]*z-index: 40/, 'under the pinned block (50), above the column headers (2)');
+});
+
+test('the pages reach the server by URLs relative to their own, so a path prefix in front of the inspector works', () => {
+  // Markup and styles carry no absolute path: a stage page says ../style.css, the stylesheet says fonts/…
+  const files = fs.readdirSync(PUBLIC, { recursive: true }).filter(f => /\.(html|css|js)$/.test(f));
+  assert.ok(files.length > 10, 'the pages were found');
+  for (const file of files) assert.doesNotMatch(read(file), /\b(href|src)="\/|url\(["']?\//, `${file} carries an absolute path`);
+  // Scripts name app-root paths and the helpers resolve them against the root the module derives from its own URL.
+  assert.equal(APP_ROOT.href, pathToFileURL(PUBLIC + '/').href);
+  assert.equal(url('/api/state'), `${APP_ROOT.href}api/state`);
+  assert.equal(url('api/state'), `${APP_ROOT.href}api/state`);
+  const nav = stageNav('basic');
+  for (const stage of ['basic', 'intermediate', 'advanced']) assert.match(nav, new RegExp(`href="${APP_ROOT.href}${stage}/"`));
+  // The landing page fixes a prefix typed without its slash, under which every relative link would resolve one level up.
+  assert.match(read('index.html'), /location\.pathname\.endsWith\('\/'\)/);
 });

@@ -12,8 +12,14 @@ export const when = iso => (iso ? iso.replace('T', ' ').replace(/(:\d\d)(\.\d+)?
 /** A date-time without its seconds, for a card's tertiary line: `2026-09-28T13:59:30Z` is "2026-09-28 13:59". */
 export const brief = iso => (iso ? iso.replace('T', ' ').replace(/(:\d\d):\d\d(\.\d+)?Z$/, '$1') : '');
 
+/** The app's root, derived from this module's own URL, so it carries any path prefix a proxy put in front of the
+ * inspector (the module lives at <root>/shared/format.js). Every URL a script builds starts from it. */
+export const ROOT = new URL('../', import.meta.url);
+/** An app-root path (`/api/state` or `api/state`, `basic/`) as an absolute URL under ROOT. */
+export const url = path => new URL(String(path).replace(/^\//, ''), ROOT).href;
+
 export async function api(path, options) {
-  const res = await fetch(path, options);
+  const res = await fetch(url(path), options);
   const body = await res.json().catch(() => ({ error: res.statusText }));
   if (!res.ok) throw new Error(body.error || res.statusText);
   return body;
@@ -32,7 +38,7 @@ export function reasonTextFor(contract) {
 
 /** The masthead's stage rail: every stage, numbered, the current one in ink. */
 export function stageNav(current) {
-  const stages = [['basic', '/basic/', 'Basic'], ['intermediate', '/intermediate/', 'Intermediate'], ['advanced', '/advanced/', 'Advanced']];
-  return `<nav class="stages" aria-label="Stages">${stages.map(([id, href, label], i) =>
-    `<a href="${href}" class="stage${id === current ? ' active' : ''}"${id === current ? ' aria-current="page"' : ''}><span class="num">${i + 1}</span>${label}</a>`).join('')}</nav>`;
+  const stages = [['basic', 'Basic'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced']];
+  return `<nav class="stages" aria-label="Stages">${stages.map(([id, label], i) =>
+    `<a href="${url(`${id}/`)}" class="stage${id === current ? ' active' : ''}"${id === current ? ' aria-current="page"' : ''}><span class="num">${i + 1}</span>${label}</a>`).join('')}</nav>`;
 }

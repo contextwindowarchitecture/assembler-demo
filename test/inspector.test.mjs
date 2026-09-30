@@ -51,8 +51,8 @@ test('GET / is the landing page, each stage has its own page, and unknown paths 
   const landing = await fetch(base + '/');
   assert.equal(landing.status, 200);
   const landingText = await landing.text();
-  assert.match(landingText, /href="\/basic\/"/);
-  assert.match(landingText, /href="\/intermediate\/"/);
+  assert.match(landingText, /href="basic\/"/);
+  assert.match(landingText, /href="intermediate\/"/);
   const basic = await fetch(base + '/basic/');
   assert.equal(basic.status, 200);
   assert.match(await basic.text(), /Candidate context/);

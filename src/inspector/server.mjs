@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // The inspector: a small HTTP server that serves the four-column screen and runs the assemblers for it through the
-// same harness the CLI uses. It never assembles anything itself. Usage: node src/inspector/server.mjs [--port 8787]
+// same harness the CLI uses. It never assembles anything itself.
+// Usage: node src/inspector/server.mjs [--host 127.0.0.1] [--port 8787]; a container passes --host 0.0.0.0.
 import { readFile } from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
@@ -17,7 +18,6 @@ import { loadDotEnv } from '../env.mjs';
 import { answer, describeProviders } from '../provider/index.mjs';
 import { snippets } from '../provider/snippets.mjs';
 
-const PORT = Number(process.env.PORT ?? (process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 8787));
 const PUBLIC = path.join(ROOT, 'src', 'inspector', 'public');
 const SCENARIOS = path.join(ROOT, 'scenarios');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json; charset=utf-8', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8' };
@@ -201,7 +201,15 @@ export function createInspector() {
   });
 }
 
+/** Where to listen: loopback on 8787 unless --host, --port or PORT (which wins over --port) say otherwise. Loopback
+ * is the default because the inspector has no login; a container passes --host 0.0.0.0 and exposes the port itself. */
+export function listenAddress(argv = process.argv, env = process.env) {
+  const flag = name => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : undefined);
+  return { host: flag('--host') ?? '127.0.0.1', port: Number(env.PORT ?? flag('--port') ?? 8787) };
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const loaded = loadDotEnv();
-  createInspector().listen(PORT, '127.0.0.1', () => console.log(`CWA demo inspector: http://localhost:${PORT}${loaded ? ' (providers from .env)' : ' (no .env: copy .env.example to configure a provider)'}`));
+  const { host, port } = listenAddress();
+  createInspector().listen(port, host, () => console.log(`CWA demo inspector: http://${host === '0.0.0.0' ? 'localhost' : host}:${port}${loaded ? ' (providers from .env)' : ' (no .env: copy .env.example to configure a provider)'}`));
 }

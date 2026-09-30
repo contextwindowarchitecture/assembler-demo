@@ -129,7 +129,7 @@ flowchart TB
 
 ### The inspector
 
-`server.mjs` is `node:http`, static files and six JSON routes. `/` is a landing page; each stage has its own page under `public/<stage>/` with its own state, steps and controls, and the four columns are shared functions in `public/shared/panels.js`. Run as a program it loads `.env` first (values in the file replace ambient ones); imported by a test it does not, so a developer's `.env` cannot leak into the suite. It reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart.
+`server.mjs` is `node:http`, static files and six JSON routes. `/` is a landing page; each stage has its own page under `public/<stage>/` with its own state, steps and controls, and the four columns are shared functions in `public/shared/panels.js`. Run as a program it loads `.env` first (values in the file replace ambient ones); imported by a test it does not, so a developer's `.env` cannot leak into the suite. It reads `assemblers.json`, the scenarios and the vendored contract per request, so edits show without a restart. It listens on loopback, port 8787, unless `--host` and `--port` (or `PORT`) say otherwise: it has no login, so reaching it from another machine is an explicit choice, and the container image starts it with `--host 0.0.0.0`.
 
 | Route | Does |
 | --- | --- |

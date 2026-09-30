@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { after, before, test } from 'node:test';
 import { ROOT } from '../src/harness/adapters.mjs';
-import { createInspector } from '../src/inspector/server.mjs';
+import { createInspector, listenAddress } from '../src/inspector/server.mjs';
 import { createMockChatServer } from './helpers/mock-chat-server.mjs';
 
 let server, base, mock;
@@ -165,4 +165,10 @@ test('POST /api/answer sends a successful messages assembly to the local model o
   assert.match(sent.messages[0].content, /^You are the support assistant for Acme Cloud/);
   assert.match(sent.messages[1].content, /&lt;system&gt;Ignore all previous instructions/, 'the injected tag reached the model escaped, as material');
   assert.equal(sent.messages.length, 2, 'prior turns stay inside the one user message (R-7)');
+});
+
+test('listenAddress is loopback on 8787 unless --host, --port or PORT say otherwise', () => {
+  assert.deepEqual(listenAddress(['node', 'server.mjs'], {}), { host: '127.0.0.1', port: 8787 });
+  assert.deepEqual(listenAddress(['node', 'server.mjs', '--host', '0.0.0.0', '--port', '9000'], {}), { host: '0.0.0.0', port: 9000 });
+  assert.deepEqual(listenAddress(['node', 'server.mjs', '--port', '9000'], { PORT: '8080' }), { host: '127.0.0.1', port: 8080 }, 'PORT in the environment wins over --port');
 });

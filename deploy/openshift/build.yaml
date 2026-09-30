@@ -1,0 +1,24 @@
+# In-cluster build objects. Applied only when the cluster supports builds (deploy.sh without IMAGE). The binary
+# build takes the staged context (deploy/stage-context.sh), so the Containerfile's path is inside cwa-demo-app/.
+apiVersion: v1
+kind: List
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: cwa-demo-app
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: cwa-demo-app
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: cwa-demo-app:latest
+    source:
+      type: Binary
+    strategy:
+      type: Docker
+      dockerStrategy:
+        dockerfilePath: cwa-demo-app/Containerfile

@@ -47,3 +47,20 @@ test(
     }
   },
 );
+
+test('the OpenShift manifests deploy the image the Containerfile builds, from the staged context', () => {
+  const read = file => readFileSync(path.join(ROOT, file), 'utf8');
+  const containerfile = read('Containerfile');
+  const app = read('deploy/openshift/app.yaml');
+  const build = read('deploy/openshift/build.yaml');
+  const deploy = read('deploy/openshift/deploy.sh');
+  for (const script of ['deploy/stage-context.sh', 'deploy/openshift/deploy.sh']) execFileSync('bash', ['-n', path.join(ROOT, script)]);
+  assert.match(app, /image: IMAGE_PLACEHOLDER$/m, 'deploy.sh substitutes the image');
+  assert.match(deploy, /IMAGE_PLACEHOLDER/);
+  const exposed = containerfile.match(/^EXPOSE (\d+)$/m)[1];
+  for (const port of [...app.matchAll(/(?:containerPort|targetPort|port): (\d+)/g)].map(m => m[1])) assert.equal(port, exposed, 'every port in app.yaml is the one the image exposes');
+  assert.match(app, /value: "8787"/, 'PORT in the Deployment is the exposed port');
+  const secret = app.match(/secretRef:\s+name: (\S+)/)[1];
+  assert.ok(deploy.includes(`"${secret}"`) || deploy.includes(` ${secret} `) || deploy.includes(` ${secret}\n`), `deploy.sh creates the Secret ${secret} the Deployment reads`);
+  assert.match(build, /dockerfilePath: cwa-demo-app\/Containerfile$/m, 'the in-cluster build finds the Containerfile inside the staged context');
+});

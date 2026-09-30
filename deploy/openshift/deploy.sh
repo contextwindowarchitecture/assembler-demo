@@ -18,6 +18,10 @@
 # a rebuilt -dirty tag is pulled again. `latest` is updated as well for convenience. A tag on IMAGE is ignored; TAG
 # overrides the computed one. The four revisions are recorded in the image's labels.
 #
+# Parameters, all optional, read by deploy/openshift/manifests.mjs (which documents them): ROUTE_HOST, ROUTE_PATH (the
+# inspector is then at https://<host><path>/), ROUTE_TIMEOUT, STORAGE_SIZE and STORAGE_CLASS (a claim for the live agent
+# runs). A Route keeps the host it was created with: to change ROUTE_HOST, `oc delete route cwa-demo-app` first.
+#
 # Providers: the inspector in the cluster reads the variables .env.example lists from the Secret cwa-demo-env. When
 # .env exists here it is applied on every deploy (what the file says is what runs, as locally); without one the
 # Secret is created empty once and left alone, so `oc edit secret cwa-demo-env` holds. A model URL must be
@@ -82,15 +86,16 @@ else
   IMAGE="image-registry.openshift-image-registry.svc:5000/$PROJECT/cwa-demo-app:$TAG"
 fi
 
-sed "s#IMAGE_PLACEHOLDER#$IMAGE#" deploy/openshift/app.yaml | oc apply -f -
+# The objects, rendered from the parameters in the environment.
+IMAGE="$IMAGE" node deploy/openshift/manifests.mjs | oc apply -f -
 
 # Roll even when the image reference did not change (a rebuilt -dirty tag, a changed Secret).
 oc rollout restart deployment/cwa-demo-app
 oc rollout status deployment/cwa-demo-app --timeout=300s
 
-ROUTE=$(oc get route cwa-demo-app -o jsonpath='{.spec.host}')
+URL="https://$(oc get route cwa-demo-app -o jsonpath='{.spec.host}{.spec.path}')/"
 echo
-echo "inspector    : https://$ROUTE/"
-echo "basic        : https://$ROUTE/basic/"
-echo "intermediate : https://$ROUTE/intermediate/"
-echo "advanced     : https://$ROUTE/advanced/"
+echo "inspector    : $URL"
+echo "basic        : ${URL}basic/"
+echo "intermediate : ${URL}intermediate/"
+echo "advanced     : ${URL}advanced/"

@@ -111,7 +111,7 @@ podman run --rm -p 8787:8787 --env-file .env cwa-demo-app     # http://localhost
 
 The image starts the inspector with `--host 0.0.0.0` (it listens on loopback otherwise) and reads the provider settings from the environment; a model URL must be reachable from the container, so a server on this machine's `localhost` is not. The inspector has no login: whoever reaches it can run the assemblers and, with a provider configured, spend its tokens.
 
-`deploy/openshift/deploy.sh` deploys it to the current `oc` project: an in-cluster binary build of the staged context by default, or `IMAGE=quay.io/<you>/cwa-demo-app` for a podman build pushed to a registry (`PLATFORM` defaults to `linux/amd64`). The image is tagged with this repository's short SHA, `-dirty` when any of the four trees has uncommitted changes, and labelled with all four revisions. `.env` becomes the Secret `cwa-demo-env`, applied on every deploy; the Route is public, with edge TLS.
+`deploy/openshift/deploy.sh` deploys it to the current `oc` project: an in-cluster binary build of the staged context by default, or `IMAGE=quay.io/<you>/cwa-demo-app` for a podman build pushed to a registry (`PLATFORM` defaults to `linux/amd64`). The image is tagged with this repository's short SHA, `-dirty` when any of the four trees has uncommitted changes, and labelled with all four revisions. `.env` becomes the Secret `cwa-demo-env`, applied on every deploy; the Route is public, with edge TLS. The Route's host and path, the router's timeout, and a storage class and size for a claim that keeps live agent runs are parameters: see [deploy/openshift/README.md](deploy/openshift/README.md).
 
 ## Layout
 

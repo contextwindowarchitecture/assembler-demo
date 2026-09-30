@@ -45,7 +45,7 @@ pnpm run live                     # step 3 through the assemblers, then to every
 pnpm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
 deploy/stage-context.sh /tmp/cwa-context                                     # the container build context: this repo and the three checkouts, nothing ignored
 podman build -f /tmp/cwa-context/cwa-demo-app/Containerfile -t cwa-demo-app /tmp/cwa-context   # the image; see the Containerfile
-deploy/openshift/deploy.sh        # to the current oc project: in-cluster build, or IMAGE=quay.io/<you>/cwa-demo-app for a podman build; .env becomes the Secret
+deploy/openshift/deploy.sh        # to the current oc project: in-cluster build, or IMAGE=quay.io/<you>/cwa-demo-app for a podman build; .env becomes the Secret; ROUTE_HOST, ROUTE_PATH, STORAGE_CLASS, STORAGE_SIZE parametrize it
 ```
 
 pnpm is the package manager: `packageManager` in package.json pins its version, and the TypeScript assembler is a `link:` dependency, so a rebuild in `../cwa-assembler-ts` reaches this app without a reinstall. Don't run `npm install` here: it writes its own lockfile and a different layout, and `test/toolchain.test.mjs` will say so.

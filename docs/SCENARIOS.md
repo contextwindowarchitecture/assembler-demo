@@ -120,7 +120,7 @@ Six steps, one question, about fifteen minutes. The page is `/intermediate/`. St
 
 **Point at:** the plan memory, now `conflict_lost`. The account says Pro; the memory from August says Free. The application declared a fact group on `plan`; the route's precedence puts the state service first. Nobody read the prose.
 
-**Point at:** the conflicts table: `g-plan` resolved by policy, winner the account row; `g-cite` escalated and surfaced. Switch the rendering to messages: both citation instructions are in the system channel marked with the group id.
+**Point at:** the conflicts table: `g-plan` resolved by policy, winner the account row; `g-cite` escalated and surfaced. Switch the rendering to messages: both citation instructions are in the system channel, each text wrapped in `<conflict group="g-cite">` by the renderer.
 
 **Say:** an unresolved conflict is never dropped silently; the route says surface, request context or refuse.
 

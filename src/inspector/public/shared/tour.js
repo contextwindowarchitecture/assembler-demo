@@ -6,6 +6,8 @@ const FIELDS = ['title', 'look', 'what', 'why'];
 
 export const nextIndex = (stops, index) => Math.min(index + 1, stops.length);
 export const backIndex = (stops, index) => Math.max(index - 1, 1);
+/** Each stop's place in the band's progress row: done, now (the stop shown) or todo. */
+export const progress = (index, total) => Array.from({ length: total }, (_, k) => (k + 1 < index ? 'done' : k + 1 === index ? 'now' : 'todo'));
 
 /** The tour's 1-based stop from `?tour=N`, or null when the tour is not active. */
 export function parseTourState(search) {

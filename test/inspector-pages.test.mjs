@@ -73,13 +73,29 @@ test('the theme is the website\'s: an attribute on <html> the masthead toggles, 
   assert.equal(themeLabel('dark'), 'light');
 });
 
-test('the stylesheet carries the style guide\'s token block verbatim, and no colour outside it', () => {
+/** The inverse block the guide derives from the website's block: the other theme's value of every token but the planes. */
+function inverseBlockOf(block) {
+  const [, light, dark] = block.match(/^:root {\n([\s\S]*?)\n}\nhtml\[data-theme="dark"\] {\n([\s\S]*?)\n}$/);
+  const values = text => Object.fromEntries([...text.matchAll(/--([\w-]+): ([^;]+);/g)].map(m => [m[1], m[2]]));
+  const l = values(light);
+  const d = values(dark);
+  const names = Object.keys(l).filter(name => !name.startsWith('p-') && name in d);
+  const lines = from => names.map(name => `  --inv-${name}: ${from[name]};`).join('\n');
+  return `:root {\n${lines(d)}\n}\nhtml[data-theme="dark"] {\n${lines(l)}\n}`;
+}
+
+test('the stylesheet carries the style guide\'s token block verbatim, the inverse block derived from it, and no colour outside them', () => {
   const css = read('style.css');
   const guide = fs.readFileSync(path.join(ROOT, 'STYLE.md'), 'utf8');
   const block = guide.match(/```css\n(:root {\n[\s\S]*?\n})\n```/)[1];
   assert.match(block, /--p-inter: oklch\(0\.76 0\.13 310\);\n}$/, 'the guide\'s block ends with the dark plane colours');
   assert.ok(css.includes(block), 'style.css contains the token block from STYLE.md section 2, verbatim');
-  const rest = css.replace(block, '');
+  const inverse = inverseBlockOf(block);
+  assert.match(inverse, /^:root {\n  --inv-bg: oklch\(0\.175 0\.008 80\);\n/, 'on a light page the inverse ground is the dark theme\'s');
+  assert.match(inverse, /--inv-accent-soft: oklch\(0\.94 0\.035 45\);\n}$/, 'and on a dark page the inverse accent-soft is the light theme\'s');
+  assert.ok(css.includes(inverse), 'style.css carries the inverse block: the other theme\'s value of every token but the planes, derived from the website\'s block');
+  assert.ok(guide.includes(inverse), 'STYLE.md section 2 shows the same inverse block');
+  const rest = css.replace(block, '').replace(inverse, '');
   const literal = rest.match(/#[0-9a-fA-F]{3,8}(?![\w-])|\b(rgba?|hsla?|oklch|oklab|lab|lch)\(/);
   assert.equal(literal, null, `a colour literal outside the token block: ${literal?.[0]} near "${rest.slice(Math.max(0, (literal?.index ?? 0) - 40), (literal?.index ?? 0) + 40)}"`);
   const mixes = [...rest.matchAll(/color-mix\((?:[^()]|\([^()]*\))*\)/g)].map(m => m[0]);
@@ -244,11 +260,12 @@ test('the pages reach the server by URLs relative to their own, so a path prefix
   assert.match(read('index.html'), /location\.pathname\.endsWith\('\/'\)/);
 });
 
-test('every stage page carries the guided tour: a band at the foot of the pinned block and a masthead button, and the landing starts each tour', () => {
+test('every stage page carries the guided tour: a band after the pinned block and a masthead button, and the landing starts each tour', () => {
   for (const stage of ['basic', 'intermediate', 'advanced']) {
     const html = read(`${stage}/index.html`);
     const top = html.match(/<header class="top">([\s\S]*?)<\/header>/)?.[1] ?? '';
-    assert.match(top, /<section class="tour" id="tour" hidden/, `${stage}: the band is in the pinned block, so it stays while the page scrolls to what it points at, and starts closed`);
+    assert.doesNotMatch(top, /id="tour"/, `${stage}: the band is not in the pinned block, whose measured height the column headers and the rail sit under`);
+    assert.match(html, /<\/header>\s*<section class="tour" id="tour" hidden/, `${stage}: the band follows the pinned block and starts closed`);
     const right = html.match(/<div class="masthead-right">([\s\S]*?)<\/div>/)?.[1] ?? '';
     assert.match(right, /<button id="tour-toggle" type="button" aria-pressed="false" hidden>Take the tour<\/button>/, `${stage}: the masthead button, hidden until the page has a tour`);
   }
@@ -257,7 +274,28 @@ test('every stage page carries the guided tour: a band at the foot of the pinned
     if (!fs.existsSync(path.join(PUBLIC, 'shared', 'tours', `${stage}.js`))) continue;
     assert.match(landing, new RegExp(`href="${stage}/\\?tour=1"`), `the landing starts the ${stage} tour`);
   }
+});
+
+test('the tour band is the one inverse surface: the other theme\'s tokens, fixed over the page as a rail, or a dock below 1280px', () => {
   const css = read('style.css');
-  assert.match(css, /\.tour\s*{[^}]*border-top: 1px solid var\(--fg\)/, 'the band carries the emphasis border, not the accent a refusal owns');
-  assert.match(css, /\.tour-target\s*{[^}]*outline: 2px solid var\(--fg\)/, 'what a stop points at is outlined in the same ink');
+  const base = css.slice(0, css.indexOf('@media'));
+  for (const token of ['bg', 'surface', 'fg', 'muted', 'line', 'accent', 'accent-soft']) {
+    assert.match(base, new RegExp(`\\.tour\\s*{[^}]*--${token}: var\\(--inv-${token}\\)`), `the band swaps --${token} to the other theme's`);
+  }
+  assert.match(base, /\.tour\s*{[^}]*position: fixed/, 'the band is fixed over the page, not in the flow');
+  assert.match(base, /\.tour\s*{[^}]*z-index: 39/, 'under the glossary (40), which covers it while open, and above the column headers (2)');
+  assert.match(base, /\.tour\s*{[^}]*top: var\(--top-h/, 'the rail starts under the pinned block');
+  assert.match(base, /\.tour\s*{[^}]*width: 400px/, 'the rail is the glossary\'s width');
+  assert.match(base, /\.tour\[hidden\]\s*{[^}]*display: none/, 'a closed band leaves no strip behind');
+  assert.match(base, /\.tour\.invite\s*{[^}]*top: auto/, 'the invite is always the dock');
+  assert.match(base, /:root\[data-touring="1"\] body\s*{[^}]*padding-right: 400px/, 'the page makes room for the rail');
+  assert.match(base, /:root\[data-touring="1"\] \.instruments \.controls \.hint\s*{[^}]*display: none/, 'the instruments\' arrow-key hint hides while the arrows move stops');
+  const dock = [...css.matchAll(/@media \(max-width: (\d+)px\)\s*{([\s\S]*?)\n}/g)].find(m => /\.tour\s*{[^}]*top: auto/.test(m[2]));
+  assert.ok(dock, 'one breakpoint turns the rail into the dock');
+  assert.equal(Number(dock[1]), 1280, 'at 1280px and below, two columns in 400px less would be too narrow');
+  assert.match(dock[2], /:root\[data-touring="1"\] body\s*{[^}]*padding-bottom: var\(--tour-h/, 'the page makes room for the dock, whose height the band measures');
+  assert.match(dock[2], /:root:has\(\.glossary:not\(\[hidden\]\)\) \.tour\s*{[^}]*right: 400px/, 'the dock stops at the open glossary\'s edge');
+  assert.match(css, /\.tour-target\s*{[^}]*outline: 2px solid var\(--fg\)/, 'what a stop points at is outlined in the page\'s ink');
+  assert.doesNotMatch(css, /body::before/, 'nothing dims the page: the copy names two places at once');
+  assert.match(read('shared/tour-band.js'), /'--tour-h'/, 'the band keeps --tour-h at its measured height');
 });

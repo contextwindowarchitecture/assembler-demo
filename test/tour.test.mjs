@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { backIndex, fill, nextIndex, parseTourState, tourKey, tourSearch, validateStops } from '../src/inspector/public/shared/tour.js';
+import { backIndex, fill, nextIndex, parseTourState, progress, tourKey, tourSearch, validateStops } from '../src/inspector/public/shared/tour.js';
 
 const stop = (id, extra = {}) => ({ id, at: { step: '01-clean' }, target: 'columns', title: 'A title', look: 'Look here.', what: 'What happened.', why: 'Why it matters.', proves: [], ...extra });
 
@@ -15,6 +15,13 @@ test('the tour index moves within its stops and never past either end', () => {
   assert.equal(nextIndex(stops, 3), 3);
   assert.equal(backIndex(stops, 2), 1);
   assert.equal(backIndex(stops, 1), 1);
+});
+
+test('progress marks each stop as done, the one shown, or still to come', () => {
+  assert.deepEqual(progress(3, 5), ['done', 'done', 'now', 'todo', 'todo']);
+  assert.deepEqual(progress(1, 3), ['now', 'todo', 'todo']);
+  assert.deepEqual(progress(3, 3), ['done', 'done', 'now']);
+  assert.deepEqual(progress(1, 1), ['now']);
 });
 
 test('the tour state lives in ?tour=N beside whatever else the URL carries', () => {

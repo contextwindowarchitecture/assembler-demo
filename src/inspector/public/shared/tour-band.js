@@ -1,9 +1,10 @@
-// The guided tour's band: the pinned strip that walks a visitor through a stage, one stop at a time. A stop selects
-// a step (or a run and a turn) through the page's own adapter, outlines what it talks about, and says where to look,
-// what the assembler did and why it matters. The copy's numbers and ids are filled from the trace and the snapshot
-// the page is showing (tour.js); the band formats them and decides nothing.
+// The guided tour's band: the inverse strip fixed over the page (a rail beside it, or a dock along its foot) that walks
+// a visitor through a stage, one stop at a time. A stop selects a step (or a run and a turn) through the page's own
+// adapter, outlines what it talks about, and says where to look, what the assembler did and why it matters. The copy's
+// numbers and ids are filled from the trace and the snapshot the page is showing (tour.js); the band formats them and
+// decides nothing.
 import { $, esc, reasonChip, tag, url, words } from './format.js';
-import { backIndex, fill, nextIndex, parseTourState, tourKey, tourSearch } from './tour.js';
+import { backIndex, fill, nextIndex, parseTourState, progress, tourKey, tourSearch } from './tour.js';
 
 let active = null; // the running tour's controller, or null
 /** Whether a tour is running: the page's own arrow keys yield to it while one is. */
@@ -26,6 +27,11 @@ export function initTour({ stage, stops, adapter, reasonText }) {
   const tour = { index: null, busy: false };
   active = tour;
   if (toggle) toggle.hidden = false;
+  // The page makes room for the band: beside the rail, under the dock. The dock's height changes with the stop, so it is
+  // measured and kept on <html>, as chrome.js keeps the pinned block's.
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => document.documentElement.style.setProperty('--tour-h', `${band.offsetHeight}px`)).observe(band);
+  }
 
   const stopAt = index => stops[index - 1];
   const target = () => (tour.index ? stopAt(tour.index).target : null);
@@ -60,12 +66,12 @@ export function initTour({ stage, stops, adapter, reasonText }) {
     const forward = next
       ? `<button type="button" class="primary" id="tour-next">${esc(stop.next ?? (moves ? `Next: ${adapter.label(next.at)}` : 'Next'))} →</button>`
       : stop.onward ? `<a class="btn" href="${esc(url(stop.onward.href))}">${esc(stop.onward.label)} →</a>` : '';
+    band.classList.remove('invite');
     band.innerHTML = `
       <div class="tour-head">
         <span class="kicker">Tour · ${esc(stage)} · ${tour.index} of ${stops.length}</span>
         <span class="label">${esc(adapter.label(stop.at))}</span>
-        <div class="tour-nav"><button type="button" id="tour-back"${tour.index === 1 ? ' disabled' : ''}>← Back</button>${forward}
-          <button type="button" id="tour-leave" title="Esc">${next ? 'Leave the tour' : 'Finish the tour'}</button></div>
+        <span class="tour-progress" aria-hidden="true">${progress(tour.index, stops.length).map(state => `<i class="${state}"></i>`).join('')}</span>
       </div>
       <h2 class="tour-title">${copy.title}</h2>
       <div class="tour-lines">
@@ -73,7 +79,10 @@ export function initTour({ stage, stops, adapter, reasonText }) {
         <div class="tour-line"><div class="label">What you see</div><p>${copy.what}</p></div>
         <div class="tour-line"><div class="label">Why it matters</div><p>${copy.why}</p></div>
       </div>
-      ${proves}`;
+      ${proves}
+      <div class="tour-nav"><button type="button" id="tour-back"${tour.index === 1 ? ' disabled' : ''}>← Back</button>${forward}
+        <button type="button" id="tour-leave" title="Esc">${next ? 'Leave the tour' : 'Finish the tour'}</button>
+        <span class="tour-keys" aria-hidden="true">← → · Esc</span></div>`;
     $('#tour-back').addEventListener('click', () => go(backIndex(stops, tour.index)));
     $('#tour-next')?.addEventListener('click', () => go(nextIndex(stops, tour.index)));
     $('#tour-leave').addEventListener('click', leave);
@@ -84,6 +93,7 @@ export function initTour({ stage, stops, adapter, reasonText }) {
     try { dismissed = localStorage.getItem(inviteKey) === '1'; } catch { /* storage may be unavailable; the invite shows */ }
     if (dismissed) { band.hidden = true; band.innerHTML = ''; return; }
     band.hidden = false;
+    band.classList.add('invite');
     band.innerHTML = `
       <div class="tour-invite">
         <span class="kicker">Guided tour · ${esc(stage)} stage</span>

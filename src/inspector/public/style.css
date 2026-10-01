@@ -43,6 +43,27 @@ html[data-theme="dark"] {
   --p-inter: oklch(0.76 0.13 310);
 }
 
+/* The inverse block: the other theme's value of every token but the planes, for the one surface that must read as the
+   other theme, the guided tour's band (STYLE.md section 2). Derived from the block above; a test checks that it is. */
+:root {
+  --inv-bg: oklch(0.175 0.008 80);
+  --inv-surface: oklch(0.215 0.008 80);
+  --inv-fg: oklch(0.955 0.004 90);
+  --inv-muted: oklch(0.68 0.010 85);
+  --inv-line: oklch(0.305 0.008 80);
+  --inv-accent: oklch(0.74 0.17 45);
+  --inv-accent-soft: oklch(0.30 0.045 45);
+}
+html[data-theme="dark"] {
+  --inv-bg: oklch(0.985 0.004 90);
+  --inv-surface: oklch(0.955 0.005 90);
+  --inv-fg: oklch(0.20 0.010 80);
+  --inv-muted: oklch(0.52 0.010 80);
+  --inv-line: oklch(0.885 0.006 90);
+  --inv-accent: oklch(0.60 0.20 38);
+  --inv-accent-soft: oklch(0.94 0.035 45);
+}
+
 /* The inspector's own tokens: a size scale talk mode raises in one place. No colour. */
 :root {
   --fs: 15px; --fs-sm: 14px; --fs-label: 11px; --fs-kicker: 12px; --fs-mono: 12.5px; --fs-title: 16px; --fs-h3: 22px; --fs-lede: 18px;
@@ -376,29 +397,62 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
 .landing-foot { justify-content: space-between; align-items: center; }
 .landing-foot .right { display: flex; gap: 20px; flex-wrap: wrap; }
 
-/* The guided tour: a band at the foot of the pinned block, in the emphasis panel's ink (the accent belongs to refusal and
-   exclusion), and the same ink as an outline on what the current stop points at. Nothing moves: the page jumps. */
-.tour { border-top: 1px solid var(--fg); background: var(--bg); padding: 14px 32px 16px; display: flex; flex-direction: column; gap: 10px; }
-.tour-head { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+/* The guided tour: the one inverse surface on the page. The band swaps its seven colour tokens to the other theme's, so
+   it is ink with paper type on a light page and paper with ink type on a dark one, and everything inside it keeps its
+   ordinary rules in the swapped tokens: the kicker, the primary button and a reason chip stay the accent; ghost buttons
+   and quiet chips take --muted as their border, since the inverse line would vanish into the ground. It is fixed over
+   the page, never in the pinned block: a 400px rail on the right under the top block, which the page makes room for
+   (STYLE.md section 6), and at 1280px and below a dock along the foot of the viewport. The invite is always the dock.
+   The page's own ink outlines what the current stop points at. Nothing moves: the page jumps. */
+.tour { --bg: var(--inv-bg); --surface: var(--inv-surface); --fg: var(--inv-fg); --muted: var(--inv-muted); --line: var(--inv-line); --accent: var(--inv-accent); --accent-soft: var(--inv-accent-soft);
+  position: fixed; top: var(--top-h, var(--mast-h)); right: 0; bottom: 0; width: 400px; max-width: 100%; z-index: 39; overflow: auto; background: var(--bg); color: var(--fg); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.tour[hidden] { display: none; }
+.tour.invite { top: auto; left: 0; width: auto; overflow: visible; padding: 14px 32px; }
+:root[data-touring="1"] body { padding-right: 400px; }
+:root[data-touring="1"] .top { margin-right: -400px; }
+:root[data-touring="1"] .instruments .controls .hint { display: none; }
+.tour button:not(.primary) { color: var(--fg); border-color: var(--muted); }
+.tour button:not(.primary):hover { border-color: var(--fg); }
+.tour .chip:not(.bad) { border-color: var(--muted); }
+.tour-head { display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; }
 .tour-head .kicker, .tour-head .label { margin-bottom: 0; }
-.tour-title { font-size: var(--fs-title); font-weight: 600; letter-spacing: -0.015em; line-height: 1.35; text-wrap: balance; }
-.tour-lines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 28px; }
+.tour-progress { display: flex; gap: 3px; align-items: center; }
+.tour-progress i { display: block; width: 7px; height: 7px; border: 1px solid var(--muted); }
+.tour-progress i.done { background: var(--fg); border-color: var(--fg); }
+.tour-progress i.now { background: var(--accent); border-color: var(--accent); }
+.tour-title { font-size: var(--fs-h3); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; text-wrap: balance; }
+.tour-lines { display: grid; grid-template-columns: 1fr; gap: 12px 28px; }
 .tour-line .label { margin-bottom: 4px; }
 .tour-line p { font-size: var(--fs-sm); line-height: 1.55; max-width: 64ch; }
 .tour-proves { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .tour-proves .label { margin: 0 4px 0 0; }
-.tour-nav { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tour-nav { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tour-nav a.btn { font-size: 14px; padding: 9px 18px; }
+.tour-keys { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.05em; color: var(--muted); margin-left: auto; }
 .tour-invite { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; }
+.tour-invite .tour-nav { margin: 0 0 0 auto; padding: 0; border: 0; }
 .tour-invite p { font-size: var(--fs-sm); line-height: 1.55; max-width: 72ch; }
-.tour-target { outline: 2px solid var(--fg); outline-offset: 3px; scroll-margin-top: calc(var(--top-h, calc(var(--mast-h) + var(--band-h))) + 104px); }
+.tour-target { outline: 2px solid var(--fg); outline-offset: 3px; scroll-margin-top: calc(var(--top-h, calc(var(--mast-h) + var(--band-h))) + 48px); }
 
 @media (max-width: 1400px) {
   .hero { grid-template-columns: 1fr; }
 }
+@media (max-width: 1280px) {
+  .tour { top: auto; left: 0; width: auto; overflow: visible; padding: 14px 32px 16px; }
+  .tour:not(.invite):not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 24px; align-items: center; }
+  .tour:not(.invite) > .tour-nav { grid-column: 2; grid-row: 1; margin: 0; padding: 0; border: 0; justify-self: end; }
+  .tour-title, .tour-lines, .tour-proves { grid-column: 1 / -1; }
+  .tour-title { font-size: var(--fs-title); letter-spacing: -0.015em; line-height: 1.35; }
+  .tour-lines { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 28px; }
+  .tour-keys { margin-left: 6px; }
+  :root[data-touring="1"] body { padding-right: 0; padding-bottom: var(--tour-h, 0px); }
+  :root[data-touring="1"] .top { margin-right: 0; }
+  :root:has(.glossary:not([hidden])) .tour { right: 400px; }
+}
 @media (max-width: 900px) {
   .tour { padding-left: 20px; padding-right: 20px; }
   .tour-lines { grid-template-columns: 1fr; }
+  :root:has(.glossary:not([hidden])) .tour { right: 0; }
   .scenario { grid-template-columns: 1fr; }
   .stage-cells { grid-template-columns: 1fr; }
   .masthead, .stepband, .instruments, .scenario, .foot, .producers-strip, .routes, .timeline { padding-left: 20px; padding-right: 20px; }

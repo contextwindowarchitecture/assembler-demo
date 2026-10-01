@@ -37,11 +37,15 @@ export function initTour({ stage, stops, adapter, reasonText }) {
   const target = () => (tour.index ? stopAt(tour.index).target : null);
   const find = key => document.querySelector(`[data-tour="${CSS.escape(key)}"]`);
 
-  /** Outline what the stop points at; the columns redraw often, so this runs again after every redraw. */
+  /** Outline what the stop points at and flag it with the stop's number; the columns redraw often, so this runs again
+   * after every redraw. */
   function mark() {
     const key = target();
-    for (const el of document.querySelectorAll('.tour-target')) if (el.dataset.tour !== key) el.classList.remove('tour-target');
-    if (key) find(key)?.classList.add('tour-target');
+    for (const el of document.querySelectorAll('.tour-target')) {
+      if (el.dataset.tour !== key) { el.classList.remove('tour-target'); delete el.dataset.tourStop; }
+    }
+    const el = key ? find(key) : null;
+    if (el) { el.classList.add('tour-target'); el.dataset.tourStop = String(tour.index); }
   }
   new MutationObserver(() => { if (tour.index) mark(); }).observe(document.body, { childList: true, subtree: true });
 

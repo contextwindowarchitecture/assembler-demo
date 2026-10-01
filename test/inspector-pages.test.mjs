@@ -299,3 +299,13 @@ test('the tour band is the one inverse surface: the other theme\'s tokens, fixed
   assert.doesNotMatch(css, /body::before/, 'nothing dims the page: the copy names two places at once');
   assert.match(read('shared/tour-band.js'), /'--tour-h'/, 'the band keeps --tour-h at its measured height');
 });
+
+test('what a stop points at carries a flag in the band\'s colours: the stop\'s number and "look here" on its top edge', () => {
+  const css = read('style.css');
+  assert.match(css, /\.tour-target\s*{[^}]*position: relative/, 'the flag is placed against the target');
+  assert.match(css, /\.tour-target::after\s*{[^}]*content: attr\(data-tour-stop\) " · look here"/, 'the flag reads the stop\'s number from the target and says where to look');
+  assert.match(css, /\.tour-target::after\s*{[^}]*background: var\(--inv-bg\)/, 'in the band\'s ground');
+  assert.match(css, /\.tour-target::after\s*{[^}]*color: var\(--inv-fg\)/, 'and the band\'s type');
+  assert.match(css, /\.tour-target::after\s*{[^}]*border-radius: var\(--pill\)/, 'a pill, like every chip');
+  assert.match(read('shared/tour-band.js'), /dataset\.tourStop = String\(tour\.index\)/, 'the band writes the stop\'s number on the target');
+});

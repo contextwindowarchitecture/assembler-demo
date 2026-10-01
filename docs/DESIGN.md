@@ -57,13 +57,13 @@ Every assembler is reached the same way, the protocol `PORTING.md` in the assemb
 `compare.mjs` follows `conformance/README.md`, Running a case:
 
 - Payload bytes are compared byte for byte. A refusal where a payload was expected, or the reverse, is a failure with the reference runner's wording.
-- Traces are compared field for field after removing only `trace_id` and `timings` (R-23). The first difference is reported as a JSON pointer, keys visited in UTF-16 code unit order (Ordering), so the report is the same one the reference runner would give.
+- Traces are compared field for field after removing only `trace_id` and `timings` (R-23), and `recovery.detail`, free text for people that no requirement defines (Running a case). The first difference is reported as a JSON pointer, keys visited in UTF-16 code unit order (Ordering), so the report is the same one the reference runner would give.
 - `unsupported` is `skipped`, never `passed`. A rejection snapshot passes only when the adapter rejected it.
 - `agreement()` takes the first judged result as the reference and compares every other with it. This is the brief's three-compiler check. It does not replace the expectation: three assemblers can agree on the same mistake.
 
 ### Expectations
 
-`cwa-demo expect --from <assembler>` writes `expected.payload.txt` and `expected.trace.json` for each rendering of each step, with `trace_id` set to the step and rendering and `timings` removed, so the files are stable. `scenario.json` records `expectations.generated_by` and `expectations.reviewed`. Regenerating a changed expectation sets `reviewed` back to `false`; an unchanged one keeps its review. The compare table and the inspector badge show unreviewed expectations as such.
+`cwa-demo expect --from <assembler>` writes `expected.payload.txt` and `expected.trace.json` for each rendering of each step, with `trace_id` set to the step and rendering and `timings` and `recovery.detail` removed, so the files are stable and hold only what is compared. `scenario.json` records `expectations.generated_by` and `expectations.reviewed`. Regenerating a changed expectation sets `reviewed` back to `false`; an unchanged one keeps its review. The compare table and the inspector badge show unreviewed expectations as such.
 
 The scenario tests check each expectation against itself and its snapshot: the payload's SHA-256 equals `result.hash`; `context.snapshot_digest` equals the digest of the committed snapshot, recomputed with the TypeScript assembler's exported function, so a Python-generated expectation is checked against a second implementation of RFC 8785; every reason code a step says to look for is recorded.
 

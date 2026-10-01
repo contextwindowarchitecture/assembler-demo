@@ -17,7 +17,7 @@ Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work st
 ## What this app must never do
 
 - **Never assemble.** No admission, fitting or rendering logic lives here. If a scenario needs a behavior the assemblers lack, the spec changes first (in the website repo), then the assemblers, then this app.
-- **Never patch an assembler's output.** The harness compares what the adapters return, byte for byte for payloads and field for field for traces (minus `trace_id` and `timings`). A difference is a finding, not something to normalize away.
+- **Never patch an assembler's output.** The harness compares what the adapters return, byte for byte for payloads and field for field for traces (minus `trace_id`, `timings` and `recovery.detail`). A difference is a finding, not something to normalize away.
 - **Never let a refusal reach a model.** The provider adapter takes a payload, and a refused assembly has none.
 - **Never read the assemblers' source to decide an expectation.** Expectations come from a named assembler's run, are committed, and are reviewed by a person. `scenario.json` records which and whether.
 

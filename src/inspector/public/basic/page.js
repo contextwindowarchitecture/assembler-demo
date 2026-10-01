@@ -108,7 +108,7 @@ function renderBadges() {
     const judged = results.filter(r => ['assembled', 'refused', 'rejected'].includes(r.outcome)).length;
     if (results.length > 1) {
       badges.push(agreement.agree
-        ? `<span class="chip ok dot" title="payload bytes and traces (without trace_id and timings) are identical">${judged} assemblers agree</span>`
+        ? `<span class="chip ok dot" title="payload bytes and traces (without trace_id, timings and recovery.detail) are identical">${judged} assemblers agree</span>`
         : `<span class="chip fill dot" title="${esc(agreement.differences.map(d => `${d.assembler} vs ${d.against}: ${d.detail}`).join('\n'))}">assemblers DISAGREE</span>`);
     }
     if (expectation) {

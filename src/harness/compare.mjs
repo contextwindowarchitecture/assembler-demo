@@ -1,13 +1,19 @@
 // The comparison conformance/README.md (Running a case) defines, applied to any assembler's result: payload bytes
-// byte for byte, traces field for field without trace_id and timings (R-23), and the JSON pointer of the first
+// byte for byte, traces field for field without trace_id, timings (R-23) and recovery.detail, and the JSON pointer of the first
 // difference. Nothing here normalizes an assembler's output; a difference is a finding.
 
 /** Trace fields that may differ between runs of the same snapshot (R-23). Everything else is compared. */
 export const IGNORED = ['trace_id', 'timings'];
 
+/** A copy of the trace without the fields conformance never compares: IGNORED, and recovery.detail, free text for
+ * people that no requirement defines (conformance/README.md, Running a case). */
 export function comparable(trace) {
   const out = {};
   for (const key of Object.keys(trace)) if (!IGNORED.includes(key)) out[key] = trace[key];
+  if (out.recovery) {
+    const { detail, ...recovery } = out.recovery;
+    out.recovery = recovery;
+  }
   return out;
 }
 

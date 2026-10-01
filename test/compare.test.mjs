@@ -1,5 +1,5 @@
 // The comparison the brief and conformance/README.md (Running a case) require: payload bytes byte for byte, traces
-// field for field without trace_id and timings, and the JSON pointer of the first difference.
+// field for field without trace_id, timings and recovery.detail, and the JSON pointer of the first difference.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { agreement, comparable, compareResult, firstDifference } from '../src/harness/compare.mjs';
@@ -12,11 +12,27 @@ const trace = (overrides = {}) => ({
   defaults_filled: [], ...overrides,
 });
 
-test('comparable removes only trace_id and timings', () => {
+test('comparable removes only trace_id and timings at the top level', () => {
   const stripped = comparable(trace());
   assert.equal('trace_id' in stripped, false);
   assert.equal('timings' in stripped, false);
   assert.deepEqual(Object.keys(stripped).sort(), ['budget', 'compressed', 'conflicts', 'context', 'defaults_filled', 'excluded', 'included', 'profile', 'refused', 'result'].sort());
+});
+
+test('comparable removes recovery.detail and keeps recovery.action, without touching the trace it was given', () => {
+  const original = trace({ refused: { bool: true, reason: 'evidence_required' }, result: null, recovery: { action: 'request_context', detail: 'ask for the order id' } });
+  assert.deepEqual(comparable(original).recovery, { action: 'request_context' });
+  assert.equal(original.recovery.detail, 'ask for the order id');
+  assert.equal('recovery' in comparable(trace()), false);
+});
+
+test('compareResult ignores a difference in recovery.detail but not in recovery.action', () => {
+  const refused = recovery => ({ payload: null, trace: trace({ refused: { bool: true, reason: 'evidence_required' }, result: null, recovery }) });
+  const expected = refused({ action: 'request_context', detail: 'one wording' });
+  const result = detail => ({ outcome: 'refused', ...refused(detail) });
+  assert.deepEqual(compareResult(result({ action: 'request_context', detail: 'another wording' }), expected), { outcome: 'passed' });
+  assert.deepEqual(compareResult(result({ action: 'request_context' }), expected), { outcome: 'passed' });
+  assert.deepEqual(compareResult(result({ action: 'retrieve_narrower', detail: 'one wording' }), expected), { outcome: 'failed', detail: 'trace differs at /recovery/action' });
 });
 
 test('firstDifference reports the JSON pointer of the first differing value, or null', () => {

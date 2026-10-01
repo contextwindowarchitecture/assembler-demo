@@ -246,7 +246,7 @@ export const TERMS = [
   },
   {
     term: 'conformance', kind: 'spec',
-    text: 'The published cases and rejections an assembler must reproduce: for each case the exact payload bytes and the trace, minus trace_id and timings. This demo vendors them and runs all of them through every assembler as the harness\'s own self-check before it is trusted with the scenarios.',
+    text: 'The published cases and rejections an assembler must reproduce: for each case the exact payload bytes and the trace, minus trace_id, timings and recovery.detail. This demo vendors them and runs all of them through every assembler as the harness\'s own self-check before it is trusted with the scenarios.',
     see: ['agreement', 'harness'], rules: ['R-21', 'R-23'],
   },
   {
@@ -318,7 +318,7 @@ export const TERMS = [
   },
   {
     term: 'agreement', kind: 'demo',
-    text: 'Every assembler that ran returned the same payload bytes and the same trace fields, minus trace_id and timings. The badge says how many ran; a disagreement is the loudest badge on the page and a finding, never something to normalise away.',
+    text: 'Every assembler that ran returned the same payload bytes and the same trace fields, minus trace_id, timings and recovery.detail. The badge says how many ran; a disagreement is the loudest badge on the page and a finding, never something to normalise away.',
     see: ['expectation', 'conformance'],
   },
   {

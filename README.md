@@ -97,7 +97,7 @@ node src/harness/cli.mjs run scenarios/basic/04-budget/snapshot.json   # one sna
 node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider local   # assemble, then ask a real model
 ```
 
-Comparison follows `conformance/README.md`: payloads byte for byte; traces field for field without `trace_id` and `timings`; the JSON pointer of the first difference; an unsupported tokenizer or renderer is skipped, never passed. Three matching assemblers can share a mistake, so the committed expectation is the independent check.
+Comparison follows `conformance/README.md`: payloads byte for byte; traces field for field without `trace_id`, `timings` and `recovery.detail`; the JSON pointer of the first difference; an unsupported tokenizer or renderer is skipped, never passed. Three matching assemblers can share a mistake, so the committed expectation is the independent check.
 
 ## In a container
 

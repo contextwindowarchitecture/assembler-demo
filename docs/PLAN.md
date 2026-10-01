@@ -88,7 +88,7 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 - `assemblers.json`: the adapter command for each assembler, relative to the repo, with an environment override each.
 - `adapters/python_adapter.py`, `adapters/typescript_adapter.mjs`; `scripts/setup.sh` builds the Go adapter from `../cwa-assembler-go/cmd/adapter` into `bin/`.
 - `src/harness/adapters.mjs`: run one adapter on snapshot bytes; classify the outcome as `assembled`, `refused`, `rejected`, `unsupported` or `error`.
-- `src/harness/compare.mjs`: payload bytes byte for byte; traces field for field without `trace_id` and `timings`; the JSON pointer of the first difference, as the reference runner reports it.
+- `src/harness/compare.mjs`: payload bytes byte for byte; traces field for field without `trace_id`, `timings` and `recovery.detail`; the JSON pointer of the first difference, as the reference runner reports it.
 - `src/harness/cli.mjs`: `run`, `compare`, `expect`, `conformance`.
 - Tests: the compare logic on hand-built traces; the conformance self-check for every available assembler (skipped, not passed, when an adapter is not built).
 

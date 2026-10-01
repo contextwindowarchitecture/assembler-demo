@@ -78,7 +78,7 @@ details > summary { cursor: pointer; }
 /* Buttons: ghost by default, the primary in the accent, the inverse for the current step. Pills, except the tabs
    and the turn cards, which are not buttons in shape. */
 button { font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.05em; color: var(--muted); background: transparent; border: 1px solid var(--line); padding: 0 14px; height: var(--control-sm); cursor: pointer; white-space: nowrap; }
-.masthead button, .instruments button, .steps button, .pidx button, .sendrow > button, button.primary { border-radius: var(--pill); }
+.masthead button, .instruments button, .steps button, .pidx button, .sendrow > button, .tour button, button.primary { border-radius: var(--pill); }
 button:hover { color: var(--fg); border-color: var(--fg); }
 button.primary { font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--bg); background: var(--accent); border-color: var(--accent); height: var(--control); padding: 0 18px; }
 button.primary:hover { background: var(--fg); border-color: var(--fg); color: var(--bg); }
@@ -137,14 +137,15 @@ input#budget { width: 7em; }
 .steps button.active { background: var(--fg); border-color: var(--fg); color: var(--bg); }
 .badges { margin-left: auto; display: inline-flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
-/* The instruments: one quiet row in the pinned block under the step band; folded behind one line in talk mode. */
+/* The instruments: one quiet row in the pinned block under the step band; folded behind one line in talk mode and
+   while a guided tour runs, which sets them for each stop. */
 .instruments { padding: 10px 32px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .instruments-toggle { display: none; gap: 8px; align-items: center; }
 .instruments-toggle .mono { color: var(--fg); letter-spacing: 0; }
 .instruments .controls { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; flex: 1 1 auto; }
 .instruments .controls .hint { margin-left: auto; align-self: center; font-family: var(--mono); font-size: var(--fs-label); }
-:root[data-talk="1"] .instruments-toggle { display: inline-flex; }
-:root[data-talk="1"] .instruments:not(.open) .controls { display: none; }
+:root[data-talk="1"] .instruments-toggle, :root[data-touring="1"] .instruments-toggle { display: inline-flex; }
+:root[data-talk="1"] .instruments:not(.open) .controls, :root[data-touring="1"] .instruments:not(.open) .controls { display: none; }
 
 /* Chips: badges, tags and statuses share one shape. Colour is the outcome (STYLE.md section 3); the word is always there. */
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid var(--line); border-radius: var(--pill); font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; white-space: nowrap; color: var(--muted); }
@@ -349,6 +350,11 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
 .hero .lede { font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 64ch; }
 .hero .cta { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
 .hero .cta .hint { font-family: var(--mono); font-size: var(--fs-label); }
+.hero .cta .cta-alt { font-family: var(--mono); font-size: var(--fs-label); }
+.hero .lead > .hint { font-family: var(--mono); font-size: var(--fs-label); line-height: 1.6; max-width: 64ch; }
+.tour-links { display: flex; gap: 8px 24px; align-items: baseline; flex-wrap: wrap; margin-top: 20px; font-size: 14px; font-weight: 500; }
+.tour-links .label { margin-bottom: 0; }
+.tour-links .num { margin-right: 8px; }
 .pipeline { display: flex; flex-direction: column; gap: 14px; }
 .pipeline .cells { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
 .pipeline .cell { background: var(--bg); padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 6px; }
@@ -368,6 +374,23 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
 .landing-foot { justify-content: space-between; align-items: center; }
 .landing-foot .right { display: flex; gap: 20px; flex-wrap: wrap; }
 
+/* The guided tour: a band at the foot of the pinned block, in the emphasis panel's ink (the accent belongs to refusal and
+   exclusion), and the same ink as an outline on what the current stop points at. Nothing moves: the page jumps. */
+.tour { border-top: 1px solid var(--fg); background: var(--bg); padding: 14px 32px 16px; display: flex; flex-direction: column; gap: 10px; }
+.tour-head { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+.tour-head .kicker, .tour-head .label { margin-bottom: 0; }
+.tour-title { font-size: var(--fs-title); font-weight: 600; letter-spacing: -0.015em; line-height: 1.35; text-wrap: balance; }
+.tour-lines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 28px; }
+.tour-line .label { margin-bottom: 4px; }
+.tour-line p { font-size: var(--fs-sm); line-height: 1.55; max-width: 64ch; }
+.tour-proves { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tour-proves .label { margin: 0 4px 0 0; }
+.tour-nav { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tour-nav a.btn { font-size: 14px; padding: 9px 18px; }
+.tour-invite { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; }
+.tour-invite p { font-size: var(--fs-sm); line-height: 1.55; max-width: 72ch; }
+.tour-target { outline: 2px solid var(--fg); outline-offset: 3px; scroll-margin-top: calc(var(--top-h, calc(var(--mast-h) + var(--band-h))) + 64px); }
+
 @media (max-width: 1400px) {
   .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .column h2 { position: static; }
@@ -375,6 +398,8 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
   .hero { grid-template-columns: 1fr; }
 }
 @media (max-width: 900px) {
+  .tour { padding-left: 20px; padding-right: 20px; }
+  .tour-lines { grid-template-columns: 1fr; }
   .scenario { grid-template-columns: 1fr; }
   .stage-cells { grid-template-columns: 1fr; }
   .masthead, .stepband, .instruments, .scenario, .foot, .producers-strip, .routes, .timeline { padding-left: 20px; padding-right: 20px; }

@@ -16,6 +16,7 @@
       </div>
       <div id="stages"></div>
       <div class="masthead-right">
+        <button id="tour-toggle" type="button" aria-pressed="false" hidden>Take the tour</button>
         <button id="talk" type="button" aria-pressed="false" title="larger type for a projector; folds the instruments behind one line">Talk mode</button>
         <button id="theme" type="button" aria-label="Toggle color theme" title="light or dark; remembered per browser">dark</button>
         <button id="glossary-toggle" type="button" aria-expanded="false" aria-controls="glossary" title="what the words mean; Esc closes">glossary</button>
@@ -50,6 +51,7 @@
         <span class="hint">← → switch steps</span>
       </div>
     </div>
+    <section class="tour" id="tour" hidden aria-label="Guided tour" aria-live="polite"></section>
   </header>
 
   <aside class="glossary" id="glossary" hidden aria-labelledby="glossary-title">

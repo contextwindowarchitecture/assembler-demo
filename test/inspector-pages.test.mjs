@@ -227,3 +227,21 @@ test('the pages reach the server by URLs relative to their own, so a path prefix
   // The landing page fixes a prefix typed without its slash, under which every relative link would resolve one level up.
   assert.match(read('index.html'), /location\.pathname\.endsWith\('\/'\)/);
 });
+
+test('every stage page carries the guided tour: a band at the foot of the pinned block and a masthead button, and the landing starts each tour', () => {
+  for (const stage of ['basic', 'intermediate', 'advanced']) {
+    const html = read(`${stage}/index.html`);
+    const top = html.match(/<header class="top">([\s\S]*?)<\/header>/)?.[1] ?? '';
+    assert.match(top, /<section class="tour" id="tour" hidden/, `${stage}: the band is in the pinned block, so it stays while the page scrolls to what it points at, and starts closed`);
+    const right = html.match(/<div class="masthead-right">([\s\S]*?)<\/div>/)?.[1] ?? '';
+    assert.match(right, /<button id="tour-toggle" type="button" aria-pressed="false" hidden>Take the tour<\/button>/, `${stage}: the masthead button, hidden until the page has a tour`);
+  }
+  const landing = read('index.html');
+  for (const stage of ['basic', 'intermediate', 'advanced']) {
+    if (!fs.existsSync(path.join(PUBLIC, 'shared', 'tours', `${stage}.js`))) continue;
+    assert.match(landing, new RegExp(`href="${stage}/\\?tour=1"`), `the landing starts the ${stage} tour`);
+  }
+  const css = read('style.css');
+  assert.match(css, /\.tour\s*{[^}]*border-top: 1px solid var\(--fg\)/, 'the band carries the emphasis border, not the accent a refusal owns');
+  assert.match(css, /\.tour-target\s*{[^}]*outline: 2px solid var\(--fg\)/, 'what a stop points at is outlined in the same ink');
+});

@@ -85,3 +85,16 @@ test('the pages carry an anchor for every place a tour points', () => {
     'decisions:reasons', 'decisions:context', 'decisions:recovery', 'request:refused', 'snippets', 'candidate:x'];
   for (const key of shared) assert.ok(anchors.has(key), `an element carries data-tour="${key}"`);
 });
+
+test('every tour module is a list of stops the band can show', async () => {
+  for (const stage of ['basic', 'intermediate', 'advanced']) {
+    const file = new URL(`../src/inspector/public/shared/tours/${stage}.js`, import.meta.url);
+    if (!fs.existsSync(file)) continue;
+    const { STOPS } = await import(file);
+    assert.ok(STOPS.length > 0, `${stage}: stops`);
+    assert.deepEqual(validateStops(STOPS), [], `${stage}: every stop complete`);
+    const anchors = anchorKeys();
+    for (const stop of STOPS) assert.ok(anchors.has(stop.target), `${stage}/${stop.id}: data-tour="${stop.target}" is emitted somewhere`);
+  }
+  assert.ok(fs.existsSync(new URL('../src/inspector/public/shared/tours/basic.js', import.meta.url)), 'the basic stage has a tour');
+});

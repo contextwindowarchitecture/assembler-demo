@@ -110,7 +110,7 @@ Reference every colour through `var()`. The stylesheet contains no literal colou
 - **`--muted` is the default for anything secondary.** Ledes, descriptions, every label and kicker inside a card, metadata rows, nav links at rest, the footer, chips at rest. A block is muted unless it is the one thing the reader must read next.
 - **`--accent` is emphasis, never texture.** Section kickers, links, the primary button, the current stage's underline, the note callout's border, text selection, and the two assembler decisions the demo is about: a refusal (the outcome band, the arrows and headers of the columns it never reaches, the *No model request* panel) and an exclusion (the reason-code chip on an excluded candidate, the strip's new codes). Never as running text, never as a large fill other than the primary button and the loud chip.
 - **`--accent-soft` is a fill only.** Hover fill on clickable grid cells and the background of the note callout.
-- **`--line` is every border.** Hairline grids, card borders, dividers, table rules, the ghost button and chip outline, the meter's track, the dashed borders of empty states and producer-excluded rows. Only the note callout (`--accent`), the emphasis panel and conflict chip (`--fg`), the refused candidate (`--accent`, dashed) and ghost buttons on hover (`--fg`) use another border colour.
+- **`--line` is every border.** Hairline grids, card borders, dividers, table rules, the ghost button and chip outline, the meter's track, the dashed borders of empty states and producer-excluded rows. Only the note callout (`--accent`), the emphasis panel, the tour band's top rule, the tour's outline and conflict chip (`--fg`), the refused candidate (`--accent`, dashed) and ghost buttons on hover (`--fg`) use another border colour.
 
 ### Plane colours
 
@@ -231,18 +231,19 @@ The stage pages are full width: four columns need it. The landing page uses the 
 flowchart TB
   M["Masthead · 68px · logo, stage rail, talk mode, theme · sticky"]
   B["Step band · surface · step pills, agreement badges · sticky with the masthead"]
-  I["Instruments · assembler, rendering, budget · sticky with the band · folded in talk mode"]
+  I["Instruments · assembler, rendering, budget · sticky with the band · folded in talk mode and on a tour"]
+  T["Tour band · a stop's look, what and why, Back and Next · sticky with the instruments · hidden until invited or started"]
   S["Step header · kicker, h1, the question, description · snapshot factsheet"]
   X["Stage strips · producers (2), routes and turns (3)"]
   D["Delta strip · hairline grid · what changed since the step you came from"]
   C["Four columns · hairline grid · headers pinned under the band"]
   F["Footer · mono 12px muted"]
   G["Glossary · fixed on the right under the pinned block · opened by the masthead button, Esc closes"]
-  M --> B --> I --> S --> X --> D --> C --> F
+  M --> B --> I --> T --> S --> X --> D --> C --> F
   M -.-> G
 ```
 
-The landing page replaces everything under the masthead with a hero (kicker, headline, lede, the primary button, and the four columns named once in a hairline grid), one surface section with the three stages as clickable hairline cells, and the footer.
+The landing page replaces everything under the masthead with a hero (kicker, headline, lede, the primary button, which starts the basic tour, a mono link to explore on your own, and the four columns named once in a hairline grid), one surface section with the three stages as clickable hairline cells and a row of links that start each stage's tour, and the footer.
 
 ### Spacing values
 
@@ -286,7 +287,7 @@ Snippets are the rules in `style.css`; hover states are ordinary `:hover` rules.
 .masthead { height: var(--mast-h); display: flex; align-items: center; gap: 28px; padding: 0 32px; }
 ```
 
-Order left to right: the logo mark (the 2 by 2 plane grid) and the wordmark "CWA" (`font-weight: 700; letter-spacing: -0.02em; font-size: 16px`, `--fg`) with "support-assistant demo" beside it in `14px` muted, the stage rail, a spacer (`margin-left: auto`), the talk-mode ghost button, the theme ghost button, the glossary ghost button.
+Order left to right: the logo mark (the 2 by 2 plane grid) and the wordmark "CWA" (`font-weight: 700; letter-spacing: -0.02em; font-size: 16px`, `--fg`) with "support-assistant demo" beside it in `14px` muted, the stage rail, a spacer (`margin-left: auto`), the tour ghost button on a stage page that has a tour, the talk-mode ghost button, the theme ghost button, the glossary ghost button.
 
 ### Stage rail
 
@@ -385,6 +386,12 @@ A hairline grid under the step header: the first cell carries the kicker "Since 
 
 Every page carries `<aside class="glossary" id="glossary" hidden>` right after the pinned block, opened by the masthead button `#glossary-toggle` (a ghost pill reading "glossary", lowercase like the theme button beside it) and closed by its Close button, the toggle again, or Esc. It is fixed on the right under the pinned block (`top: var(--top-h)`, `width: 400px`, `z-index: 40`, `--bg`, a 1px `--line` left border), so the step stays where it is. The head bar is the panel header (`padding: 12px 18px`, a bottom hairline): the muted label "Glossary", a text input that filters as you type, and the Close ghost button. The body is a scrolling column of entries under the muted section labels "The spec" and "This demo": each `.term` is the term in the card-title style with its aliases beside it in mono muted, its identifiers as `.mono` in `--fg`, the definition in `var(--fs-sm)`, and a mono line of the requirements it rests on (`R-n`, muted) and see-also links (accent, ending in the arrow). Entries are separated by hairlines; the one a see-also link opened is `.term.hit`, the emphasis border. When a reason code is asked for, a `.reason` card in the note callout style heads the body: the code as an accent identifier, the rule and kind in mono, the registry text. Any element carrying `data-reason` opens the panel there when clicked, and every reason-code chip on the page is one. The entries are data in `public/shared/terms.js`; `public/shared/glossary.js` renders and wires the panel, and `chrome.js` initialises it with the rest of the chrome.
 
+### The guided tour
+
+Every stage page carries `<section class="tour" id="tour" hidden>` as the last child of the pinned block, so it stays on screen while the page scrolls to what a stop points at, and a masthead ghost button `#tour-toggle` reading "Take the tour" (hidden until the page has a tour; the inverse pill while one runs) before the talk-mode button. The band is a strip in the emphasis panel's ink: `--bg`, a 1px `--fg` top rule, the step band's side padding. Its head row carries one accent kicker ("Tour · basic · 2 of 13"), a muted label naming the step, and on the right the ghost Back, the primary Next (labelled with where it goes, "Next: step 3 · authority →"; a primary link on the last stop to the next stage) and the ghost "Leave the tour". Under it the title in the card-title style, then three muted labels with their copy in `var(--fs-sm)`, side by side above 900px: "Look at", "What you see", "Why it matters"; then "Proves" with the stop's reason codes as reason chips and its requirements as line chips. Before a visitor has started or dismissed it, the band is a one-line invite: the kicker "Guided tour · basic stage", a sentence, the primary "Start the tour" and the ghost "Not now".
+
+The element a stop points at carries `.tour-target`: `outline: 2px solid var(--fg); outline-offset: 3px` and a `scroll-margin-top` under the pinned block. It is not the accent, which belongs to a refusal and an exclusion, and it is not the focus ring. The page jumps to it; nothing slides. While a tour runs, `data-touring` on `<html>` folds the instruments behind their summary line as talk mode does. Copy is data in `public/shared/tours/<stage>.js`; backticks in it set an identifier in mono.
+
 ### Tabs
 
 A row of text links in mono `var(--fs-label)`: the active tab is `color: var(--fg); border-bottom: 2px solid var(--accent); padding-bottom: 2px;` and inactive tabs are `--muted`, hovering to `--fg`. The snippet language and endpoint switches, and the segmented controls generally, are tabs, not pills.
@@ -445,7 +452,7 @@ Selection is `--accent` on `--bg`. Interactive elements set `cursor: pointer`. F
 
 The pages are static files served by `src/inspector/server.mjs`; the markup is produced at run time by template strings in the page modules.
 
-- **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the pinned header (the masthead, the step band and the instruments), the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/glossary.js` the glossary panel and `public/shared/terms.js` its entries, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
+- **Structure:** `public/index.html` (the landing) and `public/<stage>/index.html` are the shells: the pinned header (the masthead, the step band and the instruments), the section elements and the four column shells with their ids. `public/<stage>/page.js` owns a stage's state and controls; `public/shared/panels.js` draws the four columns, `public/shared/delta.js` the strip and the change chips, `public/shared/chrome.js` the talk-mode and theme toggles, `public/shared/glossary.js` the glossary panel and `public/shared/terms.js` its entries, `public/shared/tour-band.js` the guided tour's band, `public/shared/tour.js` its pure engine and `public/shared/tours/` each stage's stops, `public/shared/format.js` the helpers, among them `tag(text, cls, title)`, which builds every chip.
 - **Classes, one stylesheet.** Every rule lives in `public/style.css` and selects by class; the shells carry no `style` attribute, and a test checks it. Class names are shared by every page, so a new class must not collide with an existing one.
 - **Three inline values only.** A candidate row sets `--plane` from its slot (`style="--plane: var(--p-evid)"`), a meter segment sets its `flex-basis` and its plane, and `chrome.js` keeps `--top-h` on `<html>` at the measured height of the pinned top block, so the column headers pin under it however the badges wrap. The first two are computed from the snapshot or the trace at run time; nothing else is styled inline.
 - **Theme** is `data-theme` on `<html>`, `cwa-theme` in `localStorage`. A one-line script in each shell's head applies the stored choice before the first paint; `chrome.js` owns the masthead button `#theme` and its label. **Talk mode** is `data-talk`, `cwa-demo-talk`, the button `#talk`. The landing page runs `public/landing.js`, which only initialises this chrome.
@@ -477,7 +484,7 @@ These are how the inspector differs from the website on purpose. They are record
 ## 11. Checklist for a new page or section
 
 1. Copy a stage shell (`public/basic/index.html`): the stylesheet link, the masthead with the logo mark, the stage rail, the talk-mode, theme and glossary buttons, the step band, the instruments, the glossary panel after the header, the section elements and the four columns. Set the `<title>` as "CWA demo · name".
-2. Keep the ids the shared chrome and panels render into: `stages`, `agreement`, `talk`, `theme`, `instruments`, `instruments-toggle`, `instruments-summary`, `glossary-toggle`, `glossary`, `glossary-filter`, `glossary-close`, `glossary-body`, `candidates`, `decisions`, `request`, `answer`, `foot`; the page test lists them.
+2. Keep the ids the shared chrome and panels render into: `stages`, `agreement`, `tour-toggle`, `tour`, `talk`, `theme`, `instruments`, `instruments-toggle`, `instruments-summary`, `glossary-toggle`, `glossary`, `glossary-filter`, `glossary-close`, `glossary-body`, `candidates`, `decisions`, `request`, `answer`, `foot`; the page test lists them.
 3. Open the page with a kicker, a fluid h1 with `text-wrap: balance`, the question as a muted lede at `64ch`, and the factsheet as a bordered panel of key-value rows.
 4. Put one accent kicker above each strip; use muted mono labels for everything inside a column.
 5. Prefer a hairline grid to separate cards; keep cells square, filled with `--bg`, and hover clickable ones to `--accent-soft`.

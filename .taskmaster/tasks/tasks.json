@@ -329,98 +329,114 @@
   "intermediate": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Wire the tour into the intermediate page, with its anchors",
         "description": "Prerequisite: basic tasks 1–3 done (the engine, the anchors and the band). Add the page adapter and the anchors only this page has.",
         "details": "intermediate/page.js: expose the select and apply adapter (step, variant, budget, mode) to the tour band; arrows yield to the tour while it is active. Anchors: producers (the producers panel), mode (the live/replay select), decisions:conflicts and decisions:recovery if they are not already emitted, and a surfaced-conflict anchor inside the request. The tour always starts in replay mode, so it never needs uv or the producers to run.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "tour.test.mjs: the anchor scan covers the new keys. inspector-pages.test.mjs: the intermediate shell keeps #tour in header.top. Remove the producers anchor on purpose and watch it fail.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Anchors for producers, mode, conflicts, recovery, surfaced conflict",
             "description": "Attributes only.",
             "details": "Test first.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.805Z"
           },
           {
             "id": 2,
             "title": "Page adapter and keyboard yield",
             "description": "Mirror the basic wiring.",
             "details": "Commit: feat(inspector): the tour band on the intermediate stage.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
-            ]
+            ],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.806Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:07:18.806Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Intermediate tour content: 11 stops",
         "description": "shared/tours/intermediate.js: the stops listed in the PRD (Intermediate), from \"what changed\" to evidence_required.",
         "details": "Write the 11 stops. The first stop says what is new against basic: real producers, sources competing for one budget, a route that requires evidence. The producers stop explains replay (the default) and what live would do, without running it. Step 4 has two stops: g-plan resolved by policy (conflict_lost, winner user:u_1042:plan) and g-cite surfaced in the payload. Step 5 is budget 330 with state.user protected. Step 6 is evidence_required with recovery request_context and no payload. Numbers and ids come from placeholders.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "tour.test.mjs: steps exist; proves codes in the expected traces; conflict group ids and resolutions (g-plan resolved, g-cite surfaced) asserted from 04-conflict/expected.trace.json; recovery.action asserted from 06-evidence-required; placeholders resolve; targets resolve. Point the conflict stop at step 3 on purpose and watch it fail.",
         "priority": "high",
         "dependencies": [
-          1
+          "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Stops 1–2: what changed, and the producers",
             "description": "Real producers; replay vs live.",
             "details": "Write the stop in shared/tours/intermediate.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.808Z"
           },
           {
             "id": 2,
             "title": "Stops 3–5: duplicates, overlap, memory",
             "description": "duplicate_content in two places, expired; source_diversity_cap, out_of_scope; producer-suppressed and leaked memories.",
             "details": "Write the stop in shared/tours/intermediate.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.809Z"
           },
           {
             "id": 3,
             "title": "Stops 6–7: the plan conflict and the surfaced citation conflict",
             "description": "conflict_lost via precedence; g-cite in the request.",
             "details": "Write the stop in shared/tours/intermediate.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.810Z"
           },
           {
             "id": 4,
             "title": "Stops 8–9: summaries and evidence required",
             "description": "compressed under 330 with state.user protected; evidence_required, request_context.",
             "details": "Write the stop in shared/tours/intermediate.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.810Z"
           },
           {
             "id": 5,
             "title": "Stops 10–11: the answer and the wrap-up",
             "description": "No provider needed; on to advanced.",
             "details": "Write the stop in shared/tours/intermediate.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:07:18.811Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:07:18.811Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Docs and verification pass: intermediate tour",
         "description": "Docs for the intermediate tour, then the STYLE.md checklist in the browser.",
         "details": "README and DESIGN.md mention the intermediate tour; PLAN.md status. Walk all stops in both themes, talk mode, 1024 and 1440 px, step 6 (the refusal), and ?tour=N reloads; use the run skill for screenshots. Fix findings test-first.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "STYLE.md checklist passes; pnpm test green.",
         "priority": "medium",
         "dependencies": [
-          2
+          "2"
         ],
         "status": "pending",
         "subtasks": [
@@ -430,7 +446,8 @@
             "description": "README, DESIGN.md, PLAN.md.",
             "details": "Commit: docs: the intermediate tour.",
             "status": "pending",
-            "dependencies": []
+            "dependencies": [],
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -438,15 +455,20 @@
             "description": "Themes, talk mode, widths, refusal, reload.",
             "details": "",
             "status": "pending",
-            "dependencies": []
+            "dependencies": [],
+            "parentId": "undefined"
           }
         ]
       }
     ],
     "metadata": {
-      "created": "2026-10-01T18:47:02.984Z",
-      "updated": "2026-10-01T18:47:02.984Z",
-      "description": "Guided tour of the intermediate stage. Needs basic tasks 1–3."
+      "version": "1.0.0",
+      "lastModified": "2026-10-01T19:07:18.811Z",
+      "taskCount": 3,
+      "completedCount": 2,
+      "tags": [
+        "intermediate"
+      ]
     }
   },
   "advanced": {

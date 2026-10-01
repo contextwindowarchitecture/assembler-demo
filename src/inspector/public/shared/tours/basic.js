@@ -12,7 +12,7 @@ export const STOPS = [
     at: { step: '01-clean' },
     target: 'columns',
     title: 'One question, four columns: what did CWA assemble, and why?',
-    look: 'The four numbered columns, left to right: candidate context, CWA decisions, outbound request, model answer.',
+    look: 'The four numbered columns, two per row in reading order: candidate context, CWA decisions, outbound request, model answer.',
     what: 'A support assistant is asked “{meta.question}”. Before any model sees it, {snapshot.batches.length} producers hand candidate items to a context assembler, which decides what goes in and writes a trace of every decision.',
     why: 'When an answer is wrong, these columns separate a producer’s mistake from the assembler’s, the adapter’s or the model’s. Each step of this stage adds one complication to the same frozen inputs.',
     proves: [],

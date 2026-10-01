@@ -108,7 +108,7 @@ Reference every colour through `var()`. The stylesheet contains no literal colou
 - **`--bg` and `--surface` alternate.** The page and the column interiors are `--bg`; the step band, quiet cards and candidate rows are `--surface`. On the landing page the sections alternate bg, surface, bg, each separated by a 1px `--line` top border.
 - **`--fg` is for reading and for the current thing.** Body text, titles, the active step pill (`--fg` fill, `--bg` text), the emphasis panel's border, the conflict chip's border.
 - **`--muted` is the default for anything secondary.** Ledes, descriptions, every label and kicker inside a card, metadata rows, nav links at rest, the footer, chips at rest. A block is muted unless it is the one thing the reader must read next.
-- **`--accent` is emphasis, never texture.** Section kickers, links, the primary button, the current stage's underline, the note callout's border, text selection, and the two assembler decisions the demo is about: a refusal (the outcome band, the arrows and headers of the columns it never reaches, the *No model request* panel) and an exclusion (the reason-code chip on an excluded candidate, the strip's new codes). Never as running text, never as a large fill other than the primary button and the loud chip.
+- **`--accent` is emphasis, never texture.** Section kickers, links, the primary button, the current stage's underline, the note callout's border, text selection, and the two assembler decisions the demo is about: a refusal (the outcome band, the headers and the arrow of the columns it never reaches, the *No model request* panel) and an exclusion (the reason-code chip on an excluded candidate, the strip's new codes). Never as running text, never as a large fill other than the primary button and the loud chip.
 - **`--accent-soft` is a fill only.** Hover fill on clickable grid cells and the background of the note callout.
 - **`--line` is every border.** Hairline grids, card borders, dividers, table rules, the ghost button and chip outline, the meter's track, the dashed borders of empty states and producer-excluded rows. Only the note callout (`--accent`), the emphasis panel, the tour band's top rule, the tour's outline and conflict chip (`--fg`), the refused candidate (`--accent`, dashed) and ghost buttons on hover (`--fg`) use another border colour.
 
@@ -208,7 +208,7 @@ Rules that fall out of the table:
 
 ### Frame
 
-The stage pages are full width: four columns need it. The landing page uses the site's container.
+The stage pages are full width: the columns need it. The landing page uses the site's container.
 
 | Measure | Value |
 |---|---|
@@ -220,7 +220,7 @@ The stage pages are full width: four columns need it. The landing page uses the 
 | Step header | `padding: 32px 32px 24px`, grid `minmax(0, 1fr) minmax(320px, 400px)`, `gap: 40px` |
 | Strips (producers, routes, turns) | `padding: 0 32px 24px` |
 | Delta strip | `margin: 0 32px 24px`, a hairline grid |
-| Columns | `margin: 0 32px 32px`, a hairline grid of four, headers sticky at `--top-h`, the measured height of the pinned block (masthead, step band, instruments) |
+| Columns | `margin: 0 32px 32px`, a hairline grid of four, two per row, headers sticky at `--top-h`, the measured height of the pinned block (masthead, step band, instruments) |
 | Column body | `padding: 18px`, a column of cards with `gap: 12px` |
 | Footer | `padding: 24px 32px`, 1px `--line` top border |
 | Glossary panel | `width: 400px`, fixed at `right: 0` from `--top-h` to the bottom of the viewport, `--bg` with a 1px `--line` left border; full width below 900px |
@@ -236,7 +236,7 @@ flowchart TB
   S["Step header · kicker, h1, the question, description · snapshot factsheet"]
   X["Stage strips · producers (2), routes and turns (3)"]
   D["Delta strip · hairline grid · what changed since the step you came from"]
-  C["Four columns · hairline grid · headers pinned under the band"]
+  C["Four columns, two per row · hairline grid · headers pinned under the band"]
   F["Footer · mono 12px muted"]
   G["Glossary · fixed on the right under the pinned block · opened by the masthead button, Esc closes"]
   M --> B --> I --> T --> S --> X --> D --> C --> F
@@ -270,9 +270,9 @@ The stylesheet ends with `@media (max-width: …)` rules that select by class. N
 
 | Max width | Rule |
 |---|---|
-| `1400px` | The four columns become two per row; column headers stop sticking and lose their arrows. The landing hero stacks |
+| `1400px` | The landing hero stacks |
 | `900px` | The step header and the landing stages become one column; every gutter tightens to `20px`; the brand's subtitle hides. The producer, route and turn grids need no rule: they are `auto-fit` |
-| `800px` | The columns become one; the landing pipeline (a two-by-two grid) stacks |
+| `800px` | The columns become one, their headers stop sticking and the arrow goes; the landing pipeline (a two-by-two grid) stacks |
 
 Layers: the masthead block sits at `z-index: 50`, the glossary panel at `40`, column headers at `2`. Nothing else is layered.
 
@@ -357,7 +357,7 @@ A chip carrying a reason code is a `<button>`, built by `reasonChip` in `format.
 
 - **Bordered panel:** `border: 1px solid var(--line); background: var(--bg);` with an optional header bar
   `display: flex; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line);` carrying a muted label. Code blocks, the payload viewer, the factsheet and each column are this panel; a column's header bar is its `<h2>`.
-- **Column header:** the panel header bar, sticky, `background: var(--bg)`, holding the arrow glyph "→" in mono muted (from the second column on), the column number in mono accent `var(--fs-label)` tracked, the title in `var(--fs-title)` 600 `-0.015em`, and under them the summary line in mono `var(--fs-label)` muted. On a refusal the request and answer columns' arrows, numbers and titles turn `--accent`.
+- **Column header:** the panel header bar, sticky, `background: var(--bg)`, holding the arrow glyph "→" in mono muted (into the second column of each row), the column number in mono accent `var(--fs-label)` tracked, the title in `var(--fs-title)` 600 `-0.015em`, and under them the summary line in mono `var(--fs-label)` muted. On a refusal the request and answer columns' numbers and titles, and the answer column's arrow, turn `--accent`.
 - **Hairline grid cell:** `background: var(--bg); padding: 24px 22px;` for the landing stages, `22px 22px 20px` in the landing pipeline, `16px 18px` in the strips; label, then a `var(--fs-title)` 600 title, then `var(--fs-sm)` muted copy. Clickable cells are `<a>` elements with `color: var(--fg)` and `:hover { background: var(--accent-soft); }`.
 - **Candidate row:** `border: 1px solid var(--line); border-left: 3px solid var(--plane); background: var(--surface); padding: 10px 14px;` with the status chips, the id as an identifier, the facts in mono `var(--fs-label)` muted with the slot in `--fg`, the tertiary line, and the body behind a `<details>`. The outcome variants are in section 3.
 - **Card inside a column** (a system entry, a tool entry, an answer, a producer's batch): `border: 1px solid var(--line); background: var(--bg); padding: 12px 14px;`.
@@ -474,7 +474,7 @@ Left to right is the cascade order a value passes through; a later stage wins ov
 
 These are how the inspector differs from the website on purpose. They are recorded so that a matching page is not mistaken for a wrong one.
 
-- **Density.** Cards inside a column are padded `12px 14px` and candidate rows `10px 14px`, not the site's `24px 22px`, because four columns share the width.
+- **Density.** Cards inside a column are padded `12px 14px` and candidate rows `10px 14px`, not the site's `24px 22px`, because the columns share the width.
 - **Form controls.** Selects and number inputs exist here and are square hairline boxes, not pills: they are fields, not buttons.
 - **Focus styling.** Every control has the `2px` accent outline the site's guide recommends but the site does not yet apply.
 - **Numbered rails.** Stages, steps and columns are numbered so a speaker can say where they are; the numbers are mono labels, not a new component.

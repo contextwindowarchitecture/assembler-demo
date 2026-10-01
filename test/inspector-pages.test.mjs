@@ -100,6 +100,22 @@ test('hairlines and squares, no motion, two typefaces: the rules a test can chec
   }
 });
 
+test('the four columns sit two per row at every width above the one-column breakpoint, with an arrow into the second of each row', () => {
+  const css = read('style.css');
+  const base = css.slice(0, css.indexOf('@media'));
+  assert.match(base, /\.columns\s*{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/, 'the default .columns rule is two per row');
+  assert.doesNotMatch(css, /repeat\(4,/, 'nothing lays the columns out four across');
+  assert.match(base, /\.column:nth-child\(even\) h2::before\s*{[^}]*content:\s*"→"/, 'the arrow points into the second column of each row');
+  const medias = [...css.matchAll(/@media \(max-width: (\d+)px\)\s*{([\s\S]*?)\n}/g)].map(m => [Number(m[1]), m[2]]);
+  const stacked = medias.find(([, body]) => /\.columns\s*{[^}]*grid-template-columns:\s*1fr/.test(body));
+  assert.ok(stacked, 'one breakpoint stacks the columns');
+  for (const [width, body] of medias) {
+    if (width > stacked[0]) assert.doesNotMatch(body, /\.columns\s*{[^}]*grid-template-columns/, `${width}px: the columns keep their two-per-row grid`);
+  }
+  assert.match(stacked[1], /\.column h2\s*{[^}]*position:\s*static/, 'stacked, the headers stop sticking');
+  assert.match(stacked[1], /\.column h2::before\s*{[^}]*display:\s*none/, 'stacked, the arrows go');
+});
+
 test('every select sits in a .select wrapper, and the stylesheet draws its caret clear of the edge, in a token colour', () => {
   const css = read('style.css');
   assert.match(css, /\.select select\s*{[^}]*appearance: none/, 'the native caret is off');

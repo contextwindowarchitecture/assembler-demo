@@ -307,5 +307,6 @@ test('what a stop points at carries a flag in the band\'s colours: the stop\'s n
   assert.match(css, /\.tour-target::after\s*{[^}]*background: var\(--inv-bg\)/, 'in the band\'s ground');
   assert.match(css, /\.tour-target::after\s*{[^}]*color: var\(--inv-fg\)/, 'and the band\'s type');
   assert.match(css, /\.tour-target::after\s*{[^}]*border-radius: var\(--pill\)/, 'a pill, like every chip');
+  assert.match(css, /\.tour-target\s*{[^}]*scroll-margin-top: calc\(var\(--top-h, calc\(var\(--mast-h\) \+ var\(--band-h\)\)\) \+ 104px\)/, 'the target scrolls to 104px under the pinned block: clear of its column\'s sticky header, with room for the flag above it');
   assert.match(read('shared/tour-band.js'), /dataset\.tourStop = String\(tour\.index\)/, 'the band writes the stop\'s number on the target');
 });

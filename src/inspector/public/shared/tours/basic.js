@@ -157,6 +157,6 @@ export const STOPS = [
     what: 'Eligibility, authority and budget were decided by a versioned route outside the model; every decision is a trace row; three assemblers agree byte for byte; and a refusal sends nothing. Try a `budget.input` of your own: the page assembles a derived snapshot and says so.',
     why: 'This is what CWA adds to an application: a context window you can inspect, reproduce and argue about. The intermediate stage replaces these fixtures with real producers competing for one budget.',
     proves: [],
-    onward: { href: 'intermediate/', label: 'On to the intermediate stage' },
+    onward: { href: 'intermediate/?tour=1', label: 'On to the intermediate tour' },
   },
 ];

@@ -224,7 +224,7 @@ export function renderRequest(page, result) {
     const toolName = text => { try { return JSON.parse(text).name ?? null; } catch { return null; } };
     body.innerHTML = `
       <div class="sec">system · ${ir.system.length}</div>
-      ${ir.system.map(e => `<div class="entry"><div class="id">${esc(e.id)}${e.conflict ? tag(`conflict ${e.conflict}`, 'conflict code xs', 'surfaced: both instructions stay, marked') : ''}</div>${esc(e.text)}</div>`).join('') || '<p class="hint">none</p>'}
+      ${ir.system.map(e => `<div class="entry"${e.conflict ? ` data-tour="request:conflict"` : ''}><div class="id">${esc(e.id)}${e.conflict ? tag(`conflict ${e.conflict}`, 'conflict code xs', 'surfaced: both instructions stay, marked') : ''}</div>${esc(e.text)}</div>`).join('') || '<p class="hint">none</p>'}
       <div class="sec">tools · ${ir.tools.length}${ir.tools.length ? ' · from the grant' : ''}</div>
       ${ir.tools.length ? `<div class="entry"><div class="tools">${ir.tools.map(e => tag(toolName(e.text) ?? e.id, 'line code', e.id)).join('')}</div>${ir.tools.map(e => `<details><summary class="hint">${esc(e.id)}</summary><pre>${esc(e.text)}</pre></details>`).join('')}</div>` : '<p class="hint">none: no capabilities are granted on this route</p>'}
       <div class="sec">messages · ${ir.messages.length}${ir.messages.map(m => ` · role ${esc(m.role)}`).join('')}</div>

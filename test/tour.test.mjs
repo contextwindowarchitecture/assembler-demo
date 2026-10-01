@@ -85,7 +85,8 @@ test('the pages carry an anchor for every place a tour points', () => {
   const anchors = anchorKeys();
   const shared = ['scenario', 'columns', 'col:candidates', 'col:decisions', 'col:request', 'col:answer', 'agreement', 'delta',
     'instruments:budget', 'instruments:variant', 'decisions:outcome', 'decisions:excluded', 'decisions:compressed', 'decisions:conflicts',
-    'decisions:reasons', 'decisions:context', 'decisions:recovery', 'request:refused', 'snippets', 'candidate:x'];
+    'decisions:reasons', 'decisions:context', 'decisions:recovery', 'request:refused', 'request:conflict', 'snippets', 'candidate:x',
+    'producers', 'instruments:mode'];
   for (const key of shared) assert.ok(anchors.has(key), `an element carries data-tour="${key}"`);
 });
 

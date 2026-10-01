@@ -2,7 +2,7 @@
 // a step (or a run and a turn) through the page's own adapter, outlines what it talks about, and says where to look,
 // what the assembler did and why it matters. The copy's numbers and ids are filled from the trace and the snapshot
 // the page is showing (tour.js); the band formats them and decides nothing.
-import { $, esc, reasonChip, tag, url } from './format.js';
+import { $, esc, reasonChip, tag, url, words } from './format.js';
 import { backIndex, fill, nextIndex, parseTourState, tourKey, tourSearch } from './tour.js';
 
 let active = null; // the running tour's controller, or null
@@ -141,4 +141,37 @@ export function initTour({ stage, stops, adapter, reasonText }) {
 
   const wanted = parseTourState(location.search);
   if (wanted) go(Math.min(wanted, stops.length)); else invite();
+}
+
+/**
+ * The adapter a stage of frozen steps gives the band (basic, intermediate): select a stop's step with its rendering and
+ * assembler, and hand the copy the step's metadata, snapshot and trace. A stop lands with the step before it shown
+ * first when that is not already the step on screen, so the delta strip compares with that step. `prepare` sets what
+ * else a page needs for a tour (the intermediate page's replay mode) and says whether it changed anything.
+ */
+export function stepTourAdapter({ stage, state, current, selectScenario, shown, prepare = () => false }) {
+  return {
+    async go(at, set) {
+      const id = `${stage}/${at.step}`;
+      const variant = set.variant ?? 'fixture';
+      const assembler = set.assembler ?? 'all';
+      const index = state.scenarios.findIndex(s => s.id === id);
+      const showing = state.scenarios.findIndex(s => s.id === state.scenario);
+      const changed = prepare();
+      const settled = !changed && showing === index && state.variant === variant && state.assembler === assembler && state.budget === null && state.response;
+      state.variant = variant; $('#variant').value = variant;
+      state.assembler = assembler; $('#assembler').value = assembler;
+      if (settled) return;
+      if (index > 0 && showing !== index && showing !== index - 1) await selectScenario(state.scenarios[index - 1].id);
+      await selectScenario(id);
+    },
+    sources: () => ({
+      meta: current()?.meta, snapshot: state.response?.snapshot, trace: shown()?.trace, result: shown(),
+      configured: state.providers.filter(p => p.configured).length,
+    }),
+    label: at => {
+      const scenario = state.scenarios.find(s => s.id === `${stage}/${at.step}`);
+      return scenario ? `step ${scenario.meta.step} · ${words(scenario.meta.id)}` : at.step;
+    },
+  };
 }

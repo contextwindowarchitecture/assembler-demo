@@ -5,6 +5,9 @@ import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
 import { renderDelta } from '../shared/delta.js';
 import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag, url, words } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest, shownResult } from '../shared/panels.js';
+import { parseTourState } from '../shared/tour.js';
+import { initTour, stepTourAdapter, touring } from '../shared/tour-band.js';
+import { STOPS } from '../shared/tours/intermediate.js';
 
 const STAGE = 'intermediate';
 const RENDERERS = { fixture: 'fixture-xml/v1', messages: 'cwa-messages/v1' };
@@ -50,8 +53,18 @@ function selectScenario(id) {
   state.scenario = id; state.budget = null;
   $('#budget').value = frozenBudget();
   location.hash = id;
-  assemble();
+  return assemble();
 }
+
+/** The tour's side of this page. A tour replays the frozen batches, so it needs neither uv nor the producers. */
+const tourAdapter = stepTourAdapter({
+  stage: STAGE, state, current, selectScenario, shown: () => shownResult(state.response),
+  prepare: () => {
+    const changed = state.mode !== 'replay';
+    state.mode = 'replay'; $('#mode').value = 'replay';
+    return changed;
+  },
+});
 
 function render() {
   for (const button of $('#steps').querySelectorAll('button')) button.classList.toggle('active', button.dataset.id === state.scenario);
@@ -175,13 +188,14 @@ async function init() {
   });
   $('#reset').addEventListener('click', () => { state.budget = null; $('#budget').value = frozenBudget(); assemble(); });
   document.addEventListener('keydown', event => {
-    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    if (touring() || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
     const index = state.scenarios.findIndex(s => s.id === state.scenario);
     if (event.key === 'ArrowRight' && index < state.scenarios.length - 1) selectScenario(state.scenarios[index + 1].id);
     if (event.key === 'ArrowLeft' && index > 0) selectScenario(state.scenarios[index - 1].id);
   });
   const wanted = decodeURIComponent(location.hash.slice(1));
-  selectScenario(state.scenarios.find(s => s.id === wanted)?.id ?? state.scenarios[0].id);
+  if (!parseTourState(location.search)) selectScenario(state.scenarios.find(s => s.id === wanted)?.id ?? state.scenarios[0].id);
+  initTour({ stage: STAGE, stops: STOPS, adapter: tourAdapter, reasonText: page.reasonText });
 }
 
 init().catch(error => { $('#scenario').innerHTML = `<div class="outcome bad"><div class="ofoot">${esc(error.message)}</div></div>`; });

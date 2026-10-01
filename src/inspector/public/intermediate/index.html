@@ -29,7 +29,7 @@
     <div class="instruments" id="instruments">
       <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
       <div class="controls" id="controls">
-        <label class="field">Producers
+        <label class="field" data-tour="instruments:mode">Producers
           <span class="select"><select id="mode">
             <option value="replay">replay the frozen batches</option>
             <option value="live">run live now</option>
@@ -65,7 +65,7 @@
 
 
   <section class="scenario" id="scenario" data-tour="scenario"></section>
-  <section class="producers-strip" id="producers"></section>
+  <section class="producers-strip" id="producers" data-tour="producers"></section>
   <section class="delta" id="delta" data-tour="delta" aria-label="What changed since the previous step"></section>
 
   <main class="columns" data-tour="columns">

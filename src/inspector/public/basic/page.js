@@ -6,7 +6,7 @@ import { renderDelta } from '../shared/delta.js';
 import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag, url, words } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest, shownResult } from '../shared/panels.js';
 import { parseTourState } from '../shared/tour.js';
-import { initTour, touring } from '../shared/tour-band.js';
+import { initTour, stepTourAdapter, touring } from '../shared/tour-band.js';
 import { STOPS } from '../shared/tours/basic.js';
 
 const STAGE = 'basic';
@@ -57,32 +57,8 @@ function selectScenario(id) {
   return assemble();
 }
 
-/** The tour's side of this page: select a stop's step with its settings, and hand the band what the copy reads. A
- * stop always lands with the step before it shown first, so the delta strip compares with that step. */
-const tourAdapter = {
-  async go(at, set) {
-    const id = `${STAGE}/${at.step}`;
-    const variant = set.variant ?? 'fixture';
-    const assembler = set.assembler ?? 'all';
-    const index = state.scenarios.findIndex(s => s.id === id);
-    const shown = state.scenarios.findIndex(s => s.id === state.scenario);
-    const settled = shown === index && state.variant === variant && state.assembler === assembler && state.budget === null && state.response;
-    state.variant = variant; $('#variant').value = variant;
-    state.assembler = assembler; $('#assembler').value = assembler;
-    if (settled) return;
-    if (index > 0 && shown !== index && shown !== index - 1) await selectScenario(state.scenarios[index - 1].id);
-    await selectScenario(id);
-  },
-  sources: () => ({
-    meta: current()?.meta, snapshot: state.response?.snapshot, trace: shownResult(state.response)?.trace, result: shownResult(state.response),
-    configured: state.providers.filter(p => p.configured).length,
-  }),
-  label: at => {
-    const scenario = state.scenarios.find(s => s.id === `${STAGE}/${at.step}`);
-    return scenario ? `step ${scenario.meta.step} · ${words(scenario.meta.id)}` : at.step;
-  },
-};
-
+/** The tour's side of this page: select a stop's step with its settings, and hand the band what the copy reads. */
+const tourAdapter = stepTourAdapter({ stage: STAGE, state, current, selectScenario, shown: () => shownResult(state.response) });
 function render() {
   for (const button of $('#steps').querySelectorAll('button')) button.classList.toggle('active', button.dataset.id === state.scenario);
   renderScenario(); renderBadges(); renderInstruments();

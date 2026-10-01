@@ -194,3 +194,23 @@ test('every advanced tour stop holds against the recorded run and turn it select
     }
   }
 });
+
+test('the presenter\'s script names the turns the recorded runs hold', () => {
+  const script = fs.readFileSync(new URL('../docs/SCENARIOS.md', import.meta.url), 'utf8');
+  const run1 = readJson(new URL('reference-01-investigate/run.json', RUNS));
+  const run2 = readJson(new URL('reference-02-timeout/run.json', RUNS));
+  const superseded = (run, n) => run.turns.find(t => t.n === n).trace.excluded.filter(row => row.reason === 'superseded');
+  const claims = [
+    ['Turn 2: it asks for the colleague\'s account', run1.denials.some(d => d.turn === 2)],
+    ['Click turn 5 and open the decisions: observation 2 is `superseded` by observation 3', superseded(run1, 5).some(row => row.item_id.startsWith('obs:2:') && row.superseded_by.startsWith('obs:3:'))],
+    ['the answer on turn 6', run1.stop.reason === 'answer' && run1.stop.turn === 6],
+    ['turns 2, 3 and 4: the status server timed out three times', [2, 3, 4].every(n => run2.observations.some(o => o.turn === n && o.ok === false))],
+    ['Turn 5: the call came back', run2.observations.some(o => o.turn === 5 && o.ok)],
+    ['Turn 7: it answered', run2.stop.reason === 'answer' && run2.stop.turn === 7],
+    ['all four are `superseded` by the latest', superseded(run2, 7).length === 4],
+  ];
+  for (const [sentence, holds] of claims) {
+    assert.ok(script.includes(sentence), `SCENARIOS.md says: ${sentence}`);
+    assert.ok(holds, `the recording holds: ${sentence}`);
+  }
+});

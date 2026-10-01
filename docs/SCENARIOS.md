@@ -152,11 +152,11 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 **Point at:** the timeline. Turn 1: the model asks for the account; approved, observation 1. Turn 2: it asks for the colleague's account, `u_77`. **Denied**: the grant scopes `get_account` to the user of the request. It never ran. Click turn 3 and open the task state item in the candidates: the denial is there, written by the controller, which is the only way the model learns of it.
 
-**Point at:** turn 3, status: degraded, incident INC-2041. Turn 4, status again: operational. Click turn 5 and open the decisions: observation 2 is `superseded` by observation 4, the route's rule for the same call. The model reasons from the latest.
+**Point at:** turn 3, status: degraded, incident INC-2041. Turn 4, status again: operational. Click turn 5 and open the decisions: observation 2 is `superseded` by observation 3, the route's rule for the same call. The model reasons from the latest.
 
 **Point at:** the request column on any turn: one user message. The model's earlier turns are inside it as history. The tools are in the tools channel, from the grant.
 
-**Point at:** the answer on turn 5: three sections, the contract; the colleague's plan named as unchecked.
+**Point at:** the answer on turn 6: three sections, the contract; the colleague's plan named as unchecked.
 
 **Click:** *Replay through all three*. Every turn badges: three assemblers agree and match the trace recorded at the time.
 
@@ -164,7 +164,7 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 ## Run 2: timeout
 
-**Open** `reference-02-timeout`. **Point at:** turns 2, 3 and 5: the status server timed out three times. Each is an observation with an error body and a line in the task state. Turn 6: it answered; open turn 7's decisions: the three failures are `superseded` by the success. The answer says what happened.
+**Open** `reference-02-timeout`. **Point at:** turns 2, 3 and 4: the status server timed out three times. Each is an observation with an error body and a line in the task state. Turn 5: the call came back; turn 6 checked once more. Turn 7: it answered; open its decisions: the three failures and the first success, all four are `superseded` by the latest. The answer says what happened.
 
 **Say:** failures are context. The bound on turns is the controller's; the model did not get to decide when to stop.
 
@@ -184,7 +184,7 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 ## Closing
 
-`pnpm test` replays both reference runs through all three assemblers among its 122 checks. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
+`pnpm test` replays every reference run through all three assemblers each time it runs. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
 
 ## If something goes wrong
 

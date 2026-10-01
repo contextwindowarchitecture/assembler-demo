@@ -2,7 +2,8 @@
 // a local model served by Ollama, LM Studio, vLLM or llama.cpp, which is the same client with a baseURL. A
 // cwa-messages/v1 payload in, the model's answer out, with the exact outbound request captured before it is sent.
 // Every `system` entry becomes part of the one system message (some local servers honor only the first), every
-// `tools` entry a function definition, and the single user message is sent as is.
+// `tools` entry a function definition, and the single user message is sent as is. It adds no content of its own: a
+// surfaced conflict member's text arrives already marked by the renderer.
 import { performance } from 'node:perf_hooks';
 import OpenAI from 'openai';
 
@@ -37,7 +38,7 @@ export function toRequest(payloadText, { model, maxTokens = 4096, maxTokensField
   if (!ir || !Array.isArray(ir.system) || !Array.isArray(ir.tools) || !Array.isArray(ir.messages) || ir.messages.length !== 1) {
     throw new Error('the payload is not a cwa-messages/v1 document: it needs system, tools and exactly one message');
   }
-  const system = ir.system.map(entry => (entry.conflict ? `[This instruction conflicts with another, conflict group ${entry.conflict}.]\n${entry.text}` : entry.text));
+  const system = ir.system.map(entry => entry.text);
   const request = {
     model,
     [maxTokensField]: maxTokens,

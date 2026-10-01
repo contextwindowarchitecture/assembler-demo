@@ -36,14 +36,14 @@ test('toRequest joins system entries into one system message ahead of the one us
   assert.throws(() => toRequest('<query/>', { model: 'm' }), /not a cwa-messages\/v1 document/);
 });
 
-test('toRequest maps tool entries to function definitions and marks a surfaced conflict', () => {
+test('toRequest maps tool entries to function definitions and sends a surfaced conflict member\'s text as the renderer marked it', () => {
   const ir = {
-    system: [{ id: 'a', text: 'Cite sources.', conflict: 'g-cite' }, { id: 'b', text: 'Be brief.' }],
+    system: [{ id: 'a', text: '<conflict group="g-cite">\nCite sources.\n</conflict>', conflict: 'g-cite' }, { id: 'b', text: 'Be brief.' }],
     tools: [{ id: 'cap:issue_refund', text: '{"name": "issue_refund", "parameters": {"type": "object", "properties": {"order_id": {"type": "string"}}}}' }],
     messages: [{ role: 'user', content: 'hi' }],
   };
   const request = toRequest(JSON.stringify(ir), { model: 'm' });
-  assert.equal(request.messages[0].content, '[This instruction conflicts with another, conflict group g-cite.]\nCite sources.\n\nBe brief.');
+  assert.equal(request.messages[0].content, '<conflict group="g-cite">\nCite sources.\n</conflict>\n\nBe brief.', 'the renderer marks the conflict; the provider adds nothing');
   assert.deepEqual(request.tools, [{ type: 'function', function: { name: 'issue_refund', description: '', parameters: { type: 'object', properties: { order_id: { type: 'string' } } } } }]);
 });
 

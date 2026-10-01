@@ -158,7 +158,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 | `system[]` | one `system` message, entries joined by a blank line | one `text` block per entry in `system` |
 | `tools[]` | `tools[].function` from each entry's JSON spec | `tools[]` with `input_schema` |
 | `messages[0]` | the `user` message as is | the `user` message as is |
-| a surfaced conflict (`conflict`) | the entry's text prefixed with a one-line mark | the same |
+| a surfaced conflict (`conflict`) | the entry's text as is: the renderer has already wrapped it in `<conflict group="…">` (R-11) | the same |
 | `max_tokens` | the route's `reserved_output` (`max_completion_tokens` for OpenAI) | the same |
 
 `local` and `openai` share `chat-completions.mjs`, which uses the official OpenAI SDK: the same client reaches OpenAI and any OpenAI-compatible local server through `baseURL`, and its typed errors are reported most specific first (its connection error extends its API error, so it is tested before the general case). `anthropic.mjs` uses the official Anthropic SDK; against the real API it sends adaptive thinking and server-side refusal fallbacks, and against a compatible server (a custom `ANTHROPIC_BASE_URL`) it sends neither unless asked, since a compatible server may not know them. The captured request is the object handed to the client, so what the inspector shows is what was sent. Tests inject the client, and the inspector's API test drives the real OpenAI SDK against a mock HTTP server.

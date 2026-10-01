@@ -1,7 +1,7 @@
 // The provider adapter for the Anthropic Messages API: a cwa-messages/v1 payload in, the model's answer out, with the
 // exact outbound request captured before it is sent. It maps the render IR to the platform's roles (R-7): every
 // `system` entry becomes a system text block, every `tools` entry a tool definition, and the single user message is
-// sent as is. It adds no content of its own, apart from marking a surfaced conflict, which the renderer asks for.
+// sent as is. It adds no content of its own: a surfaced conflict member's text arrives already marked by the renderer.
 import { existsSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
@@ -56,10 +56,7 @@ export function toRequest(payloadText, { model: chosen = DEFAULT_MODEL, maxToken
     messages: ir.messages.map(message => ({ role: message.role, content: message.content })),
   };
   if (ir.system.length) {
-    request.system = ir.system.map(entry => ({
-      type: 'text',
-      text: entry.conflict ? `[This instruction conflicts with another, conflict group ${entry.conflict}.]\n${entry.text}` : entry.text,
-    }));
+    request.system = ir.system.map(entry => ({ type: 'text', text: entry.text }));
   }
   if (ir.tools.length) request.tools = ir.tools.map(toTool);
   return request;

@@ -15,7 +15,7 @@ The project uses pnpm, pinned by `packageManager` in package.json. Install it on
 ```sh
 pnpm install          # ajv, the Anthropic SDK, and a link to ../cwa-assembler-ts
 pnpm run setup        # builds the Go adapter into bin/ and checks the Python and TypeScript adapters
-pnpm test             # 64 tests: compare logic, scenario validity, the 74 vendored conformance snapshots through every adapter, the inspector API
+pnpm test             # compare logic, scenario validity, every scenario and the 82 vendored conformance snapshots through every adapter, the inspector API
 pnpm run inspector    # http://localhost:8787
 ```
 

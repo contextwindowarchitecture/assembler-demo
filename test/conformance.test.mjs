@@ -1,7 +1,7 @@
 // The harness's self-check: the vendored conformance cases and rejections through every available assembler, judged
 // as conformance/README.md says. A harness that cannot reproduce the published reports cannot be trusted with the
 // demo's. An assembler whose adapter is not built is skipped, not passed. CWA_DEMO_QUICK=1 runs a three-snapshot
-// smoke subset instead of the full 74.
+// smoke subset instead of the full corpus.
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { test } from 'node:test';

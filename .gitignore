@@ -8,3 +8,6 @@ __pycache__/
 .env
 producers/.venv/
 scenarios/advanced/runs/live-*/
+.codex
+.mcp.json
+.serena

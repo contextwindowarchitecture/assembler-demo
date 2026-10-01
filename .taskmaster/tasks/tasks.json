@@ -438,34 +438,37 @@
         "dependencies": [
           "2"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Docs",
             "description": "README, DESIGN.md, PLAN.md.",
             "details": "Commit: docs: the intermediate tour.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:08:03.917Z"
           },
           {
             "id": 2,
             "title": "Browser pass",
             "description": "Themes, talk mode, widths, refusal, reload.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:08:03.918Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:08:03.918Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-01T19:07:18.811Z",
+      "lastModified": "2026-10-01T19:08:03.918Z",
       "taskCount": 3,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "intermediate"
       ]
@@ -474,187 +477,222 @@
   "advanced": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Engine extension: stops at a run and a turn",
         "description": "Prerequisite: basic tasks 1–3 done. Teach the tour to address { run, turn } and drive the advanced page's run and turn selection.",
         "details": "tour.js: validateStops accepts at: { run, turn }; fill gains {run.…} and {turn.…} sources (the recorded run.json and the turn's snapshot and trace). advanced/page.js: expose the adapter (select a run, select a turn, open the routes <details>); arrows yield to the tour while it is active. A stop may name an action the visitor performs (the replay click): the band shows \"Click Replay through all three, then Next\" and does not click it for them.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "tour.test.mjs: validation and fill for run/turn stops against a recorded run; the keyboard mapping holds on this page. Break the turn lookup (off by one) and watch it fail.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Tests for run/turn stops and fill sources",
             "description": "Against reference-01-investigate.",
             "details": "Red first.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.851Z"
           },
           {
             "id": 2,
             "title": "Implement the extension and the page adapter",
             "description": "Including opening the routes details.",
             "details": "Commit: feat(inspector): tour stops at a run and a turn.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
-            ]
+            ],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.852Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:11:16.852Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Anchors on the advanced page",
         "description": "agent:granted, agent:proposed, routes, timeline, turn:<n>, guard:<n>, replay, recorded-answer.",
         "details": "Add the data-tour attributes in advanced/page.js (renderHead, renderRoutes, renderTimeline, the replay button) and in panels.js where the recorded answer renders. Attributes only.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "The anchor scan in tour.test.mjs covers the new keys and prefixes; remove guard: on purpose and watch it fail.",
         "priority": "high",
         "dependencies": [
-          1
+          "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Test for the new keys",
             "description": "Scan includes turn: and guard: prefixes.",
             "details": "",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.853Z"
           },
           {
             "id": 2,
             "title": "Add the attributes",
             "description": "advanced/page.js, panels.js.",
             "details": "Commit: feat(inspector): data-tour anchors on the advanced page.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
-            ]
+            ],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.854Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:11:16.854Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Advanced tour content: 11 stops, turn claims checked against the recordings",
         "description": "shared/tours/advanced.js: the stops in the PRD (Advanced), each turn claim backed by a named check against run.json.",
         "details": "Write the 11 stops. Each stop that makes a claim about a turn carries expect: { denied | superseded | answer | observationOk }. As recorded on 2026-09-28: reference-01-investigate denies u_77 on turn 2, first shows superseded in turn 5's trace, answers on turn 6 (stop.turn 6); reference-02-timeout times out on turns 2–4 (observations ok: false), succeeds on 5 and 6, answers on turn 7; reference-01-investigate-reinforced denies on turn 4 and answers on turn 7. The copy fills turn numbers from placeholders where it can, so a re-recording moves the copy with it. The replay stop asks the visitor to click and explains the per-turn badges. The second-route stop opens the routes details and compares placement, budget.input (1400 vs 620) and endpoint, all from routes.json and the run.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "tour.test.mjs: every at.run exists and at.turn is in range; every expect check holds against run.json (denials[].turn, the superseded count in the turn's trace, response text on the answer turn, observations[].ok); proves codes appear in the turn's trace; placeholders resolve; targets resolve. Change one expected turn on purpose and watch it fail.",
         "priority": "high",
         "dependencies": [
-          1,
-          2
+          "1",
+          "2"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Stops 1–3: what changed, granted vs proposed, turn 1",
             "description": "The loop; close_ticket never offered; observation 1 as evidence.tool_results.",
             "details": "Write the stop in shared/tours/advanced.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.855Z"
           },
           {
             "id": 2,
             "title": "Stops 4–6: the denial, supersession, the answer (reference-01)",
             "description": "Guard denial as task state; superseded; output contract.",
             "details": "Write the stop in shared/tours/advanced.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.856Z"
           },
           {
             "id": 3,
             "title": "Stop 7: replay through all three",
             "description": "The visitor clicks; badges explained.",
             "details": "Write the stop in shared/tours/advanced.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.857Z"
           },
           {
             "id": 4,
             "title": "Stop 8: reference-02 timeouts",
             "description": "Failures as observations and task state; superseded by the success; the answer names the gap.",
             "details": "Write the stop in shared/tours/advanced.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.857Z"
           },
           {
             "id": 5,
             "title": "Stops 9–11: the second route, the reinforced run, the wrap-up",
             "description": "Placement, budget, endpoint; the Messages API request; the bound belongs to the application.",
             "details": "Write the stop in shared/tours/advanced.js (look / what / why / proves, placeholders for every number or id), then extend test/tour.test.mjs so the stop's codes, placeholders and target are checked.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:11:16.858Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:11:16.858Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Fix the advanced drift in SCENARIOS.md",
         "description": "The script's turn numbers disagree with the recorded runs.",
         "details": "docs/SCENARIOS.md:151-157: in reference-01-investigate the supersession first shows in turn 5's decisions and the answer is on turn 6, not turn 5. docs/SCENARIOS.md:165: in reference-02-timeout the timeouts are on turns 2, 3 and 4, the first success is on turn 5, and the answer is on turn 7. Re-check every turn reference in the advanced section against run.json. If practical, add a test that reads the turn numbers the script states (a small, explicit list in the test) and asserts them against the recordings, sharing the checks written for task 3.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "The turn-claim test (if added) fails on the old text and passes on the new.",
         "priority": "medium",
         "dependencies": [
-          3
+          "3"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Correct the turn references",
             "description": "Run 1 and run 2 paragraphs.",
             "details": "Commit: docs: the advanced script follows the recorded turns.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:12:03.360Z"
           },
           {
             "id": 2,
             "title": "Optional guard test for the script's turn claims",
             "description": "Reuse the task 3 checks.",
             "details": "",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:12:03.361Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:12:03.361Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Docs and verification pass: advanced tour",
         "description": "Docs for the advanced tour, then the STYLE.md checklist in the browser.",
         "details": "README and DESIGN.md mention the advanced tour; PLAN.md status. Walk all stops in both themes, talk mode, 1024 and 1440 px; click Replay during its stop and confirm the badges; check that switching runs mid-tour and ?tour=N reloads land on the right run and turn; confirm nothing needs a provider. Use the run skill for screenshots. Fix findings test-first.\n\nRules (AGENTS.md): test-first (red, green, refactor); commit unasked at each green step with `git commit -s`, Conventional Commits, scope `inspector` (or `docs`); docs change in the same commit as the behavior; prove each guard by breaking the code on purpose; never push. PRD: .taskmaster/docs/guided-tours-prd.md.",
         "testStrategy": "STYLE.md checklist passes; pnpm test green.",
         "priority": "medium",
         "dependencies": [
-          3
+          "3"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "Docs",
             "description": "README, DESIGN.md, PLAN.md.",
             "details": "Commit: docs: the advanced tour.",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:12:40.328Z"
           },
           {
             "id": 2,
             "title": "Browser pass",
             "description": "Themes, talk mode, widths, replay, reload, no provider.",
             "details": "",
-            "status": "pending",
-            "dependencies": []
+            "status": "done",
+            "dependencies": [],
+            "parentId": "undefined",
+            "updatedAt": "2026-10-01T19:12:40.329Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-01T19:12:40.329Z"
       }
     ],
     "metadata": {
-      "created": "2026-10-01T18:47:02.984Z",
-      "updated": "2026-10-01T18:47:02.984Z",
-      "description": "Guided tour of the advanced stage. Needs basic tasks 1–3."
+      "version": "1.0.0",
+      "lastModified": "2026-10-01T19:12:40.329Z",
+      "taskCount": 5,
+      "completedCount": 5,
+      "tags": [
+        "advanced"
+      ]
     }
   }
 }

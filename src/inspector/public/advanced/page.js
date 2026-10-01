@@ -170,7 +170,7 @@ function renderBadges() {
     badges.push(ok ? `<span class="chip ok dot">${state.replay.turns.length} inferences replayed · all three agree and match the recorded traces</span>` : '<span class="chip fill dot">replay differs from the record</span>');
   }
   if (state.error) badges.push(`<span class="chip bad dot">${esc(state.error)}</span>`);
-  $('#agreement').outerHTML = `<span id="agreement" class="badges">${badges.join('')}</span>`;
+  $('#agreement').outerHTML = `<span id="agreement" class="badges" data-tour="agreement">${badges.join('')}</span>`;
 }
 
 function renderFoot() {

@@ -144,7 +144,7 @@ function renderBadges() {
       badges.push('<span class="chip warn dot" title="a derived snapshot has no committed expectation">no expectation · derived</span>');
     }
   }
-  $('#agreement').outerHTML = `<span id="agreement" class="badges">${badges.join('')}</span>`;
+  $('#agreement').outerHTML = `<span id="agreement" class="badges" data-tour="agreement">${badges.join('')}</span>`;
 }
 
 function renderFoot() {

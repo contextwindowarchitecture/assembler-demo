@@ -1,7 +1,10 @@
 // The guided tours: the engine's pure functions, and every tour's stops checked against what the assemblers
 // returned, so a tour cannot claim what the trace does not hold.
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { backIndex, fill, nextIndex, parseTourState, tourKey, tourSearch, validateStops } from '../src/inspector/public/shared/tour.js';
 
 const stop = (id, extra = {}) => ({ id, at: { step: '01-clean' }, target: 'columns', title: 'A title', look: 'Look here.', what: 'What happened.', why: 'Why it matters.', proves: [], ...extra });
@@ -51,4 +54,34 @@ test('validateStops names every stop that lacks a field the band shows', () => {
   assert.deepEqual(validateStops([stop('b', { at: {} })]), ['b: at names no step and no run']);
   assert.deepEqual(validateStops([stop('c', { proves: 'expired' })]), ['c: proves is not a list']);
   assert.deepEqual(validateStops([stop('d', { at: { run: 'reference-01-investigate' } })]), ['d: at.run without at.turn']);
+});
+
+// Every data-tour key the public sources emit: a literal key, or the static prefix of one built from data
+// (`candidate:${item.id}` contributes the prefix `candidate:`).
+const PUBLIC = new URL('../src/inspector/public/', import.meta.url);
+function anchorKeys() {
+  const keys = new Set();
+  const prefixes = new Set();
+  const walk = dir => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(file);
+      else if (/\.(html|js)$/.test(entry.name) && !file.includes(`${path.sep}tours${path.sep}`)) {
+        for (const [, key] of fs.readFileSync(file, 'utf8').matchAll(/data-tour="([^"]*)"/g)) {
+          const at = key.indexOf('${');
+          if (at === -1) keys.add(key); else prefixes.add(key.slice(0, at));
+        }
+      }
+    }
+  };
+  walk(fileURLToPath(PUBLIC));
+  return { keys, prefixes, has: key => keys.has(key) || [...prefixes].some(prefix => prefix && key.startsWith(prefix)) };
+}
+
+test('the pages carry an anchor for every place a tour points', () => {
+  const anchors = anchorKeys();
+  const shared = ['scenario', 'columns', 'col:candidates', 'col:decisions', 'col:request', 'col:answer', 'agreement', 'delta',
+    'instruments:budget', 'instruments:variant', 'decisions:outcome', 'decisions:excluded', 'decisions:compressed', 'decisions:conflicts',
+    'decisions:reasons', 'decisions:context', 'decisions:recovery', 'request:refused', 'snippets', 'candidate:x'];
+  for (const key of shared) assert.ok(anchors.has(key), `an element carries data-tour="${key}"`);
 });

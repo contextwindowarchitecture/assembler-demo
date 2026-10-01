@@ -206,6 +206,8 @@ button.chip:hover { background: var(--accent-soft); }
 .column h2 .col-sub:empty { display: none; }
 .columns.refused #request h2 .col-title, .columns.refused #answer h2 .col-title, .columns.refused #request h2 .num, .columns.refused #answer h2 .num, .columns.refused #request h2::before, .columns.refused #answer h2::before { color: var(--accent); }
 .column .body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+/* A section of a column a tour can point at (its heading and what follows), spaced as the column spaces its children. */
+.column .part { display: flex; flex-direction: column; gap: 12px; }
 
 /* Candidate context: an index of producers, then each producer's batch as rows coloured by plane. */
 .pidx { display: flex; gap: 4px; flex-wrap: wrap; }

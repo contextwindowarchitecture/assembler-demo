@@ -109,7 +109,7 @@ export function renderCandidates(page, result) {
           item.relevance !== undefined ? `rerank ${esc(item.relevance)}` : '', item.injection_risk ? esc(item.injection_risk) : ''].filter(Boolean).join('<span class="sep">·</span>');
         const tert = [`fresh ${brief(item.freshness)}`, item.expires ? `expires ${brief(item.expires)}` : '', scope, item.variants?.length ? plural(item.variants.length, 'variant') : '',
           item.source ? `source ${esc(item.source)}` : ''].filter(Boolean).join(' · ');
-        return `<article class="item ${status.kind}"${plane ? ` style="--plane: var(--p-${plane})"` : ''}>
+        return `<article class="item ${status.kind}" data-tour="candidate:${esc(item.id)}"${plane ? ` style="--plane: var(--p-${plane})"` : ''}>
           <div class="status">${statusChip(status, reasonText)}${change ? tag(change, 'line') : ''}${group ? tag(`conflict ${group.id}`, 'conflict code', `${group.kind} group${group.fact ? ` on fact ${group.fact}` : ''}`) : ''}</div>
           <div class="id">${esc(item.id)}</div>
           <div class="facts">${facts}</div>
@@ -118,7 +118,7 @@ export function renderCandidates(page, result) {
             ${(item.variants ?? []).map(v => `<div class="snippet"><strong>${esc(v.id)}</strong> (${esc(v.method)}): ${esc(v.body)}</div>`).join('')}</details>
         </article>`;
       }).join('')}
-      ${batch.excluded.map(row => `<article class="item producer-excluded">
+      ${batch.excluded.map(row => `<article class="item producer-excluded" data-tour="candidate:${esc(row.item_id)}">
         <div class="status">${reasonChip(`${row.reason} · producer`, 'gray code', reasonText(row.reason), row.reason)}${row.duplicate_of ? `<span class="meta">duplicate of ${esc(row.duplicate_of)}</span>` : ''}${row.superseded_by ? `<span class="meta">superseded by ${esc(row.superseded_by)}</span>` : ''}</div>
         <div class="id">${esc(row.item_id)}</div>
         <div class="tert">reported by the producer; body never sent</div></article>`).join('')}
@@ -142,30 +142,30 @@ export function renderDecisions(page, result) {
   const meter = meterFor(trace, snapshot.budget.input);
   const pct = n => Math.min(100, Math.round(100 * n / Math.max(1, snapshot.budget.input)));
   const outcome = trace.refused.bool
-    ? `<div class="outcome bad"><div class="head"><span class="title">Refused</span><span class="mono">${esc(trace.refused.reason)}</span></div>
+    ? `<div class="outcome bad" data-tour="decisions:outcome"><div class="head"><span class="title">Refused</span><span class="mono">${esc(trace.refused.reason)}</span></div>
         <div class="ofoot"><span>${esc(reasonText(trace.refused.reason))}</span></div>
-        <div class="ofoot mono">result: null · nothing included · admission decisions kept${trace.recovery ? ` · recovery: ${esc(trace.recovery.action)}${trace.recovery.detail ? ` (${esc(trace.recovery.detail)})` : ''}` : ''}</div></div>`
-    : `<div class="outcome ok"><div class="head"><span class="title">Assembled</span><span class="mono">${trace.result.input_tokens} of ${snapshot.budget.input} input tokens</span></div>
+        <div class="ofoot mono" data-tour="decisions:recovery">result: null · nothing included · admission decisions kept${trace.recovery ? ` · recovery: ${esc(trace.recovery.action)}${trace.recovery.detail ? ` (${esc(trace.recovery.detail)})` : ''}` : ''}</div></div>`
+    : `<div class="outcome ok" data-tour="decisions:outcome"><div class="head"><span class="title">Assembled</span><span class="mono">${trace.result.input_tokens} of ${snapshot.budget.input} input tokens</span></div>
         <div class="meter" title="${meter.used} used, ${meter.summarised} of them as summaries; ${meter.free} free">${meter.segments.map(s => `<i class="segment${s.compressed ? ' compressed' : ''}" style="flex-basis: ${pct(s.tokens)}%${s.plane ? `; --plane: var(--p-${s.plane})` : ''}" title="${esc(s.item_id)} · ${esc(s.slot)} · ${s.tokens} tokens${s.compressed ? ' as a summary' : ''}"></i>`).join('')}</div>
         <div class="ofoot"><span>${trace.included.length} included</span><span>${trace.compressed.length} compressed</span><span>${trace.excluded.length} excluded</span>${meter.summarised ? `<span>${meter.summarised} tokens as summaries</span>` : ''}<span class="right">hash <span class="mono">${esc(trace.result.hash.slice(0, 12))}…</span></span></div></div>`;
-  const conflicts = trace.conflicts.length ? `<div class="sec">Conflicts</div><table><tr><th>group</th><th>kind</th><th>resolution</th><th>winner</th></tr>
-    ${trace.conflicts.map(c => `<tr><td class="m">${esc(c.group_id)}</td><td>${esc(c.kind)}</td><td>${esc(c.resolution)} <span class="hint">${esc(c.decided_by)}</span></td><td class="m">${esc(c.winner ?? '—')}</td></tr>`).join('')}</table>` : '';
-  const compressed = trace.compressed.length ? `<div class="sec">Compressed</div><table><tr><th>item · variant</th><th class="num">from → to</th></tr>
-    ${trace.compressed.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags hint">${esc(row.variant_id)} · ${esc(row.method)}</div></td><td class="num">${row.from} → ${row.to}</td></tr>`).join('')}</table>` : '';
-  const excluded = trace.excluded.length ? `<div class="sec">Excluded</div><table><tr><th>item · reason · stage</th></tr>
-    ${trace.excluded.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags">${reasonChip(row.reason, row.stage === 'producer' ? 'gray code' : 'bad code', reasonText(row.reason))}<span class="hint">${esc(row.stage)}${row.duplicate_of ? ` · of ${esc(row.duplicate_of)}` : ''}${row.superseded_by ? ` · by ${esc(row.superseded_by)}` : ''}</span></div></td></tr>`).join('')}</table>`
-    : '<div class="sec">Excluded</div><p class="hint">nothing</p>';
+  const conflicts = trace.conflicts.length ? `<div class="part" data-tour="decisions:conflicts"><div class="sec">Conflicts</div><table><tr><th>group</th><th>kind</th><th>resolution</th><th>winner</th></tr>
+    ${trace.conflicts.map(c => `<tr><td class="m">${esc(c.group_id)}</td><td>${esc(c.kind)}</td><td>${esc(c.resolution)} <span class="hint">${esc(c.decided_by)}</span></td><td class="m">${esc(c.winner ?? '—')}</td></tr>`).join('')}</table></div>` : '';
+  const compressed = trace.compressed.length ? `<div class="part" data-tour="decisions:compressed"><div class="sec">Compressed</div><table><tr><th>item · variant</th><th class="num">from → to</th></tr>
+    ${trace.compressed.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags hint">${esc(row.variant_id)} · ${esc(row.method)}</div></td><td class="num">${row.from} → ${row.to}</td></tr>`).join('')}</table></div>` : '';
+  const excluded = trace.excluded.length ? `<div class="part" data-tour="decisions:excluded"><div class="sec">Excluded</div><table><tr><th>item · reason · stage</th></tr>
+    ${trace.excluded.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags">${reasonChip(row.reason, row.stage === 'producer' ? 'gray code' : 'bad code', reasonText(row.reason))}<span class="hint">${esc(row.stage)}${row.duplicate_of ? ` · of ${esc(row.duplicate_of)}` : ''}${row.superseded_by ? ` · by ${esc(row.superseded_by)}` : ''}</span></div></td></tr>`).join('')}</table></div>`
+    : `<div class="part" data-tour="decisions:excluded"><div class="sec">Excluded</div><p class="hint">nothing</p></div>`;
   const included = trace.included.length ? `<div class="sec">Included (placement order)</div><table><tr><th>item · slot</th><th class="num">tokens</th></tr>
     ${trace.included.map(row => `<tr><td class="m">${esc(row.item_id)}<div class="tags hint">${esc(row.slot)}</div></td><td class="num">${row.tokens}</td></tr>`).join('')}</table>` : '';
   const codes = [...new Set([...trace.excluded.map(r => r.reason), ...(trace.refused.reason ? [trace.refused.reason] : [])])];
-  const reasons = codes.length ? `<div class="sec">Reason codes in this assembly</div><div class="reasons">${codes.map(code => {
+  const reasons = codes.length ? `<div class="part" data-tour="decisions:reasons"><div class="sec">Reason codes in this assembly</div><div class="reasons">${codes.map(code => {
     const text = reasonText(code) || 'not in the registry';
     const [rule, ...rest] = text.split(': ');
     return `<span class="c">${esc(code)}</span><span class="r">${rest.length ? `<b>${esc(rule)}</b> ${esc(rest.join(': '))}` : esc(text)}</span>`;
-  }).join('')}</div>` : '';
+  }).join('')}</div></div>` : '';
   const defaults = trace.defaults_filled.length ? `<p class="hint">${trace.defaults_filled.length} default${trace.defaults_filled.length === 1 ? '' : 's'} filled (R-3)</p>` : '<p class="hint">no defaults filled: every producer declared its policy fields</p>';
   body.innerHTML = `${outcome}${conflicts}${compressed}${excluded}${included}${reasons}${defaults}
-    <div class="sec">Context</div><div class="kv">
+    <div class="part" data-tour="decisions:context"><div class="sec">Context</div><div class="kv">
       <span class="k">assembler</span><span class="v">${esc(result.assembler)} · ${result.durationMs} ms</span>
       <span class="k">profile</span><span class="v">${esc(trace.profile.id)} v${trace.profile.version}</span>
       <span class="k">route policy</span><span class="v">${esc(trace.context.route_policy_version)}</span>
@@ -174,27 +174,27 @@ export function renderDecisions(page, result) {
       <span class="k">assembly time</span><span class="v">${esc(trace.context.assembly_time)}</span>
       <span class="k">snapshot digest</span><span class="v">${esc(trace.context.snapshot_digest)}</span>
       ${trace.result ? `<span class="k">payload hash</span><span class="v">${esc(trace.result.hash)}</span>` : ''}
-    </div>`;
+    </div></div>`;
 }
 
 const SNIPPET_TABS = [['assemble', 'Assemble (CWA)'], ['local', 'OpenAI SDK · local'], ['openai', 'OpenAI SDK'], ['anthropic', 'Anthropic SDK']];
 
 function renderSnippets(state) {
   const snippets = state.snippets;
-  if (!snippets) return '<div class="sec">Use it in your code</div><p class="spinner">building snippets…</p>';
-  if (snippets.error) return `<div class="sec">Use it in your code</div><p class="hint">${esc(snippets.error)}</p>`;
+  if (!snippets) return '<div class="part" data-tour="snippets"><div class="sec">Use it in your code</div><p class="spinner">building snippets…</p></div>';
+  if (snippets.error) return `<div class="part" data-tour="snippets"><div class="sec">Use it in your code</div><p class="hint">${esc(snippets.error)}</p></div>`;
   const tabs = SNIPPET_TABS.filter(([id]) => snippets[id]);
   if (!tabs.some(([id]) => id === state.snippetTab)) state.snippetTab = tabs[0][0];
   const code = snippets[state.snippetTab]?.[state.snippetLang] ?? '';
   const seg = (id, options, current) => `<div class="seg" id="${id}">${options.map(([value, label]) => `<button type="button" data-value="${value}" aria-pressed="${value === current}">${esc(label)}</button>`).join('')}</div>`;
-  return `<div class="sec">Use it in your code</div>
+  return `<div class="part" data-tour="snippets"><div class="sec">Use it in your code</div>
     <div class="sendrow">
       ${seg('snippet-tab', tabs, state.snippetTab)}
       ${seg('snippet-lang', [['typescript', 'TypeScript'], ['python', 'Python']], state.snippetLang)}
       <button id="snippet-copy" type="button" class="right">copy</button>
     </div>
     <pre class="snippet-code" id="snippet-code">${esc(code)}</pre>
-    <p class="hint">The object in the call is the request the provider sends, built by the same code. Copy it into your application: the assembler's payload is all it takes.</p>`;
+    <p class="hint">The object in the call is the request the provider sends, built by the same code. Copy it into your application: the assembler's payload is all it takes.</p></div>`;
 }
 
 /** Fetch the SDK snippets for a successful messages assembly into page.state.snippets, then redraw the request. */
@@ -213,7 +213,7 @@ export function renderRequest(page, result) {
   const body = $('#request .body');
   if (!result) { body.innerHTML = ''; return; }
   if (result.outcome === 'refused') {
-    body.innerHTML = `<div class="norequest"><div class="big">No model request</div><p>The assembly was refused with <span class="mono">${esc(result.trace.refused.reason)}</span>, so there is no payload to send (R-17). Nothing reaches the model.</p><div class="mono">payload: null</div></div>
+    body.innerHTML = `<div class="norequest" data-tour="request:refused"><div class="big">No model request</div><p>The assembly was refused with <span class="mono">${esc(result.trace.refused.reason)}</span>, so there is no payload to send (R-17). Nothing reaches the model.</p><div class="mono">payload: null</div></div>
       <p class="hint">The application gets a reason and decides: raise the budget, narrow retrieval, or stop.</p>`;
     return;
   }

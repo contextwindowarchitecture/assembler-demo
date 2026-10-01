@@ -23,7 +23,7 @@
     </div>
     <div class="stepband">
       <nav class="steps" id="steps" aria-label="Scenario steps"></nav>
-      <span id="agreement" class="badges"></span>
+      <span id="agreement" class="badges" data-tour="agreement"></span>
     </div>
     <div class="instruments" id="instruments">
       <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
@@ -31,13 +31,13 @@
         <label class="field">Assembler
           <span class="select"><select id="assembler"></select></span>
         </label>
-        <label class="field">Rendering
+        <label class="field" data-tour="instruments:variant">Rendering
           <span class="select"><select id="variant">
             <option value="fixture">fixture-xml/v1 (compare)</option>
             <option value="messages">cwa-messages/v1 (model)</option>
           </select></span>
         </label>
-        <label class="field">budget.input
+        <label class="field" data-tour="instruments:budget">budget.input
           <span class="number"><input id="budget" type="number" min="0" step="10" inputmode="numeric"></span>
         </label>
         <button id="reset" type="button" title="Back to the frozen snapshot's budget">frozen</button>
@@ -56,14 +56,14 @@
   </aside>
 
 
-  <section class="scenario" id="scenario"></section>
-  <section class="delta" id="delta" aria-label="What changed since the previous step"></section>
+  <section class="scenario" id="scenario" data-tour="scenario"></section>
+  <section class="delta" id="delta" data-tour="delta" aria-label="What changed since the previous step"></section>
 
-  <main class="columns">
-    <section class="column" id="candidates"><h2><span class="num">1</span><span class="col-title">Candidate context</span><span class="col-sub"></span></h2><div class="body"></div></section>
-    <section class="column" id="decisions"><h2><span class="num">2</span><span class="col-title">CWA decisions</span><span class="col-sub"></span></h2><div class="body"></div></section>
-    <section class="column" id="request"><h2><span class="num">3</span><span class="col-title">Outbound request</span><span class="col-sub"></span></h2><div class="body"></div></section>
-    <section class="column" id="answer"><h2><span class="num">4</span><span class="col-title">Model answer</span><span class="col-sub"></span></h2><div class="body"></div></section>
+  <main class="columns" data-tour="columns">
+    <section class="column" id="candidates" data-tour="col:candidates"><h2><span class="num">1</span><span class="col-title">Candidate context</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="decisions" data-tour="col:decisions"><h2><span class="num">2</span><span class="col-title">CWA decisions</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="request" data-tour="col:request"><h2><span class="num">3</span><span class="col-title">Outbound request</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="answer" data-tour="col:answer"><h2><span class="num">4</span><span class="col-title">Model answer</span><span class="col-sub"></span></h2><div class="body"></div></section>
   </main>
 
   <footer class="foot" id="foot"></footer>

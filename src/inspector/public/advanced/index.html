@@ -23,7 +23,7 @@
     </div>
     <div class="stepband">
       <nav class="steps" id="steps" aria-label="Turns of the run"></nav>
-      <span id="agreement" class="badges"></span>
+      <span id="agreement" class="badges" data-tour="agreement"></span>
     </div>
     <div class="instruments" id="instruments">
       <button class="instruments-toggle" id="instruments-toggle" type="button" aria-expanded="false" aria-controls="controls">Instruments <span class="mono" id="instruments-summary"></span></button>
@@ -57,16 +57,16 @@
   </aside>
 
 
-  <section class="scenario" id="scenario-head"></section>
+  <section class="scenario" id="scenario-head" data-tour="scenario"></section>
   <section class="routes" id="routes"></section>
   <section class="timeline" id="timeline"></section>
-  <section class="delta" id="delta" aria-label="What changed since the previous turn"></section>
+  <section class="delta" id="delta" data-tour="delta" aria-label="What changed since the previous turn"></section>
 
-  <main class="columns">
-    <section class="column" id="candidates"><h2><span class="num">1</span><span class="col-title">Candidate context</span><span class="col-sub"></span></h2><div class="body"></div></section>
-    <section class="column" id="decisions"><h2><span class="num">2</span><span class="col-title">CWA decisions</span><span class="col-sub"></span></h2><div class="body"></div></section>
-    <section class="column" id="request"><h2><span class="num">3</span><span class="col-title">Outbound request</span><span class="col-sub"></span></h2><div class="body"></div></section>
-    <section class="column" id="answer"><h2><span class="num">4</span><span class="col-title">Model response</span><span class="col-sub"></span></h2><div class="body"></div></section>
+  <main class="columns" data-tour="columns">
+    <section class="column" id="candidates" data-tour="col:candidates"><h2><span class="num">1</span><span class="col-title">Candidate context</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="decisions" data-tour="col:decisions"><h2><span class="num">2</span><span class="col-title">CWA decisions</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="request" data-tour="col:request"><h2><span class="num">3</span><span class="col-title">Outbound request</span><span class="col-sub"></span></h2><div class="body"></div></section>
+    <section class="column" id="answer" data-tour="col:answer"><h2><span class="num">4</span><span class="col-title">Model response</span><span class="col-sub"></span></h2><div class="body"></div></section>
   </main>
 
   <footer class="foot" id="foot"></footer>

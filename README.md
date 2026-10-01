@@ -19,6 +19,8 @@ pnpm test             # compare logic, scenario validity, every scenario and the
 pnpm run inspector    # http://localhost:8787
 ```
 
+New to CWA? Open the inspector and press **Take the guided tour**. The tour drives the page for you, one stop at a time: it selects the step, outlines the place to look, and says what the assembler did, why it matters and what it proves. Every stage page offers its own tour, and none needs a model.
+
 The sibling checkouts are expected at `../cwa-assembler` (Python, run through `uv`), `../cwa-assembler-ts` (built, so `dist/` exists) and `../cwa-assembler-go`. `assemblers.json` names each adapter command and the environment variable that overrides it.
 
 For live answers, copy `.env.example` to `.env` and fill in a provider. A local model through any OpenAI-compatible server is the simplest:
@@ -40,7 +42,7 @@ The test suite's only model is a mock under `test/helpers/`, used by one API tes
 
 ## The basic stage
 
-Five steps, each adding to the last, so the audience watches one snapshot grow and the decisions change. [docs/SCENARIOS.md](docs/SCENARIOS.md) is the script.
+Five steps, each adding to the last, so the audience watches one snapshot grow and the decisions change. [docs/SCENARIOS.md](docs/SCENARIOS.md) is the presenter's script; a visitor on their own takes the guided tour, fourteen stops on the page itself (`?tour=1`).
 
 | Step | What changes | Reason codes the trace shows |
 | --- | --- | --- |
@@ -127,7 +129,7 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 | `src/agent/` | The controller, the capability policy, the guard, the MCP client, the agent's producers and the run store |
 | `scenarios/advanced/` | The stage's source (services, capability policy, route, profiles, instructions, scenarios) and the recorded reference runs |
 | `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `producers.mjs` (run the producers live), `cli.mjs` |
-| `src/inspector/` | The server; `public/` holds the landing page, a page per stage and the shared columns |
+| `src/inspector/` | The server; `public/` holds the landing page, a page per stage, the shared columns and the guided tours (`public/shared/tours/`) |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
 | `vendor/cwa/` | The published contract, pinned by `vendor/cwa.lock.json` |
 | `Containerfile`, `deploy/` | The image (inspector and three assemblers), `stage-context.sh` for its build context, and the OpenShift deployment |

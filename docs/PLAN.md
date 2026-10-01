@@ -19,6 +19,7 @@ That view separates a producer error from an assembler error from an adapter err
 | M5 Talk script | `docs/SCENARIOS.md`: what to click, what to say, what each step proves | done |
 | Intermediate | Competing sources under a constrained budget: LlamaIndex retrieval, an account database, a memory store, history with summaries, declared conflicts, dedupe, diversity, required evidence; live or replayed producers | done; expectations await review |
 | Advanced | A bounded tool loop over three MCP servers: capability policy, guard, observations as evidence with supersession, task state, bounded recovery, every inference recorded and replayed; a second route with its own placement profile, budget and endpoint; three reference runs against a real model | done |
+| Guided tours | A self-serve tour per stage on the stage page itself: each stop selects the step, outlines the place to look, and says what the assembler did, why it matters and what it proves, with every number read from the trace and every stop checked against the committed expectations; planned in Taskmaster (`.taskmaster/`, one tag per stage) | basic done; intermediate and advanced next |
 
 ## Decisions
 

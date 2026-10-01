@@ -1,5 +1,7 @@
 # The basic stage, as a script
 
+This is the presenter's script. A visitor on their own does not need it: every stage page offers a guided tour (the landing page's first button, or *Take the tour* in the masthead) that sets the page for each stop and says what to look at and why.
+
 Five steps, one question, about twelve minutes. Each step adds to the last: the audience watches one snapshot grow and the decisions change. What to click, what to say, what to point at, and what to ask.
 
 ## Before the talk
@@ -8,7 +10,7 @@ Five steps, one question, about twelve minutes. Each step adds to the last: the 
 - `.env` names the provider (see `.env.example`). `pnpm run inspector`, open `http://localhost:8787` at full width (the four columns need about 1400 px), and pick the OS theme the projector reads best; the page follows it.
 - Click *Talk mode* in the masthead: larger type, the instruments folded behind one line (click the line to open them), and the tertiary details hidden from the candidate cards. The browser remembers it.
 - The *glossary* button beside the theme toggle opens every term the spec and the demo use in a panel on the right; type to filter, Esc to close. The step stays where it is. Click any reason code, on a candidate, in the decisions or in the delta strip, to open it at that code.
-- `pnpm test` once. It runs the 74 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
+- `pnpm test` once. It runs the 82 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
 - Have a terminal ready with `pnpm run compare` for the closing.
 - Arrow keys switch steps. The budget field reassembles live. The `frozen` button returns to the committed snapshot.
 

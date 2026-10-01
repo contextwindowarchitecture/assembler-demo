@@ -44,6 +44,7 @@ test('the glossary covers the vocabulary: the words STYLE.md says to use as the 
   for (const slot of Object.keys(contract.slot_defaults)) assert.ok(text.includes(slot), `${slot} is named`);
   for (const outcome of ['included', 'compressed', 'excluded', 'refused', 'rejected']) assert.ok(text.includes(outcome), `${outcome} is named`);
   assert.ok(TERMS.some(entry => entry.kind === 'demo'), 'the demo has words of its own');
+  assert.ok(TERMS.some(entry => entry.term === 'guided tour' && entry.kind === 'demo'), 'the tour a visitor is offered on every stage page has an entry');
 });
 
 test('filterTerms matches the term, its aliases and its text, case-insensitively, and keeps the order', () => {

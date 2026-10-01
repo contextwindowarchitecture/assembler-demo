@@ -282,6 +282,11 @@ export const TERMS = [
     see: ['candidate', 'trace', 'payload', 'provider'],
   },
   {
+    term: 'guided tour', aliases: ['tour', 'tour stop'], kind: 'demo',
+    text: 'A walk through one stage for a visitor on their own, started from the landing page or the masthead\'s Take the tour button. Each stop selects a step for you, outlines the place to look, and says what the assembler did, why it matters and which codes and requirements it proves; every number in it is read from the trace. The arrow keys move between stops and Esc leaves. No model is needed.',
+    see: ['stage', 'step', 'the four columns', 'look for'],
+  },
+  {
     term: 'candidate', kind: 'demo',
     text: 'An item as a producer sent it, before the assembler decided. The first column lists every candidate in its slot\'s plane with its outcome as a chip: included, compressed, excluded with the code, admitted but assembly refused, not placed, or reported excluded by the producer.',
     see: ['item', 'exclusion'],

@@ -42,7 +42,7 @@
           <span class="select"><select id="provider"></select></span>
         </label>
         <button class="primary" id="start" type="button" title="run the controller now against the chosen model and record it">Run live</button>
-        <button id="replay" type="button" title="every recorded inference through all three assemblers">Replay through all three</button>
+        <button id="replay" type="button" data-tour="replay" title="every recorded inference through all three assemblers">Replay through all three</button>
         <span class="hint">← → switch turns</span>
       </div>
     </div>
@@ -60,8 +60,8 @@
 
 
   <section class="scenario" id="scenario-head" data-tour="scenario"></section>
-  <section class="routes" id="routes"></section>
-  <section class="timeline" id="timeline"></section>
+  <section class="routes" id="routes" data-tour="routes"></section>
+  <section class="timeline" id="timeline" data-tour="timeline"></section>
   <section class="delta" id="delta" data-tour="delta" aria-label="What changed since the previous turn"></section>
 
   <main class="columns" data-tour="columns">

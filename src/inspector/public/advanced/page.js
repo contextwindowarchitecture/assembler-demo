@@ -7,6 +7,9 @@ import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
 import { renderDelta } from '../shared/delta.js';
 import { $, api, esc, postJson, reasonChip, reasonTextFor, stageNav, tag } from '../shared/format.js';
 import { loadSnippets, renderAnswer, renderCandidates, renderColumnHeads, renderDecisions, renderRequest } from '../shared/panels.js';
+import { parseTourState } from '../shared/tour.js';
+import { initTour, touring } from '../shared/tour-band.js';
+import { STOPS } from '../shared/tours/advanced.js';
 
 const STAGE = 'advanced';
 
@@ -62,6 +65,22 @@ async function selectTurn(n) {
   if (result?.outcome === 'assembled') await loadSnippets(page, result);
 }
 
+/** The tour's side of this page: a stop names a recorded run and a turn; it may open the routes. The copy reads the
+ * run as recorded and the turn's snapshot and trace. */
+const tourAdapter = {
+  async go(at, set) {
+    if (state.run?.id !== at.run) await selectRun(at.run);
+    if (state.turn !== at.turn) await selectTurn(at.turn);
+    const routes = $('#routes details');
+    if (routes) routes.open = Boolean(set.routes);
+  },
+  sources: () => {
+    const turn = currentTurn();
+    return { run: state.run, turn, snapshot: turn?.snapshot, trace: turn?.trace, configured: state.providers.filter(p => p.configured).length };
+  },
+  label: at => `${at.run.replace(/^reference-/, '')} · turn ${at.turn}`,
+};
+
 function render() {
   renderHead(); renderRoutes(); renderSteps(); renderTimeline(); renderBadges(); renderInstruments();
   const result = state.response?.results[0] ?? null;
@@ -87,8 +106,8 @@ function renderHead() {
       <p class="question">“${esc(run.question)}”</p>
       <p>${esc(scenario.description ?? '')}</p>
       <div class="proves"><strong>Proves</strong><span>${esc(scenario.proves ?? '')}</span>${(scenario.look_for ?? []).map(code => reasonChip(code, 'bad code', page.reasonText(code))).join('')}</div>
-      <div class="granted"><strong>Granted</strong>${run.capabilities.granted.map(id => tag(id, 'ok code xs')).join('')}
-        <strong>Proposed, not granted</strong>${run.capabilities.not_granted.map(t => `${tag(t.tool, 'gray code xs')}<span class="meta">${esc(t.why)}</span>`).join('') || '<span class="meta">none</span>'}${faults}</div>
+      <div class="granted"><span class="grant" data-tour="agent:granted"><strong>Granted</strong>${run.capabilities.granted.map(id => tag(id, 'ok code xs')).join('')}</span>
+        <span class="grant" data-tour="agent:proposed"><strong>Proposed, not granted</strong>${run.capabilities.not_granted.map(t => `${tag(t.tool, 'gray code xs')}<span class="meta">${esc(t.why)}</span>`).join('') || '<span class="meta">none</span>'}</span>${faults}</div>
     </div>
     <aside class="factsheet">
       <div class="label">Run</div>
@@ -151,9 +170,9 @@ function renderTimeline() {
     const outcome = turn.outcome === 'assembled' ? tag(`assembled · ${turn.trace.result.input_tokens} tokens`, 'ok xs') : turn.outcome === 'refused' ? tag(`refused · ${turn.trace.refused.reason}`, 'bad xs') : tag(turn.outcome, 'bad xs');
     const response = turn.response ? (turn.response.tool_calls.length ? `<div class="hint">${turn.response.tool_calls.length} tool request${turn.response.tool_calls.length === 1 ? '' : 's'} · ${turn.response.durationMs} ms</div>` : `<div class="hint">answer · ${turn.response.durationMs} ms</div>`) : turn.recovery ? `<div class="hint">recovery: ${esc(turn.recovery.action ?? 'none')}</div>` : '<div class="hint">no model call</div>';
     const badge = rp ? (rp.agreement.agree && rp.results.every(r => r.outcome === 'passed') ? tag(`replay: ${rp.results.length} agree, match recorded`, 'ok xs') : tag('replay: DIFFERS', 'fill xs', rp.results.map(r => `${r.assembler}: ${r.outcome} ${r.detail ?? ''}`).join('\n'))) : '';
-    return `<button type="button" class="turn ${turn.n === state.turn ? 'active' : ''}" data-n="${turn.n}">
+    return `<button type="button" class="turn ${turn.n === state.turn ? 'active' : ''}" data-n="${turn.n}" data-tour="turn:${turn.n}">
       <div class="turn-head"><strong>Turn ${turn.n}</strong> <span class="hint">${esc(turn.at)}</span></div>
-      <div class="tags">${outcome}${badge}</div>${response}${requests}
+      <div class="tags">${outcome}${badge}</div>${response}${requests ? `<div class="guard" data-tour="guard:${turn.n}">${requests}</div>` : ''}
       <div class="hint mono">digest ${esc(turn.trace?.context.snapshot_digest.slice(0, 12) ?? '—')}…</div>
     </button>`;
   }).join('')}</div>`;
@@ -210,13 +229,15 @@ async function init() {
     state.busy = null; render();
   });
   document.addEventListener('keydown', event => {
-    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName) || !state.run) return;
+    if (touring() || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName) || !state.run) return;
     if (event.key === 'ArrowRight' && state.turn < state.run.turns.length) selectTurn(state.turn + 1);
     if (event.key === 'ArrowLeft' && state.turn > 1) selectTurn(state.turn - 1);
   });
   const wanted = decodeURIComponent(location.hash.slice(1));
   const first = state.runs.find(r => r.id === wanted) ?? state.runs.find(r => r.reference) ?? state.runs[0];
-  if (first) await selectRun(first.id); else render();
+  if (parseTourState(location.search)) render();
+  else if (first) await selectRun(first.id); else render();
+  initTour({ stage: STAGE, stops: STOPS, adapter: tourAdapter, reasonText: page.reasonText });
 }
 
 init().catch(error => { $('#scenario-head').innerHTML = `<div class="outcome bad"><div class="ofoot">${esc(error.message)}</div></div>`; });

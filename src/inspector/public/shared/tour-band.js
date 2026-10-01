@@ -106,6 +106,10 @@ export function initTour({ stage, stops, adapter, reasonText }) {
     const stop = stopAt(index);
     try { await adapter.go(stop.at, stop.set ?? {}); } finally { tour.busy = false; }
     if (tour.index !== index) return;
+    // A stop that points into the instruments (the advanced page's replay button) unfolds them; the others fold them.
+    const open = Boolean(stop.set?.instruments);
+    $('#instruments')?.classList.toggle('open', open);
+    $('#instruments-toggle')?.setAttribute('aria-expanded', String(open));
     setUrl(index);
     band.hidden = false;
     draw();

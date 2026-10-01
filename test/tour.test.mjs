@@ -86,7 +86,7 @@ test('the pages carry an anchor for every place a tour points', () => {
   const shared = ['scenario', 'columns', 'col:candidates', 'col:decisions', 'col:request', 'col:answer', 'agreement', 'delta',
     'instruments:budget', 'instruments:variant', 'decisions:outcome', 'decisions:excluded', 'decisions:compressed', 'decisions:conflicts',
     'decisions:reasons', 'decisions:context', 'decisions:recovery', 'request:refused', 'request:conflict', 'snippets', 'candidate:x',
-    'producers', 'instruments:mode'];
+    'producers', 'instruments:mode', 'agent:granted', 'agent:proposed', 'routes', 'timeline', 'turn:1', 'guard:1', 'replay', 'recorded-answer'];
   for (const key of shared) assert.ok(anchors.has(key), `an element carries data-tour="${key}"`);
 });
 
@@ -148,3 +148,49 @@ for (const stage of ['basic', 'intermediate']) {
     }
   });
 }
+
+// A recorded turn, as the advanced page shows it: the run, the turn, and the turn's snapshot and recorded trace.
+const RUNS = new URL('advanced/runs/', SCENARIOS);
+function turnSources(runId, n) {
+  const run = readJson(new URL(`${runId}/run.json`, RUNS));
+  const turn = run.turns.find(t => t.n === n);
+  return { run, turn, snapshot: turn?.snapshot, trace: turn?.trace, configured: 0 };
+}
+
+/** What a stop may claim about its turn, each checked against the recording. */
+const TURN_CHECKS = {
+  denied: ({ run, turn }) => run.denials.some(d => d.turn === turn.n),
+  superseded: ({ trace }, n) => trace.excluded.filter(row => row.reason === 'superseded').length >= n,
+  answer: ({ run, turn }) => run.stop.reason === 'answer' && run.stop.turn === turn.n && Boolean(turn.response?.text),
+  observationOk: ({ run, turn }, ok) => run.observations.some(o => o.turn === turn.n && o.ok === ok),
+  compressed: ({ trace }, n) => trace.compressed.length >= n,
+};
+
+test('every advanced tour stop holds against the recorded run and turn it selects', async () => {
+  const file = new URL('../src/inspector/public/shared/tours/advanced.js', import.meta.url);
+  assert.ok(fs.existsSync(file), 'the advanced stage has a tour');
+  const { STOPS } = await import(file);
+  for (const stop of STOPS) {
+    const where = `advanced/${stop.id}`;
+    assert.ok(fs.existsSync(new URL(`${stop.at.run}/run.json`, RUNS)), `${where}: run ${stop.at.run} is recorded`);
+    assert.ok(stop.at.run.startsWith('reference-'), `${where}: a tour shows committed reference runs, never a live one`);
+    const sources = turnSources(stop.at.run, stop.at.turn);
+    assert.ok(sources.turn, `${where}: ${stop.at.run} has a turn ${stop.at.turn}`);
+    const codes = new Set([...sources.trace.excluded.map(row => row.reason), ...(sources.trace.refused.reason ? [sources.trace.refused.reason] : [])]);
+    for (const code of stop.proves) {
+      if (/^R-\d+$/.test(code)) assert.ok(REQUIREMENTS.has(code), `${where}: ${code} is a requirement the contract numbers`);
+      else assert.ok(codes.has(code), `${where}: ${code} is in the trace of ${stop.at.run} turn ${stop.at.turn}`);
+    }
+    if (stop.target.startsWith('candidate:')) {
+      const id = stop.target.slice('candidate:'.length);
+      assert.ok(sources.snapshot.batches.some(b => b.items.some(i => i.id === id)), `${where}: ${id} is a candidate of ${stop.at.run} turn ${stop.at.turn}`);
+    }
+    for (const [check, value] of Object.entries(stop.expect ?? {})) {
+      assert.ok(TURN_CHECKS[check], `${where}: ${check} is a check the test knows`);
+      assert.ok(TURN_CHECKS[check](sources, value), `${where}: ${check} ${JSON.stringify(value)} holds at ${stop.at.run} turn ${stop.at.turn}`);
+    }
+    for (const field of ['title', 'look', 'what', 'why']) {
+      assert.deepEqual(fill(stop[field], sources).missing, [], `${where}: every placeholder in ${field} resolves`);
+    }
+  }
+});

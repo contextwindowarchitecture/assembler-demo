@@ -262,7 +262,7 @@ export function renderAnswer(page, result) {
   if (page.recordedAnswer) {
     // A recorded run: the model's response for this turn, as it was captured, and nothing to send.
     const a = page.recordedAnswer(result);
-    body.innerHTML = a ? `<div class="entry">
+    body.innerHTML = a ? `<div class="entry" data-tour="recorded-answer">
       <div class="id">${answerMeta(a, `${a.label ?? 'recorded'} · ${a.model ?? ''}`)}</div>
       ${(a.tool_calls ?? []).length ? `<div class="sec">Tool request${a.tool_calls.length === 1 ? '' : 's'}</div>${a.tool_calls.map(c => `<div class="sendrow">${tag(c.name, 'line code')}<span class="mono">${esc(JSON.stringify(c.arguments))}</span></div>`).join('')}` : ''}
       ${a.text ? `<div class="answer-text">${esc(a.text)}</div>` : '<p class="hint">no answer text this turn</p>'}

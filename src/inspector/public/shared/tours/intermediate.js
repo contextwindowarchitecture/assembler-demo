@@ -132,6 +132,6 @@ export const STOPS = [
     what: 'Real producers bring copies, stale editions, leaks and disagreements. Each was handled by a declared rule: deduplication and source diversity, scope at admission, a fact precedence, a surfaced instruction conflict, supplied summaries, and a refusal when evidence is required and missing.',
     why: 'Every one of those decisions is a trace row, reproducible from a frozen snapshot. The advanced stage lets the context change between inferences, through a tool loop the application bounds.',
     proves: [],
-    onward: { href: 'advanced/', label: 'On to the advanced stage' },
+    onward: { href: 'advanced/?tour=1', label: 'On to the advanced tour' },
   },
 ];

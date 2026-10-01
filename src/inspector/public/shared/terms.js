@@ -136,8 +136,8 @@ export const TERMS = [
   },
   {
     term: 'relevance', kind: 'spec',
-    text: 'The rerank score a retrieval producer puts on each chunk before assembly, on the producer\'s own scale. An item scoring below its slot\'s min_relevance, or carrying no score where the route sets one, is excluded with below_threshold; a score equal to the threshold passes.',
-    see: ['producer'], rules: ['R-13', 'R-18'],
+    text: 'The rerank score a retrieval producer puts on each chunk before assembly, on the producer\'s own scale. Every evidence.knowledge item, from any producer, must carry one, and one without it is excluded with missing_field:relevance. An item scoring below its slot\'s min_relevance, or carrying no score in any other slot that sets one, is excluded with below_threshold; a score equal to the threshold passes.',
+    see: ['producer'], rules: ['R-2', 'R-13', 'R-18'],
   },
   {
     term: 'conflict group', kind: 'spec',
@@ -171,13 +171,13 @@ export const TERMS = [
   },
   {
     term: 'tokenizer', kind: 'spec',
-    text: 'The declared way of counting tokens, named in the snapshot and repeated in the trace. This demo uses fixture-whitespace/v1 in both renderings so the count is portable and the fitting decisions are identical; a production route names the model\'s tokenizer, or estimate-utf8/v1 with a margin.',
+    text: 'The declared way of counting tokens, named in the snapshot and repeated in the trace. This demo uses fixture-whitespace/v1 in both renderings so the count is portable and the fitting decisions are identical; a production route names the model\'s tokenizer, or estimate-utf8/v1 with a margin. An assembler stops before assembly, with no payload and no trace, on a tokenizer the application supplies under a published tokenizer\'s id, so a trace naming a published tokenizer always means its published count.',
     see: ['budget'], rules: ['R-16', 'R-23'],
   },
   {
     term: 'renderer', aliases: ['fixture-xml/v1', 'cwa-messages/v1'], kind: 'spec',
-    text: 'The declared output format. fixture-xml/v1 is the fixture renderer most conformance cases use: one text the three assemblers must reproduce byte for byte. cwa-messages/v1 is the request IR a provider sends: system entries, tools, and the user message, which the inspector shows as the literal SDK call.',
-    see: ['rendering', 'payload', 'provider'],
+    text: 'The declared output format. fixture-xml/v1 is the fixture renderer most conformance cases use: one text the three assemblers must reproduce byte for byte. cwa-messages/v1 is the request IR a provider sends: system entries, tools, and the user message, which the inspector shows as the literal SDK call. Both mark a surfaced conflict member in its text, since that is all the model sees: fixture-xml/v1 with a conflict attribute on the wrapper, cwa-messages/v1 by wrapping a system or tools entry\'s text in <conflict group="…">. An assembler stops before assembly on a renderer the application supplies under a published renderer\'s id.',
+    see: ['rendering', 'payload', 'provider'], rules: ['R-11', 'R-16'],
   },
   {
     term: 'payload', kind: 'spec',

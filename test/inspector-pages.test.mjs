@@ -132,6 +132,15 @@ test('the four columns sit two per row at every width above the one-column break
   assert.match(stacked[1], /\.column h2::before\s*{[^}]*display:\s*none/, 'stacked, the arrows go');
 });
 
+test('the landing hero keeps both columns down to 1100px, where the pipeline grid still has room beside the headline', () => {
+  const css = read('style.css');
+  const medias = [...css.matchAll(/@media \(max-width: (\d+)px\)\s*{([\s\S]*?)\n}/g)].map(m => [Number(m[1]), m[2]]);
+  const stacks = medias.filter(([, body]) => /\.hero\s*{[^}]*grid-template-columns:\s*1fr/.test(body)).map(([width]) => width);
+  assert.deepEqual(stacks, [1100], 'one breakpoint stacks the hero, at 1100px: stacked at 1400px, the right half of the hero sat empty on every laptop');
+  const widths = medias.map(([width]) => width);
+  assert.deepEqual(widths, [...widths].sort((a, b) => b - a), 'the breakpoints are in descending order');
+});
+
 test('every select sits in a .select wrapper, and the stylesheet draws its caret clear of the edge, in a token colour', () => {
   const css = read('style.css');
   assert.match(css, /\.select select\s*{[^}]*appearance: none/, 'the native caret is off');

@@ -299,8 +299,8 @@ The stylesheet ends with `@media (max-width: …)` rules that select by class. N
 
 | Max width | Rule |
 |---|---|
-| `1400px` | The landing hero stacks |
 | `1280px` | The tour's rail becomes the dock along the foot of the viewport, and the page's room for it moves from the right to the bottom |
+| `1100px` | The landing hero stacks; above it the pipeline grid keeps its place beside the headline |
 | `900px` | The step header and the landing stages become one column; every gutter tightens to `20px`; the brand's subtitle hides. The producer, route and turn grids need no rule: they are `auto-fit` |
 | `800px` | The columns become one, their headers stop sticking and the arrow goes; the landing pipeline (a two-by-two grid) stacks |
 

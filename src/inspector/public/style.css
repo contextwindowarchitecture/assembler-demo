@@ -438,9 +438,6 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
 .tour-target { position: relative; outline: 2px solid var(--fg); outline-offset: 3px; scroll-margin-top: calc(var(--top-h, calc(var(--mast-h) + var(--band-h))) + 104px); }
 .tour-target::after { content: attr(data-tour-stop) " · look here"; position: absolute; top: -15px; left: 14px; z-index: 3; display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: var(--pill); background: var(--inv-bg); color: var(--inv-fg); font-family: var(--mono); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; line-height: 1; }
 
-@media (max-width: 1400px) {
-  .hero { grid-template-columns: 1fr; }
-}
 @media (max-width: 1280px) {
   .tour { top: auto; left: 0; width: auto; overflow: visible; padding: 14px 32px 16px; }
   .tour:not(.invite):not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 24px; align-items: center; }
@@ -452,6 +449,9 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
   :root[data-touring="1"] body { padding-right: 0; padding-bottom: var(--tour-h, 0px); }
   :root[data-touring="1"] .top { margin-right: 0; }
   :root:has(.glossary:not([hidden])) .tour { right: 400px; }
+}
+@media (max-width: 1100px) {
+  .hero { grid-template-columns: 1fr; }
 }
 @media (max-width: 900px) {
   .tour { padding-left: 20px; padding-right: 20px; }

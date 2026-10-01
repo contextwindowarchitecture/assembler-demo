@@ -91,7 +91,7 @@ node src/harness/cli.mjs replay reference-01-investigate            # every reco
 
 ```sh
 pnpm run compare                     # every step, both renderings, every assembler: passed/failed vs expectation, and three-way agreement
-pnpm run conformance                 # the vendored 52 cases and 22 rejections through every adapter: 52/52 and 22/22 for all three
+pnpm run conformance                 # the vendored 58 cases and 24 rejections through every adapter: 58/58 and 24/24 for all three
 pnpm run expect --from python        # regenerate expectations from one assembler
 node src/harness/cli.mjs run scenarios/basic/04-budget/snapshot.json   # one snapshot, all assemblers, the payload printed
 node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider local   # assemble, then ask a real model

@@ -46,6 +46,9 @@ test('fill takes every number and id from the sources and reports what it could 
   assert.deepEqual(fill('{trace.excluded[reason=over_budget].item_id}', sources), { text: 'b, c', missing: [] });
   assert.deepEqual(fill('{trace.nothing.here} and {snapshot.budget}', sources), { text: '? and ?', missing: ['trace.nothing.here', 'snapshot.budget'] });
   assert.deepEqual(fill('no placeholders', sources), { text: 'no placeholders', missing: [] });
+  const nested = { snapshot: { batches: [{ producer: { id: 'kb' }, items: [{ id: 'a', slot: 'evidence.knowledge', relevance: 0.41 }] }], route_policy: { slots: { 'evidence.knowledge': { min_relevance: 0.6 } } } } };
+  assert.deepEqual(fill('{snapshot.batches[producer.id=kb][0].items[slot=evidence.knowledge][0].relevance}', nested), { text: '0.41', missing: [] }, 'a filter key and value may carry dots');
+  assert.deepEqual(fill('{snapshot.route_policy.slots[evidence.knowledge].min_relevance}', nested), { text: '0.6', missing: [] }, 'a bracketed name reads an object key that carries dots');
 });
 
 test('validateStops names every stop that lacks a field the band shows', () => {
@@ -98,3 +101,49 @@ test('every tour module is a list of stops the band can show', async () => {
   }
   assert.ok(fs.existsSync(new URL('../src/inspector/public/shared/tours/basic.js', import.meta.url)), 'the basic stage has a tour');
 });
+
+// A step's committed files, as the page would show them: the rendering a stop sets (fixture unless it says messages),
+// the snapshot, the expected trace (standing in for the assemblers' agreed result) and scenario.json as `meta`.
+const SCENARIOS = new URL('../scenarios/', import.meta.url);
+const readJson = url => JSON.parse(fs.readFileSync(url, 'utf8'));
+function stepSources(stage, step, variant = 'fixture') {
+  const dir = new URL(`${stage}/${step}/`, SCENARIOS);
+  const suffix = variant === 'messages' ? '.messages' : '';
+  return {
+    meta: readJson(new URL('scenario.json', dir)),
+    snapshot: readJson(new URL(`snapshot${suffix}.json`, dir)),
+    trace: readJson(new URL(`expected${suffix}.trace.json`, dir)),
+    configured: 0,
+  };
+}
+const REQUIREMENTS = new Set(readJson(new URL('../vendor/cwa/contract/requirements.json', import.meta.url)).map(r => r.id));
+
+for (const stage of ['basic', 'intermediate']) {
+  test(`every ${stage} tour stop holds against the committed step it selects`, async () => {
+    const file = new URL(`../src/inspector/public/shared/tours/${stage}.js`, import.meta.url);
+    if (!fs.existsSync(file)) return;
+    const { STOPS } = await import(file);
+    for (const stop of STOPS) {
+      const where = `${stage}/${stop.id}`;
+      assert.ok(fs.existsSync(new URL(`${stage}/${stop.at.step}/scenario.json`, SCENARIOS)), `${where}: step ${stop.at.step} exists`);
+      const sources = stepSources(stage, stop.at.step, stop.set?.variant);
+      const { trace, snapshot } = sources;
+      const codes = new Set([...trace.excluded.map(row => row.reason), ...(trace.refused.reason ? [trace.refused.reason] : [])]);
+      for (const code of stop.proves) {
+        if (/^R-\d+$/.test(code)) assert.ok(REQUIREMENTS.has(code), `${where}: ${code} is a requirement the contract numbers`);
+        else assert.ok(codes.has(code), `${where}: ${code} is in the expected trace of ${stop.at.step}`);
+      }
+      if (stop.target.startsWith('candidate:')) {
+        const id = stop.target.slice('candidate:'.length);
+        assert.ok(snapshot.batches.some(b => b.items.some(i => i.id === id) || b.excluded.some(r => r.item_id === id)), `${where}: ${id} is a candidate of ${stop.at.step}`);
+      }
+      for (const variant of [stop, stop.noProvider ?? {}]) {
+        for (const field of ['title', 'look', 'what', 'why']) {
+          if (!variant[field]) continue;
+          const { missing } = fill(variant[field], { ...sources, configured: variant === stop ? 1 : 0 });
+          assert.deepEqual(missing, [], `${where}: every placeholder in ${field} resolves`);
+        }
+      }
+    }
+  });
+}

@@ -27,21 +27,26 @@ export function tourKey(key, active) {
   return { ArrowRight: 'next', ArrowLeft: 'back', Escape: 'leave' }[key] ?? null;
 }
 
-// A path is dot-separated segments; a segment may carry [n] (an index) or [key=value] (a filter). `.length` on a
-// list is its count, any other name on a list reads that field of each entry, and a list of scalars at the end reads
-// as "a, b".
+// A path is dot-separated segments (a dot inside brackets does not separate); a segment may carry [n] (an index into a
+// list), [key=value] (the entries of a list whose key, itself a dotted path, has that value) or [name] (an object's
+// key, for keys such as slot ids that carry dots). `.length` on a list is its count, any other name on a list reads
+// that field of each entry, and a list of scalars at the end reads as "a, b".
+const segments = path => path.split(/\.(?![^[]*\])/);
+const read = (value, dotted) => segments(dotted).reduce((v, name) => v?.[name], value);
+
 function resolve(path, sources) {
   let value = sources;
-  for (const part of path.split('.')) {
+  for (const part of segments(path)) {
     const match = /^([^[\]]*)((?:\[[^\]]+\])*)$/.exec(part);
     if (!match) return undefined;
     const [, name, brackets] = match;
     if (name && Array.isArray(value)) value = name === 'length' ? value.length : value.map(entry => entry?.[name]);
     else if (name) value = value?.[name];
     for (const [, inner] of brackets.matchAll(/\[([^\]]+)\]/g)) {
-      if (!Array.isArray(value)) return undefined;
       const filter = /^([^=]+)=(.*)$/.exec(inner);
-      value = filter ? value.filter(entry => String(entry?.[filter[1]]) === filter[2]) : value[Number(inner)];
+      if (Array.isArray(value)) value = filter ? value.filter(entry => String(read(entry, filter[1])) === filter[2]) : value[Number(inner)];
+      else if (!filter && value && typeof value === 'object') value = value[inner];
+      else return undefined;
     }
     if (value === undefined || value === null) return undefined;
   }

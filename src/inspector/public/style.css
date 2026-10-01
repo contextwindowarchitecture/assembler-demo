@@ -389,7 +389,7 @@ button.turn .call { font-family: var(--mono); font-size: var(--fs-label); color:
 .tour-nav a.btn { font-size: 14px; padding: 9px 18px; }
 .tour-invite { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; }
 .tour-invite p { font-size: var(--fs-sm); line-height: 1.55; max-width: 72ch; }
-.tour-target { outline: 2px solid var(--fg); outline-offset: 3px; scroll-margin-top: calc(var(--top-h, calc(var(--mast-h) + var(--band-h))) + 64px); }
+.tour-target { outline: 2px solid var(--fg); outline-offset: 3px; scroll-margin-top: calc(var(--top-h, calc(var(--mast-h) + var(--band-h))) + 104px); }
 
 @media (max-width: 1400px) {
   .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }

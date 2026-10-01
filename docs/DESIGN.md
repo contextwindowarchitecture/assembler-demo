@@ -169,7 +169,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 
 ## Testing
 
-`pnpm test` runs, in about four seconds:
+`pnpm test` runs, in about ten seconds:
 
 - `compare.test.mjs`: the judging rules on hand-built traces, including UTF-16 key order.
 - `contract-lock.test.mjs`: every vendored file matches its SHA-256; nothing unlocked.

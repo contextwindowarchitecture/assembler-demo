@@ -1,0 +1,60 @@
+# The tests, with the three assemblers checked out beside this repository as they are locally: assembler-python
+# run through uv, assembler-typescript built so the link: dependency resolves, and assembler-go built into bin/ by
+# pnpm run setup, which fails unless all three adapters are available. Each assembler is at its main.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: pnpm test against the three assemblers (Node 24)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: assembler-demo
+      - uses: actions/checkout@v5
+        with:
+          repository: contextwindowarchitecture/assembler-python
+          ref: main
+          path: assembler-python
+      - uses: actions/checkout@v5
+        with:
+          repository: contextwindowarchitecture/assembler-typescript
+          ref: main
+          path: assembler-typescript
+      - uses: actions/checkout@v5
+        with:
+          repository: contextwindowarchitecture/assembler-go
+          ref: main
+          path: assembler-go
+      # The version comes from packageManager in the demo's package.json.
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: assembler-demo/package.json
+      # Node 24, as in the Containerfile.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: |
+            assembler-demo/pnpm-lock.yaml
+            assembler-typescript/pnpm-lock.yaml
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: assembler-go/go.mod
+      - uses: astral-sh/setup-uv@v6
+      - name: build the TypeScript assembler the demo links
+        working-directory: assembler-typescript
+        run: pnpm install --frozen-lockfile && pnpm run build
+      - working-directory: assembler-demo
+        run: pnpm install --frozen-lockfile
+      - working-directory: assembler-demo
+        run: pnpm run setup
+      - working-directory: assembler-demo
+        run: pnpm test

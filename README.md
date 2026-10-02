@@ -115,6 +115,10 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 
 `deploy/openshift/deploy.sh` deploys it to the current `oc` project: an in-cluster binary build of the staged context by default, or `IMAGE=quay.io/<you>/cwa-demo-app` for a podman build pushed to a registry (`PLATFORM` defaults to `linux/amd64`). The image is tagged with this repository's short SHA, `-dirty` when any of the four trees has uncommitted changes, and labelled with all four revisions. `.env` becomes the Secret `cwa-demo-env`, applied on every deploy; the Route is public, with edge TLS. The Route's host and path, the router's timeout, and a storage class and size for a claim that keeps live agent runs are parameters: see [deploy/openshift/README.md](deploy/openshift/README.md).
 
+## CI
+
+`.github/workflows/ci.yml` checks out the three assemblers beside this repository, as they sit locally, builds the TypeScript one, runs `pnpm run setup`, which fails unless all three adapters are available, then `pnpm test` on Node 24, the Containerfile's. Pushes and pull requests test against each assembler's `main`.
+
 ## Layout
 
 | Path | What it is |

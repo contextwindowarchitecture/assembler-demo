@@ -1,11 +1,23 @@
 # The tests, with the three assemblers checked out beside this repository as they are locally: assembler-python
 # run through uv, assembler-typescript built so the link: dependency resolves, and assembler-go built into bin/ by
-# pnpm run setup, which fails unless all three adapters are available. Each assembler is at its main.
+# pnpm run setup, which fails unless all three adapters are available. Each assembler is at its main, except when
+# release.yml runs it for a tag: then the demo and all three assemblers are at that tag.
 name: ci
 
 on:
   push:
+    branches: ["**"]
   pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: The commit to test; release.yml passes the tag
+        type: string
+        default: ""
+      assemblers_ref:
+        description: The ref of each assembler to test against; release.yml passes the same tag
+        type: string
+        default: main
 
 permissions:
   contents: read
@@ -17,21 +29,23 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: ${{ inputs.ref }}
           path: assembler-demo
+      # A push or pull request passes no inputs, so the assemblers fall back to main.
       - uses: actions/checkout@v5
         with:
           repository: contextwindowarchitecture/assembler-python
-          ref: main
+          ref: ${{ inputs.assemblers_ref || 'main' }}
           path: assembler-python
       - uses: actions/checkout@v5
         with:
           repository: contextwindowarchitecture/assembler-typescript
-          ref: main
+          ref: ${{ inputs.assemblers_ref || 'main' }}
           path: assembler-typescript
       - uses: actions/checkout@v5
         with:
           repository: contextwindowarchitecture/assembler-go
-          ref: main
+          ref: ${{ inputs.assemblers_ref || 'main' }}
           path: assembler-go
       # The version comes from packageManager in the demo's package.json.
       - uses: pnpm/action-setup@v6

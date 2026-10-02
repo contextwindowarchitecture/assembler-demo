@@ -28,7 +28,7 @@ Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work st
 ## Commands
 
 ```sh
-pnpm install                      # installs ajv and links ../cwa-assembler-ts
+pnpm install                      # installs ajv and links ../assembler-typescript
 pnpm run setup                    # builds the Go adapter into bin/, checks the Python and TypeScript adapters
 pnpm test                         # unit tests, scenario checks, and the harness against every available assembler
 pnpm run conformance              # the vendored conformance cases through every adapter: the harness's self-check
@@ -48,12 +48,12 @@ podman build -f /tmp/cwa-context/cwa-demo-app/Containerfile -t cwa-demo-app /tmp
 deploy/openshift/deploy.sh        # to the current oc project: in-cluster build, or IMAGE=quay.io/<you>/cwa-demo-app for a podman build; .env becomes the Secret; ROUTE_HOST, ROUTE_PATH, STORAGE_CLASS, STORAGE_SIZE parametrize it
 ```
 
-pnpm is the package manager: `packageManager` in package.json pins its version, and the TypeScript assembler is a `link:` dependency, so a rebuild in `../cwa-assembler-ts` reaches this app without a reinstall. Don't run `npm install` here: it writes its own lockfile and a different layout, and `test/toolchain.test.mjs` will say so.
+pnpm is the package manager: `packageManager` in package.json pins its version, and the TypeScript assembler is a `link:` dependency, so a rebuild in `../assembler-typescript` reaches this app without a reinstall. Don't run `npm install` here: it writes its own lockfile and a different layout, and `test/toolchain.test.mjs` will say so.
 
 The intermediate stage's producers are Python under `producers/`, run with `uv run --directory producers`; their data is under `scenarios/intermediate/source/`. A change to the corpus, a store or a producer means `pnpm run producers:write`, then `pnpm run expect --from python scenarios/intermediate`, and the tests will say so.
 
 The advanced stage's MCP servers are under `mcp/servers/` and the controller under `src/agent/`. Reference runs are recorded against a real model and committed; live runs (`scenarios/advanced/runs/live-*`) are ignored. A change to the controller, the policy or the services means re-recording the reference runs with `--reference`, since the recorded snapshots carry the instructions and the grant.
 
-The sibling checkouts are expected at `../cwa-assembler` (Python, with its `.venv` or `uv`), `../cwa-assembler-ts` (built: `dist/` present) and `../cwa-assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
+The sibling checkouts are expected at `../assembler-python` (Python, with its `.venv` or `uv`), `../assembler-typescript` (built: `dist/` present) and `../assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
 
 `.env` is gitignored and holds provider settings and keys for one machine. Never commit it, never paste its values into a commit message, a document or a chat reply.

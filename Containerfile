@@ -4,10 +4,10 @@
 # context holds all four side by side, each under its own name, and the image keeps that layout under /opt/cwa so
 # the relative paths in assemblers.json hold:
 #
-#   <context>/cwa-demo-app/       this repository
-#   <context>/cwa-assembler/      ../cwa-assembler     Python, run through uv from its own .venv
-#   <context>/cwa-assembler-ts/   ../cwa-assembler-ts  TypeScript, built here and linked by pnpm as locally
-#   <context>/cwa-assembler-go/   ../cwa-assembler-go  Go, built into bin/cwa-adapter-go as `pnpm run setup` does
+#   <context>/cwa-demo-app/          this repository
+#   <context>/assembler-python/      ../assembler-python      Python, run through uv from its own .venv
+#   <context>/assembler-typescript/  ../assembler-typescript  TypeScript, built here and linked by pnpm as locally
+#   <context>/assembler-go/          ../assembler-go          Go, built into bin/cwa-adapter-go as `pnpm run setup` does
 #
 # deploy/stage-context.sh writes that context from the working trees (what git lists, nothing it ignores, never
 # .env), and deploy/openshift/deploy.sh builds from it. By hand:
@@ -22,7 +22,7 @@
 # The Go adapter.
 FROM docker.io/library/golang:1.26-alpine AS go
 WORKDIR /src
-COPY cwa-assembler-go/ .
+COPY assembler-go/ .
 RUN CGO_ENABLED=0 go build -mod=vendor -trimpath -o /out/cwa-adapter-go ./cmd/adapter
 
 # Node, Python and uv: what both the build and the running inspector need. Debian trixie's python3 is 3.13, which
@@ -37,13 +37,13 @@ ENV UV_PYTHON_PREFERENCE=only-system UV_LINK_MODE=copy
 # Install and build everything under /opt/cwa, then hand the tree to the runtime stage.
 FROM base AS build
 WORKDIR /opt/cwa
-COPY cwa-assembler-ts/ cwa-assembler-ts/
-COPY cwa-assembler/ cwa-assembler/
+COPY assembler-typescript/ assembler-typescript/
+COPY assembler-python/ assembler-python/
 COPY cwa-demo-app/ cwa-demo-app/
 RUN npm install -g "pnpm@$(node -p "require('./cwa-demo-app/package.json').packageManager.split('@')[1]")"
 # The TypeScript assembler: built with its dev dependencies, then pruned to what dist/ imports.
-RUN cd cwa-assembler-ts && pnpm install --frozen-lockfile && pnpm run build && pnpm prune --prod
-# This app: its dependencies and the link to ../cwa-assembler-ts, as `pnpm install` makes locally.
+RUN cd assembler-typescript && pnpm install --frozen-lockfile && pnpm run build && pnpm prune --prod
+# This app: its dependencies and the link to ../assembler-typescript, as `pnpm install` makes locally.
 RUN cd cwa-demo-app && pnpm install --frozen-lockfile --prod
 # The Python assembler and the producers, each in its own .venv from its lockfile; bytecode compiled now, since
 # the running container may not write into the tree. PyStemmer, a producers' dependency, has no wheel for every
@@ -51,9 +51,9 @@ RUN cd cwa-demo-app && pnpm install --frozen-lockfile --prod
 RUN apt-get update \
   && apt-get install -y --no-install-recommends gcc python3-dev \
   && rm -rf /var/lib/apt/lists/*
-RUN uv sync --frozen --no-dev --compile-bytecode --project cwa-assembler \
+RUN uv sync --frozen --no-dev --compile-bytecode --project assembler-python \
   && uv sync --frozen --no-dev --compile-bytecode --directory cwa-demo-app/producers \
-  && cwa-assembler/.venv/bin/python -m compileall -q cwa-assembler/src \
+  && assembler-python/.venv/bin/python -m compileall -q assembler-python/src \
   && cwa-demo-app/producers/.venv/bin/python -m compileall -q cwa-demo-app/producers/producers
 COPY --from=go /out/cwa-adapter-go cwa-demo-app/bin/cwa-adapter-go
 # OpenShift runs the container as an arbitrary user in the root group: give the group the owner's rights, so the

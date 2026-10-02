@@ -3,15 +3,15 @@
   "python": {
     "language": "Python",
     "name": "cwa-assembler",
-    "checkout": "../cwa-assembler",
-    "command": ["uv", "run", "--quiet", "--project", "../cwa-assembler", "python", "adapters/python_adapter.py"],
-    "requires": ["../cwa-assembler/pyproject.toml"],
+    "checkout": "../assembler-python",
+    "command": ["uv", "run", "--quiet", "--project", "../assembler-python", "python", "adapters/python_adapter.py"],
+    "requires": ["../assembler-python/pyproject.toml"],
     "env": "CWA_PYTHON_ADAPTER"
   },
   "typescript": {
     "language": "TypeScript",
     "name": "@contextwindowarchitecture/assembler",
-    "checkout": "../cwa-assembler-ts",
+    "checkout": "../assembler-typescript",
     "command": ["node", "adapters/typescript_adapter.mjs"],
     "requires": ["node_modules/@contextwindowarchitecture/assembler/dist/index.js"],
     "env": "CWA_TYPESCRIPT_ADAPTER"
@@ -19,7 +19,7 @@
   "go": {
     "language": "Go",
     "name": "github.com/contextwindowarchitecture/assembler-go",
-    "checkout": "../cwa-assembler-go",
+    "checkout": "../assembler-go",
     "command": ["bin/cwa-adapter-go"],
     "requires": ["bin/cwa-adapter-go"],
     "env": "CWA_GO_ADAPTER"

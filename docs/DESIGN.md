@@ -192,7 +192,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 
 - `compare.test.mjs`: the judging rules on hand-built traces, including UTF-16 key order.
 - `contract-lock.test.mjs`: every vendored file matches its SHA-256; nothing unlocked.
-- `toolchain.test.mjs`: pnpm is pinned, its lockfile is the only one, and the installed TypeScript assembler is `../cwa-assembler-ts` itself, not a copy.
+- `toolchain.test.mjs`: pnpm is pinned, its lockfile is the only one, and the installed TypeScript assembler is `../assembler-typescript` itself, not a copy.
 - `glossary.test.mjs`: every entry has a definition, cites only requirements the contract numbers and terms that exist, the vocabulary covers every plane, slot and outcome, and the panel renders each entry with its anchor, the spec's words before the demo's.
 - `conformance.test.mjs`: the 82 vendored snapshots through every available assembler, judged as the reference runner judges them, and three-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.
 - `scenarios.test.mjs`: schema validity, generated files current, expectations consistent (hash, digest, reason codes).

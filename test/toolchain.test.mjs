@@ -1,5 +1,5 @@
 // One package manager, pnpm: package.json names it, pnpm-lock.yaml is the only lockfile, and the TypeScript
-// assembler is ../cwa-assembler-ts itself. pnpm copies a `file:` dependency into its store; `link:` keeps the
+// assembler is ../assembler-typescript itself. pnpm copies a `file:` dependency into its store; `link:` keeps the
 // symlink, so a rebuild in the sibling reaches this app without a reinstall.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
@@ -8,12 +8,12 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const SIBLING = path.resolve(ROOT, '..', 'cwa-assembler-ts');
+const SIBLING = path.resolve(ROOT, '..', 'assembler-typescript');
 const pkg = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 
 test('package.json pins pnpm and declares the TypeScript assembler as a link', () => {
   assert.match(pkg.packageManager ?? '', /^pnpm@\d+\.\d+\.\d+$/, 'packageManager names a pnpm version');
-  assert.equal(pkg.dependencies['@contextwindowarchitecture/assembler'], 'link:../cwa-assembler-ts');
+  assert.equal(pkg.dependencies['@contextwindowarchitecture/assembler'], 'link:../assembler-typescript');
   for (const [name, script] of Object.entries(pkg.scripts)) {
     assert.doesNotMatch(script, /\bnpm\b/, `script ${name} calls npm`);
   }
@@ -25,8 +25,8 @@ test('pnpm-lock.yaml is the only lockfile', () => {
 });
 
 test(
-  'the installed TypeScript assembler is ../cwa-assembler-ts itself, not a copy',
-  { skip: existsSync(SIBLING) ? false : '../cwa-assembler-ts is not checked out' },
+  'the installed TypeScript assembler is ../assembler-typescript itself, not a copy',
+  { skip: existsSync(SIBLING) ? false : '../assembler-typescript is not checked out' },
   () => {
     const installed = path.join(ROOT, 'node_modules', '@contextwindowarchitecture', 'assembler');
     assert.ok(existsSync(installed), 'the assembler is not installed: run pnpm install');

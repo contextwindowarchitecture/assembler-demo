@@ -13,7 +13,7 @@ The last mile is the code people already write. The live answers go through the 
 The project uses pnpm, pinned by `packageManager` in package.json. Install it once with `npm install -g pnpm`, or run `corepack enable` on a Node that bundles corepack and it fetches the pinned version on first use. Running `npm install` here stops on the `link:` dependency rather than leaving a mixed tree.
 
 ```sh
-pnpm install          # ajv, the Anthropic SDK, and a link to ../cwa-assembler-ts
+pnpm install          # ajv, the Anthropic SDK, and a link to ../assembler-typescript
 pnpm run setup        # builds the Go adapter into bin/ and checks the Python and TypeScript adapters
 pnpm test             # compare logic, scenario validity, every scenario and the 82 vendored conformance snapshots through every adapter, the inspector API
 pnpm run inspector    # http://localhost:8787
@@ -21,7 +21,7 @@ pnpm run inspector    # http://localhost:8787
 
 New to CWA? Open the inspector and press **Take the guided tour**. The tour drives the page for you, one stop at a time: it selects the step, outlines the place to look, and says what the assembler did, why it matters and what it proves. Every stage page offers its own tour, and none needs a model.
 
-The sibling checkouts are expected at `../cwa-assembler` (Python, run through `uv`), `../cwa-assembler-ts` (built, so `dist/` exists) and `../cwa-assembler-go`. `assemblers.json` names each adapter command and the environment variable that overrides it.
+The sibling checkouts are expected at `../assembler-python` (Python, run through `uv`), `../assembler-typescript` (built, so `dist/` exists) and `../assembler-go`. `assemblers.json` names each adapter command and the environment variable that overrides it.
 
 For live answers, copy `.env.example` to `.env` and fill in a provider. A local model through any OpenAI-compatible server is the simplest:
 
@@ -119,7 +119,7 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 
 | Path | What it is |
 | --- | --- |
-| `adapters/` | The Python and TypeScript adapters (a dozen lines each); the Go one is `../cwa-assembler-go/cmd/adapter`, built into `bin/` |
+| `adapters/` | The Python and TypeScript adapters (a dozen lines each); the Go one is `../assembler-go/cmd/adapter`, built into `bin/` |
 | `assemblers.json` | Adapter commands, requirements and environment overrides |
 | `scenarios/basic/source/` | The route policy, the two profiles, the clean fixture's batches, and each step's additions |
 | `scenarios/basic/NN-step/` | Generated snapshots, `scenario.json`, and the expected payloads and traces |

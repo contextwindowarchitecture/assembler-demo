@@ -5,7 +5,7 @@ Snapshot bytes on stdin. Exit 0 with {"payload": base64 or null, "trace": {...}}
 exit 2 when the snapshot is rejected before assembly (the problems on stderr); exit 3 when it names a tokenizer or
 renderer this assembler does not provide. Run it with the assembler's environment:
 
-    uv run --quiet --project ../cwa-assembler python adapters/python_adapter.py < snapshot.json
+    uv run --quiet --project ../assembler-python python adapters/python_adapter.py < snapshot.json
 """
 import base64
 import json

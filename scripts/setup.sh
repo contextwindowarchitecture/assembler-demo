@@ -4,27 +4,27 @@ set -eu
 cd "$(dirname "$0")/.."
 
 status=0
-if [ -d ../cwa-assembler-go ]; then
-  echo "go: building ../cwa-assembler-go/cmd/adapter -> bin/cwa-adapter-go"
+if [ -d ../assembler-go ]; then
+  echo "go: building ../assembler-go/cmd/adapter -> bin/cwa-adapter-go"
   mkdir -p bin
-  (cd ../cwa-assembler-go && go build -o "$OLDPWD/bin/cwa-adapter-go" ./cmd/adapter)
+  (cd ../assembler-go && go build -o "$OLDPWD/bin/cwa-adapter-go" ./cmd/adapter)
 else
-  echo "go: ../cwa-assembler-go is not checked out; the Go assembler will be skipped" >&2
+  echo "go: ../assembler-go is not checked out; the Go assembler will be skipped" >&2
   status=1
 fi
 
 if [ -f node_modules/@contextwindowarchitecture/assembler/dist/index.js ]; then
-  echo "typescript: linked ../cwa-assembler-ts (dist/ present)"
+  echo "typescript: linked ../assembler-typescript (dist/ present)"
 else
-  echo "typescript: run 'pnpm install' here and 'npm run build' in ../cwa-assembler-ts; the TypeScript assembler will be skipped" >&2
+  echo "typescript: run 'pnpm install' here and 'npm run build' in ../assembler-typescript; the TypeScript assembler will be skipped" >&2
   status=1
 fi
 
-if [ -f ../cwa-assembler/pyproject.toml ] && command -v uv >/dev/null 2>&1; then
-  echo "python: ../cwa-assembler through uv"
-  uv run --quiet --project ../cwa-assembler python -c "import cwa" || { echo "python: 'uv run' cannot import cwa" >&2; status=1; }
+if [ -f ../assembler-python/pyproject.toml ] && command -v uv >/dev/null 2>&1; then
+  echo "python: ../assembler-python through uv"
+  uv run --quiet --project ../assembler-python python -c "import cwa" || { echo "python: 'uv run' cannot import cwa" >&2; status=1; }
 else
-  echo "python: ../cwa-assembler with uv is needed; the Python assembler will be skipped" >&2
+  echo "python: ../assembler-python with uv is needed; the Python assembler will be skipped" >&2
   status=1
 fi
 

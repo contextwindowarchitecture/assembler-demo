@@ -27,7 +27,9 @@ COPY assembler-go/ .
 RUN CGO_ENABLED=0 go build -mod=vendor -trimpath -o /out/cwa-adapter-go ./cmd/adapter
 
 # The Rust adapter, an example of the crate, statically linked against musl. 1.80 is the crate's rust-version.
+# That image has no musl-dev, whose crt files the proc-macro crates (serde_derive) need to link.
 FROM docker.io/library/rust:1.80-alpine AS rust
+RUN apk add --no-cache musl-dev
 WORKDIR /src
 COPY assembler-rust/ .
 RUN cargo build --release --locked --example adapter && mkdir /out && cp target/release/examples/adapter /out/cwa-adapter-rust

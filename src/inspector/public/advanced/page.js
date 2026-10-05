@@ -1,7 +1,7 @@
 // The advanced stage: a recorded run of the controller, inference by inference. The turns are the step band's
 // progression and a timeline of cards: each turn's outcome, the model's response and every tool request with the
 // guard's decision; selecting a turn shows its snapshot, trace, payload and recorded response in the shared columns.
-// "Run live" records a new run against a real model; "Replay" feeds every recorded snapshot through all three
+// "Run live" records a new run against a real model; "Replay" feeds every recorded snapshot through all four
 // assemblers.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
 import { renderDelta } from '../shared/delta.js';
@@ -182,11 +182,11 @@ function renderTimeline() {
 function renderBadges() {
   const badges = [];
   if (state.busy === 'running') badges.push('<span class="chip">running the controller against the model…</span>');
-  else if (state.busy === 'replaying') badges.push('<span class="chip">replaying every inference through all three…</span>');
+  else if (state.busy === 'replaying') badges.push('<span class="chip">replaying every inference through all four…</span>');
   else if (state.busy) badges.push(`<span class="chip">${esc(state.busy)}…</span>`);
   else if (state.replay) {
     const ok = state.replay.turns.every(t => t.agreement.agree && t.results.every(r => r.outcome === 'passed'));
-    badges.push(ok ? `<span class="chip ok dot">${state.replay.turns.length} inferences replayed · all three agree and match the recorded traces</span>` : '<span class="chip fill dot">replay differs from the record</span>');
+    badges.push(ok ? `<span class="chip ok dot">${state.replay.turns.length} inferences replayed · all four agree and match the recorded traces</span>` : '<span class="chip fill dot">replay differs from the record</span>');
   }
   if (state.error) badges.push(`<span class="chip bad dot">${esc(state.error)}</span>`);
   $('#agreement').outerHTML = `<span id="agreement" class="badges" data-tour="agreement">${badges.join('')}</span>`;

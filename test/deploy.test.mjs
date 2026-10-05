@@ -24,7 +24,7 @@ test('the Containerfile copies this repository and every checkout assemblers.jso
 });
 
 test(
-  'stage-context.sh writes the four working trees side by side: what git lists, nothing it ignores, never .env',
+  'stage-context.sh writes the five working trees side by side: what git lists, nothing it ignores, never .env',
   { skip: allPresent ? false : 'a checkout is missing or is not a git checkout' },
   () => {
     const context = mkdtempSync(path.join(tmpdir(), 'cwa-context-'));

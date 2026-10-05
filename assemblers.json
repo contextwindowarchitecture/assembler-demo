@@ -23,5 +23,13 @@
     "command": ["bin/cwa-adapter-go"],
     "requires": ["bin/cwa-adapter-go"],
     "env": "CWA_GO_ADAPTER"
+  },
+  "rust": {
+    "language": "Rust",
+    "name": "contextwindowarchitecture-assembler",
+    "checkout": "../assembler-rust",
+    "command": ["bin/cwa-adapter-rust"],
+    "requires": ["bin/cwa-adapter-rust"],
+    "env": "CWA_RUST_ADAPTER"
   }
 }

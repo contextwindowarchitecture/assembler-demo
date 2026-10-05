@@ -2,7 +2,7 @@
   "name": "cwa-demo-app",
   "version": "0.1.0",
   "private": true,
-  "description": "Support-assistant demo for the Context Window Architecture: frozen scenarios, a three-assembler comparison harness, and an inspector for candidates, decisions and the outbound request",
+  "description": "Support-assistant demo for the Context Window Architecture: frozen scenarios, a four-assembler comparison harness, and an inspector for candidates, decisions and the outbound request",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {

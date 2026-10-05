@@ -1,6 +1,6 @@
 # Working in cwa-demo-app
 
-A demo application for the Context Window Architecture (CWA) draft specification. It runs a support-assistant scenario through the three conformant assemblers (Python, TypeScript, Go), compares their payloads and traces, and shows every decision in an inspector. It is not an assembler: it never decides what goes into a context window. It freezes inputs, hands them to an assembler, and shows what came back.
+A demo application for the Context Window Architecture (CWA) draft specification. It runs a support-assistant scenario through the four conformant assemblers (Python, TypeScript, Go, Rust), compares their payloads and traces, and shows every decision in an inspector. It is not an assembler: it never decides what goes into a context window. It freezes inputs, hands them to an assembler, and shows what came back.
 
 Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work stands, [docs/DESIGN.md](docs/DESIGN.md) for how the pieces fit, and [STYLE.md](STYLE.md) before touching the inspector's pages or stylesheet: it is the website's visual language applied here, and a test checks what it can.
 
@@ -43,7 +43,7 @@ pnpm run compare                  # every scenario through every assembler, agai
 pnpm run inspector                # http://localhost:8787; loads .env (see .env.example) for the live-answer providers
 pnpm run live                     # step 3 through the assemblers, then to every configured provider: real model answers on the terminal
 pnpm run test:live                # the live path as a test (CWA_DEMO_LIVE=1); needs a running model
-deploy/stage-context.sh /tmp/cwa-context                                     # the container build context: this repo and the three checkouts, nothing ignored
+deploy/stage-context.sh /tmp/cwa-context                                     # the container build context: this repo and the four checkouts, nothing ignored
 podman build -f /tmp/cwa-context/cwa-demo-app/Containerfile -t cwa-demo-app /tmp/cwa-context   # the image; see the Containerfile
 deploy/openshift/deploy.sh        # to the current oc project: in-cluster build, or IMAGE=quay.io/<you>/cwa-demo-app for a podman build; .env becomes the Secret; ROUTE_HOST, ROUTE_PATH, STORAGE_CLASS, STORAGE_SIZE parametrize it
 ```
@@ -54,6 +54,6 @@ The intermediate stage's producers are Python under `producers/`, run with `uv r
 
 The advanced stage's MCP servers are under `mcp/servers/` and the controller under `src/agent/`. Reference runs are recorded against a real model and committed; live runs (`scenarios/advanced/runs/live-*`) are ignored. A change to the controller, the policy or the services means re-recording the reference runs with `--reference`, since the recorded snapshots carry the instructions and the grant.
 
-The sibling checkouts are expected at `../assembler-python` (Python, with its `.venv` or `uv`), `../assembler-typescript` (built: `dist/` present) and `../assembler-go`. `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
+The sibling checkouts are expected at `../assembler-python` (Python, with its `.venv` or `uv`), `../assembler-typescript` (built: `dist/` present), `../assembler-go` and `../assembler-rust` (with `cargo`). `assemblers.json` names the adapter commands; override a path with the environment variables it documents.
 
 `.env` is gitignored and holds provider settings and keys for one machine. Never commit it, never paste its values into a commit message, a document or a chat reply.

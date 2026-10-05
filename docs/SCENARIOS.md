@@ -10,7 +10,7 @@ Five steps, one question, about twelve minutes. Each step adds to the last: the 
 - `.env` names the provider (see `.env.example`). `pnpm run inspector`, open `http://localhost:8787` at full width (the four columns sit two per row and stack only below 800 px), and pick the OS theme the projector reads best; the page follows it.
 - Click *Talk mode* in the masthead: larger type, the instruments folded behind one line (click the line to open them), and the tertiary details hidden from the candidate cards. The browser remembers it.
 - The *glossary* button beside the theme toggle opens every term the spec and the demo use in a panel on the right; type to filter, Esc to close. The step stays where it is. Click any reason code, on a candidate, in the decisions or in the delta strip, to open it at that code.
-- `pnpm test` once. It runs the 82 published conformance snapshots through all three assemblers, so if it is green the harness can be trusted on stage.
+- `pnpm test` once. It runs the 86 published conformance snapshots through all four assemblers, so if it is green the harness can be trusted on stage.
 - Have a terminal ready with `pnpm run compare` for the closing.
 - Arrow keys switch steps. The budget field reassembles live. The `frozen` button returns to the committed snapshot.
 
@@ -18,7 +18,7 @@ The screen, four numbered columns two per row, read left to right and then down,
 
 ## Step 1: assemble a clean fixture
 
-**Click:** step 1, rendering `fixture-xml/v1`, assembler `all three`.
+**Click:** step 1, rendering `fixture-xml/v1`, assembler `all four`.
 
 **Say:** One support question, *What support does the Pro plan include?* Five producers ran before assembly: a policy registry, an account-state service, a knowledge-base search, a memory store and the conversation. Each handed over a batch of candidate items. Nothing decided anything yet.
 
@@ -38,7 +38,7 @@ The screen, four numbered columns two per row, read left to right and then down,
 
 **Point at:** the three red cards in the candidates column, each with its reason code, and the *Reason codes in this assembly* list under the decisions, which quotes the published registry text for each. `expired` (R-9), `out_of_scope` (R-2), `below_threshold` (R-13).
 
-**Say:** Eligibility is the route's predicate, versioned and applied outside the model. The stale SLA never reaches the request, so the model cannot repeat it. And when an item fails several checks, the trace records the earliest applicable code, in the registry's order, so three implementations record the same one.
+**Say:** Eligibility is the route's predicate, versioned and applied outside the model. The stale SLA never reaches the request, so the model cannot repeat it. And when an item fails several checks, the trace records the earliest applicable code, in the registry's order, so four implementations record the same one.
 
 **Ask:** without this, whose job was it to notice the 2025 document?
 
@@ -86,9 +86,9 @@ The screen, four numbered columns two per row, read left to right and then down,
 
 ## Closing
 
-**Run:** `pnpm run compare` in the terminal. Ten rows, one per step and rendering, three assemblers, all `passed`, all `agree`.
+**Run:** `pnpm run compare` in the terminal. Ten rows, one per step and rendering, four assemblers, all `passed`, all `agree`.
 
-**Say:** Three implementations, three languages, same frozen input, same bytes out. The expectation they are compared with is generated from one of them and reviewed by a person, because three matching assemblers can share a mistake. What the model then does with those bytes is evaluated separately, and that is the next stage: competing sources under a constrained budget, then a tool loop.
+**Say:** Four implementations, four languages, same frozen input, same bytes out. The expectation they are compared with is generated from one of them and reviewed by a person, because four matching assemblers can share a mistake. What the model then does with those bytes is evaluated separately, and that is the next stage: competing sources under a constrained budget, then a tool loop.
 
 # The intermediate stage, as a script
 
@@ -140,7 +140,7 @@ Six steps, one question, about fifteen minutes. The page is `/intermediate/`. St
 
 ## Closing
 
-`pnpm run compare` shows both stages: twenty-two rows, three assemblers, all passed, all agree.
+`pnpm run compare` shows both stages: twenty-two rows, four assemblers, all passed, all agree.
 
 # The advanced stage, as a script
 
@@ -158,7 +158,7 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 **Point at:** the answer on turn 6: three sections, the contract; the colleague's plan named as unchecked.
 
-**Click:** *Replay through all three*. Every turn badges: three assemblers agree and match the trace recorded at the time.
+**Click:** *Replay through all four*. Every turn badges: four assemblers agree and match the trace recorded at the time.
 
 **Ask:** which part of this would you trust the model with? None of it decided what it was allowed to do.
 
@@ -184,7 +184,7 @@ Two recorded runs and one live one, about twelve minutes. The page is `/advanced
 
 ## Closing
 
-`pnpm test` replays every reference run through all three assemblers each time it runs. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
+`pnpm test` replays every reference run through all four assemblers each time it runs. Three stages, one screen, one rule: nothing decides inside the model that the application can decide outside it.
 
 ## If something goes wrong
 

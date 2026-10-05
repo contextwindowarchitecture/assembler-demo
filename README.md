@@ -1,6 +1,6 @@
 # cwa-demo-app
 
-A support-assistant demo for the [Context Window Architecture](https://contextwindowarchitecture.io) (CWA) draft. One question, *What support does the Pro plan include?*, runs through the three conformant assemblers (Python, TypeScript, Go) on the same frozen inputs, and an inspector shows every decision on one screen:
+A support-assistant demo for the [Context Window Architecture](https://contextwindowarchitecture.io) (CWA) draft. One question, *What support does the Pro plan include?*, runs through the four conformant assemblers (Python, TypeScript, Go, Rust) on the same frozen inputs, and an inspector shows every decision on one screen:
 
 > **Candidate context → CWA decisions → outbound request → model answer**
 
@@ -21,7 +21,7 @@ pnpm run inspector    # http://localhost:8787
 
 New to CWA? Open the inspector and press **Take the guided tour**. The tour drives the page for you, one stop at a time: it selects the step, outlines the place to look, and says what the assembler did, why it matters and what it proves. Every stage page offers its own tour, and none needs a model.
 
-The sibling checkouts are expected at `../assembler-python` (Python, run through `uv`), `../assembler-typescript` (built, so `dist/` exists) and `../assembler-go`. `assemblers.json` names each adapter command and the environment variable that overrides it.
+The sibling checkouts are expected at `../assembler-python` (Python, run through `uv`), `../assembler-typescript` (built, so `dist/` exists), `../assembler-go` and `../assembler-rust` (with `cargo`, which builds its adapter). `assemblers.json` names each adapter command and the environment variable that overrides it.
 
 For live answers, copy `.env.example` to `.env` and fill in a provider. A local model through any OpenAI-compatible server is the simplest:
 
@@ -92,8 +92,8 @@ node src/harness/cli.mjs replay reference-01-investigate            # every reco
 ## The harness
 
 ```sh
-pnpm run compare                     # every step, both renderings, every assembler: passed/failed vs expectation, and three-way agreement
-pnpm run conformance                 # the vendored 61 cases and 25 rejections through every adapter: 61/61 and 25/25 for all three
+pnpm run compare                     # every step, both renderings, every assembler: passed/failed vs expectation, and four-way agreement
+pnpm run conformance                 # the vendored 61 cases and 25 rejections through every adapter: 61/61 and 25/25 for all four
 pnpm run expect --from python        # regenerate expectations from one assembler
 node src/harness/cli.mjs run scenarios/basic/04-budget/snapshot.json   # one snapshot, all assemblers, the payload printed
 node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider local   # assemble, then ask a real model
@@ -103,7 +103,7 @@ Comparison follows `conformance/README.md`: payloads byte for byte; traces field
 
 ## In a container
 
-`Containerfile` builds one image with the inspector and the three assemblers. The build context is not this repository alone, since the assemblers are sibling checkouts: `deploy/stage-context.sh` lays the four working trees out side by side, each as git lists it (tracked and untracked files, nothing ignored, never `.env`), and the image is built from that. Inside, the four keep the same layout under `/opt/cwa`, so `assemblers.json` holds as it does here.
+`Containerfile` builds one image with the inspector and the four assemblers. The build context is not this repository alone, since the assemblers are sibling checkouts: `deploy/stage-context.sh` lays the five working trees out side by side, each as git lists it (tracked and untracked files, nothing ignored, never `.env`), and the image is built from that. Inside, the five keep the same layout under `/opt/cwa`, so `assemblers.json` holds as it does here.
 
 ```sh
 deploy/stage-context.sh /tmp/cwa-context
@@ -117,13 +117,13 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 
 ## CI
 
-`.github/workflows/ci.yml` checks out the three assemblers beside this repository, as they sit locally, builds the TypeScript one, runs `pnpm run setup`, which fails unless all three adapters are available, then `pnpm test` on Node 24, the Containerfile's. Pushes and pull requests test against each assembler's `main`. Each tag gets a GitHub release (`.github/workflows/release.yml`) once that job passes with this repository and all three assemblers at the tag, so a demo tag is released only when every assembler carries the same tag and they work together. The notes name the website commit `vendor/cwa.lock.json` pins and the assembler tag, then list the tag's own commits, written by git-cliff (`cliff.toml`). A tag that is not `vX.Y.Z` is a prerelease, and a tag pushed before the workflow existed is released with `gh workflow run release.yml -f tag=<tag>`.
+`.github/workflows/ci.yml` checks out the four assemblers beside this repository, as they sit locally, builds the TypeScript one, runs `pnpm run setup`, which fails unless all four adapters are available, then `pnpm test` on Node 24, the Containerfile's. Pushes and pull requests test against each assembler's `main`. Each tag gets a GitHub release (`.github/workflows/release.yml`) once that job passes with this repository and all four assemblers at the tag, so a demo tag is released only when every assembler carries the same tag and they work together. The notes name the website commit `vendor/cwa.lock.json` pins and the assembler tag, then list the tag's own commits, written by git-cliff (`cliff.toml`). A tag that is not `vX.Y.Z` is a prerelease, and a tag pushed before the workflow existed is released with `gh workflow run release.yml -f tag=<tag>`.
 
 ## Layout
 
 | Path | What it is |
 | --- | --- |
-| `adapters/` | The Python and TypeScript adapters (a dozen lines each); the Go one is `../assembler-go/cmd/adapter`, built into `bin/` |
+| `adapters/` | The Python and TypeScript adapters (a dozen lines each); the Go one is `../assembler-go/cmd/adapter` and the Rust one `../assembler-rust`'s `adapter` example, both built into `bin/` |
 | `assemblers.json` | Adapter commands, requirements and environment overrides |
 | `scenarios/basic/source/` | The route policy, the two profiles, the clean fixture's batches, and each step's additions |
 | `scenarios/basic/NN-step/` | Generated snapshots, `scenario.json`, and the expected payloads and traces |
@@ -136,7 +136,7 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 | `src/inspector/` | The server; `public/` holds the landing page, a page per stage, the shared columns and the guided tours (`public/shared/tours/`) |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
 | `vendor/cwa/` | The published contract, pinned by `vendor/cwa.lock.json` |
-| `Containerfile`, `deploy/` | The image (inspector and three assemblers), `stage-context.sh` for its build context, and the OpenShift deployment |
+| `Containerfile`, `deploy/` | The image (inspector and four assemblers), `stage-context.sh` for its build context, and the OpenShift deployment |
 | `docs/` | [PLAN.md](docs/PLAN.md), [DESIGN.md](docs/DESIGN.md), [SCENARIOS.md](docs/SCENARIOS.md) |
 
 See [AGENTS.md](AGENTS.md) for the working rules.

@@ -1,7 +1,7 @@
-# The tests, with the three assemblers checked out beside this repository as they are locally: assembler-python
-# run through uv, assembler-typescript built so the link: dependency resolves, and assembler-go built into bin/ by
-# pnpm run setup, which fails unless all three adapters are available. Each assembler is at its main, except when
-# release.yml runs it for a tag: then the demo and all three assemblers are at that tag.
+# The tests, with the four assemblers checked out beside this repository as they are locally: assembler-python
+# run through uv, assembler-typescript built so the link: dependency resolves, and assembler-go and assembler-rust
+# built into bin/ by pnpm run setup, which fails unless all four adapters are available. Each assembler is at its
+# main, except when release.yml runs it for a tag: then the demo and all four assemblers are at that tag.
 name: ci
 
 on:
@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   test:
-    name: pnpm test against the three assemblers (Node 24)
+    name: pnpm test against the four assemblers (Node 24)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -47,6 +47,11 @@ jobs:
           repository: contextwindowarchitecture/assembler-go
           ref: ${{ inputs.assemblers_ref || 'main' }}
           path: assembler-go
+      - uses: actions/checkout@v5
+        with:
+          repository: contextwindowarchitecture/assembler-rust
+          ref: ${{ inputs.assemblers_ref || 'main' }}
+          path: assembler-rust
       # The version comes from packageManager in the demo's package.json.
       - uses: pnpm/action-setup@v6
         with:
@@ -62,6 +67,8 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: assembler-go/go.mod
+      # Stable Rust, as the crate's own ci installs it; pnpm run setup builds its adapter example.
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
       - uses: astral-sh/setup-uv@v6
       - name: build the TypeScript assembler the demo links
         working-directory: assembler-typescript

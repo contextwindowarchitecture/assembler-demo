@@ -31,7 +31,7 @@ const post = async (path, body) => {
 test('GET /api/state lists the assemblers, the three providers and the scenarios', async () => {
   const { status, body } = await get('/api/state');
   assert.equal(status, 200);
-  assert.deepEqual(body.assemblers.map(a => a.id), ['python', 'typescript', 'go']);
+  assert.deepEqual(body.assemblers.map(a => a.id), ['python', 'typescript', 'go', 'rust']);
   assert.deepEqual(body.providers.map(p => p.id), ['local', 'anthropic', 'openai']);
   const local = body.providers[0];
   assert.deepEqual([local.configured, local.model, local.source], [true, 'mock-llama', 'first of 1 models the server lists']);

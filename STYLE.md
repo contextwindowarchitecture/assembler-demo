@@ -339,7 +339,7 @@ All buttons are pills. A `<button>` always sets `font-family` explicitly because
 | Ghost pill (steps, producer index) | the ghost, identifiers kept as written; the producer index at `padding: 3px 8px` | same as ghost |
 | Large primary (landing) | primary at `font-size: 16px; padding: 15px 26px` | `background: var(--fg)` |
 
-Labels are sentence case: "Talk mode", "Run live", "Replay through all three", "Send to all". The theme and glossary buttons are the exception, in the website's lowercase mono: "dark", "glossary". A disabled button is at `opacity: 0.5` with `cursor: not-allowed`; there is no loading or pressed style beyond `aria-pressed`, which the talk-mode button renders as the inverse pill.
+Labels are sentence case: "Talk mode", "Run live", "Replay through all four", "Send to all". The theme and glossary buttons are the exception, in the website's lowercase mono: "dark", "glossary". A disabled button is at `opacity: 0.5` with `cursor: not-allowed`; there is no loading or pressed style beyond `aria-pressed`, which the talk-mode button renders as the inverse pill.
 
 ### Form controls
 

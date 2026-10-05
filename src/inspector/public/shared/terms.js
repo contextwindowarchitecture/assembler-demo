@@ -176,7 +176,7 @@ export const TERMS = [
   },
   {
     term: 'renderer', aliases: ['fixture-xml/v1', 'cwa-messages/v1'], kind: 'spec',
-    text: 'The declared output format. fixture-xml/v1 is the fixture renderer most conformance cases use: one text the three assemblers must reproduce byte for byte. cwa-messages/v1 is the request IR a provider sends: system entries, tools, and the user message, which the inspector shows as the literal SDK call. Both mark a surfaced conflict member in its text, since that is all the model sees: fixture-xml/v1 with a conflict attribute on the wrapper, cwa-messages/v1 by wrapping a system or tools entry\'s text in <conflict group="…">. An assembler stops before assembly on a renderer the application supplies under a published renderer\'s id.',
+    text: 'The declared output format. fixture-xml/v1 is the fixture renderer most conformance cases use: one text the four assemblers must reproduce byte for byte. cwa-messages/v1 is the request IR a provider sends: system entries, tools, and the user message, which the inspector shows as the literal SDK call. Both mark a surfaced conflict member in its text, since that is all the model sees: fixture-xml/v1 with a conflict attribute on the wrapper, cwa-messages/v1 by wrapping a system or tools entry\'s text in <conflict group="…">. An assembler stops before assembly on a renderer the application supplies under a published renderer\'s id.',
     see: ['rendering', 'payload', 'provider'], rules: ['R-11', 'R-16'],
   },
   {
@@ -256,14 +256,14 @@ export const TERMS = [
   },
   {
     term: 'canonical JSON', aliases: ['I-JSON', 'RFC 8785'], kind: 'spec',
-    text: 'How a snapshot is digested and compared: keys in UTF-16 code unit order, numbers as IEEE 754 doubles, strings well-formed Unicode. Three implementations in three languages must serialise the same snapshot to the same bytes, which is what the digest check in this demo tests.',
+    text: 'How a snapshot is digested and compared: keys in UTF-16 code unit order, numbers as IEEE 754 doubles, strings well-formed Unicode. Four implementations in four languages must serialise the same snapshot to the same bytes, which is what the digest check in this demo tests.',
     see: ['snapshot digest'], rules: ['R-2', 'R-22'],
   },
 
   // This demo's words.
   {
     term: 'the demo', aliases: ['inspector', 'cwa-demo-app'], kind: 'demo',
-    text: 'A support-assistant scenario run through the three conformant assemblers (Python, TypeScript, Go) on the same frozen inputs, with every decision shown on one screen. The app never assembles: it freezes inputs, hands them to an assembler through the adapter protocol, compares what comes back, and shows it.',
+    text: 'A support-assistant scenario run through the four conformant assemblers (Python, TypeScript, Go, Rust) on the same frozen inputs, with every decision shown on one screen. The app never assembles: it freezes inputs, hands them to an assembler through the adapter protocol, compares what comes back, and shows it.',
     see: ['stage', 'the four columns', 'adapter'],
   },
   {
@@ -293,7 +293,7 @@ export const TERMS = [
   },
   {
     term: 'frozen', kind: 'demo',
-    text: 'A committed snapshot with its clock inside it, so the same bytes go to all three assemblers today and next year. Basic snapshots are generated from one source; intermediate ones are built by the real producers and frozen; the frozen button returns to the committed snapshot after a budget change.',
+    text: 'A committed snapshot with its clock inside it, so the same bytes go to all four assemblers today and next year. Basic snapshots are generated from one source; intermediate ones are built by the real producers and frozen; the frozen button returns to the committed snapshot after a budget change.',
     see: ['derived', 'live', 'snapshot'],
   },
   {
@@ -318,7 +318,7 @@ export const TERMS = [
   },
   {
     term: 'expectation', aliases: ['unreviewed'], kind: 'demo',
-    text: 'The expected payload and trace for a step, generated from a named assembler and committed. scenario.json records which assembler and whether a person has reviewed it; an unreviewed expectation shows as an accent badge, since three assemblers can share a mistake and a reviewed expectation is the independent check.',
+    text: 'The expected payload and trace for a step, generated from a named assembler and committed. scenario.json records which assembler and whether a person has reviewed it; an unreviewed expectation shows as an accent badge, since four assemblers can share a mistake and a reviewed expectation is the independent check.',
     see: ['agreement', 'harness'],
   },
   {
@@ -328,7 +328,7 @@ export const TERMS = [
   },
   {
     term: 'adapter', kind: 'demo',
-    text: 'The command that runs one assembler the way the harness runs all three: the snapshot\'s bytes on stdin, an exit code (0 assembled or refused, 2 rejected, 3 unsupported), and the payload and trace on stdout. The TypeScript assembler goes through an adapter too, so no assembler has a shortcut.',
+    text: 'The command that runs one assembler the way the harness runs all four: the snapshot\'s bytes on stdin, an exit code (0 assembled or refused, 2 rejected, 3 unsupported), and the payload and trace on stdout. The TypeScript assembler goes through an adapter too, so no assembler has a shortcut.',
     see: ['harness', 'rejection'],
   },
   {

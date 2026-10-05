@@ -23,6 +23,7 @@ flowchart TB
         PY["uv run … python adapters/python_adapter.py"]
         TS["node adapters/typescript_adapter.mjs"]
         GO["bin/cwa-adapter-go"]
+        RS["bin/cwa-adapter-rust"]
     end
     subgraph inspector["src/inspector"]
         SRV["server.mjs<br/>/api/state · /api/assemble · /api/answer"] --> UI["public/<br/>four columns"]
@@ -33,7 +34,7 @@ flowchart TB
     end
     SNAP --> CASES
     EXP --> CMP
-    AD --> PY & TS & GO
+    AD --> PY & TS & GO & RS
     SRV --> AD
     SRV --> CMP
     SRV --> IDX
@@ -59,7 +60,7 @@ Every assembler is reached the same way, the protocol `PORTING.md` in the assemb
 - Payload bytes are compared byte for byte. A refusal where a payload was expected, or the reverse, is a failure with the reference runner's wording.
 - Traces are compared field for field after removing only `trace_id` and `timings` (R-23), and `recovery.detail`, free text for people that no requirement defines (Running a case). The first difference is reported as a JSON pointer, keys visited in UTF-16 code unit order (Ordering), so the report is the same one the reference runner would give.
 - `unsupported` is `skipped`, never `passed`. A rejection snapshot passes only when the adapter rejected it.
-- `agreement()` takes the first judged result as the reference and compares every other with it. This is the brief's three-compiler check. It does not replace the expectation: three assemblers can agree on the same mistake.
+- `agreement()` takes the first judged result as the reference and compares every other with it. This is the brief's three-compiler check. It does not replace the expectation: four assemblers can agree on the same mistake.
 
 ### Expectations
 
@@ -194,7 +195,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 - `contract-lock.test.mjs`: every vendored file matches its SHA-256; nothing unlocked.
 - `toolchain.test.mjs`: pnpm is pinned, its lockfile is the only one, and the installed TypeScript assembler is `../assembler-typescript` itself, not a copy.
 - `glossary.test.mjs`: every entry has a definition, cites only requirements the contract numbers and terms that exist, the vocabulary covers every plane, slot and outcome, and the panel renders each entry with its anchor, the spec's words before the demo's.
-- `conformance.test.mjs`: the 86 vendored snapshots through every available assembler, judged as the reference runner judges them, and three-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.
+- `conformance.test.mjs`: the 86 vendored snapshots through every available assembler, judged as the reference runner judges them, and four-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.
 - `scenarios.test.mjs`: schema validity, generated files current, expectations consistent (hash, digest, reason codes).
 - `scenarios-assemblers.test.mjs`: what `pnpm run compare` checks, as a test: every scenario in both renderings through every available assembler, against its committed expectation and across the assemblers. A contract or assembler change that moves a payload or a trace fails here; before it, only `compare` caught that.
 - `tour.test.mjs`: the guided tours' engine (navigation, the URL state, the keyboard, placeholder filling, stop validation), every `data-tour` anchor a tour names, and every stop checked against the committed expectations it describes.

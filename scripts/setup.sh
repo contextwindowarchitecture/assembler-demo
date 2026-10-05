@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the Go adapter into bin/ and checks that every adapter can run. Safe to rerun.
+# Builds the Go and Rust adapters into bin/ and checks that every adapter can run. Safe to rerun.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -10,6 +10,16 @@ if [ -d ../assembler-go ]; then
   (cd ../assembler-go && go build -o "$OLDPWD/bin/cwa-adapter-go" ./cmd/adapter)
 else
   echo "go: ../assembler-go is not checked out; the Go assembler will be skipped" >&2
+  status=1
+fi
+
+if [ -d ../assembler-rust ] && command -v cargo >/dev/null 2>&1; then
+  echo "rust: building ../assembler-rust's adapter example -> bin/cwa-adapter-rust"
+  mkdir -p bin
+  (cd ../assembler-rust && cargo build --quiet --release --locked --example adapter)
+  cp ../assembler-rust/target/release/examples/adapter bin/cwa-adapter-rust
+else
+  echo "rust: ../assembler-rust with cargo is needed; the Rust assembler will be skipped" >&2
   status=1
 fi
 

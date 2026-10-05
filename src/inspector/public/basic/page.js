@@ -1,4 +1,4 @@
-// The basic stage: five frozen steps, one assembler or all three, a budget override, and the four shared columns.
+// The basic stage: five frozen steps, one assembler or all four, a budget override, and the four shared columns.
 // Everything shown comes from /api/assemble: the frozen (or derived) snapshot and the assemblers' own traces and
 // payloads. This page owns its state and controls; the columns and the chrome are shared with the other stages.
 import { initChrome, setInstrumentsSummary } from '../shared/chrome.js';
@@ -69,7 +69,7 @@ function render() {
 
 /** The one line that stands for the instruments when talk mode folds them. */
 function renderInstruments() {
-  const assembler = state.assembler === 'all' ? 'all three' : state.assemblers.find(a => a.id === state.assembler)?.language ?? state.assembler;
+  const assembler = state.assembler === 'all' ? 'all four' : state.assemblers.find(a => a.id === state.assembler)?.language ?? state.assembler;
   setInstrumentsSummary(`${assembler} · ${RENDERERS[state.variant]} · budget.input ${state.budget ?? frozenBudget() ?? '?'}${state.budget === null ? '' : ' (derived)'}`);
 }
 
@@ -141,7 +141,7 @@ async function init() {
   const [st, contract] = await Promise.all([api('/api/state'), api('/api/contract')]);
   Object.assign(state, { scenarios: st.scenarios.filter(s => s.id.startsWith(`${STAGE}/`)), assemblers: st.assemblers, providers: st.providers, contract });
   page.reasonText = reasonTextFor(contract);
-  $('#assembler').innerHTML = '<option value="all">all three</option>' + st.assemblers.map(a =>
+  $('#assembler').innerHTML = '<option value="all">all four</option>' + st.assemblers.map(a =>
     `<option value="${esc(a.id)}"${a.available ? '' : ' disabled'}>${esc(a.language)}${a.available ? '' : ' (not built)'}</option>`).join('');
   $('#steps').innerHTML = state.scenarios.map(s => `<button type="button" data-id="${esc(s.id)}" title="${esc(s.meta.title)}"><span class="num">${s.meta.step}</span>${esc(words(s.meta.id))}</button>`).join('');
   $('#steps').addEventListener('click', event => { const id = event.target.closest('button')?.dataset.id; if (id) selectScenario(id); });

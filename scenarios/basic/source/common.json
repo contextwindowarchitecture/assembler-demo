@@ -1,5 +1,5 @@
 {
-  "$comment": "What every step of the basic stage shares. The tokenizer is the conformance fixture, not a model tokenizer: it makes the comparison portable across the three assemblers. A production route names the model's tokenizer, or estimate-utf8/v1 with a budget.margin_percent. budget.reserved_output is 1200 on every step: budget.input is already net of it, so it changes no fitting decision, and a reasoning model such as gpt-oss needs that much room to think and then answer.",
+  "$comment": "What every step of the basic stage shares. The tokenizer is the conformance fixture, not a model tokenizer: it makes the comparison portable across the four assemblers. A production route names the model's tokenizer, or estimate-utf8/v1 with a budget.margin_percent. budget.reserved_output is 1200 on every step: budget.input is already net of it, so it changes no fitting decision, and a reasoning model such as gpt-oss needs that much room to think and then answer.",
   "assembly_time": "2026-09-28T14:00:00Z",
   "scope": {
     "tenant": "acme",

@@ -1,13 +1,14 @@
-# The CWA demo inspector with its three assemblers in one image.
+# The CWA demo inspector with its four assemblers in one image.
 #
 # The build context is not this repository alone: the assemblers are sibling checkouts (assemblers.json), so the
-# context holds all four side by side, each under its own name, and the image keeps that layout under /opt/cwa so
+# context holds all five side by side, each under its own name, and the image keeps that layout under /opt/cwa so
 # the relative paths in assemblers.json hold:
 #
 #   <context>/cwa-demo-app/          this repository
 #   <context>/assembler-python/      ../assembler-python      Python, run through uv from its own .venv
 #   <context>/assembler-typescript/  ../assembler-typescript  TypeScript, built here and linked by pnpm as locally
 #   <context>/assembler-go/          ../assembler-go          Go, built into bin/cwa-adapter-go as `pnpm run setup` does
+#   <context>/assembler-rust/        ../assembler-rust        Rust, built into bin/cwa-adapter-rust as `pnpm run setup` does
 #
 # deploy/stage-context.sh writes that context from the working trees (what git lists, nothing it ignores, never
 # .env), and deploy/openshift/deploy.sh builds from it. By hand:
@@ -24,6 +25,12 @@ FROM docker.io/library/golang:1.26-alpine AS go
 WORKDIR /src
 COPY assembler-go/ .
 RUN CGO_ENABLED=0 go build -mod=vendor -trimpath -o /out/cwa-adapter-go ./cmd/adapter
+
+# The Rust adapter, an example of the crate, statically linked against musl. 1.80 is the crate's rust-version.
+FROM docker.io/library/rust:1.80-alpine AS rust
+WORKDIR /src
+COPY assembler-rust/ .
+RUN cargo build --release --locked --example adapter && mkdir /out && cp target/release/examples/adapter /out/cwa-adapter-rust
 
 # Node, Python and uv: what both the build and the running inspector need. Debian trixie's python3 is 3.13, which
 # both the Python assembler (>=3.11) and the producers (>=3.12) accept.
@@ -56,6 +63,7 @@ RUN uv sync --frozen --no-dev --compile-bytecode --project assembler-python \
   && assembler-python/.venv/bin/python -m compileall -q assembler-python/src \
   && cwa-demo-app/producers/.venv/bin/python -m compileall -q cwa-demo-app/producers/producers
 COPY --from=go /out/cwa-adapter-go cwa-demo-app/bin/cwa-adapter-go
+COPY --from=rust /out/cwa-adapter-rust cwa-demo-app/bin/cwa-adapter-rust
 # OpenShift runs the container as an arbitrary user in the root group: give the group the owner's rights, so the
 # tree is readable and the run store (scenarios/advanced/runs) is writable.
 RUN chmod -R g=u /opt/cwa
@@ -63,7 +71,7 @@ RUN chmod -R g=u /opt/cwa
 FROM base
 ARG REVISIONS=""
 LABEL org.opencontainers.image.title="cwa-demo-app" \
-      org.opencontainers.image.description="The CWA support-assistant demo: the inspector with the Python, TypeScript and Go assemblers" \
+      org.opencontainers.image.description="The CWA support-assistant demo: the inspector with the Python, TypeScript, Go and Rust assemblers" \
       org.opencontainers.image.licenses="Apache-2.0" \
       io.contextwindowarchitecture.revisions="$REVISIONS"
 COPY --from=build /opt/cwa /opt/cwa

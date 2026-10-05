@@ -105,7 +105,7 @@ async function produceAndAssemble(body, assemblers) {
 }
 
 /** POST /api/agent/replay: {run, assemblers?}. Every recorded inference through the assemblers, judged against the
- * trace recorded at the time, with three-way agreement. */
+ * trace recorded at the time, with four-way agreement. */
 async function replayRun(body, assemblers) {
   const run = await loadRun(String(body.run ?? ''));
   if (!run) throw new HttpError(404, `no recorded run ${body.run}`);

@@ -38,7 +38,7 @@ export function manifests({ image, routeHost = '', routePath = '', routeTimeout 
     // The landing page is a static file: the probes run no assembler and ask no model.
     readinessProbe: { httpGet: { path: '/', port: PORT }, initialDelaySeconds: 3, periodSeconds: 5 },
     livenessProbe: { httpGet: { path: '/', port: PORT }, initialDelaySeconds: 10, periodSeconds: 20 },
-    // An assembly runs the three adapters at once; a live producer run imports LlamaIndex.
+    // An assembly runs the four adapters at once; a live producer run imports LlamaIndex.
     resources: { requests: { cpu: '250m', memory: '512Mi' }, limits: { cpu: '2', memory: '2Gi' } },
     ...(storage ? { volumeMounts: [{ name: 'runs', mountPath: RUNS }] } : {}),
   };

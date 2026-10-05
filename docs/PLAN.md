@@ -1,6 +1,6 @@
 # Plan: the CWA support-assistant demo
 
-One support-assistant demo, built in three stages, run through one comparison harness for the Python, TypeScript and Go assemblers. This document is the working plan for the **basic** stage and the frame for the two after it. [cwa-demo-setups.md](../cwa-demo-setups.md) is the brief it follows.
+One support-assistant demo, built in three stages, run through one comparison harness for the Python, TypeScript, Go and Rust assemblers. This document is the working plan for the **basic** stage and the frame for the two after it. [cwa-demo-setups.md](../cwa-demo-setups.md) is the brief it follows.
 
 The demo answers one question at every stage: **what did CWA assemble, and why?** Its screen is always the same four columns:
 
@@ -28,7 +28,7 @@ These were made to start work. Each is cheap to reverse now and expensive later,
 1. **The app is plain Node.js (22+) ES modules, no framework and no build step.** The website repo works this way, the TypeScript assembler is a Node package, and a demo for a talk should start with one command. The browser inspector is static HTML and JavaScript served by a small `node:http` server.
 2. **Every assembler runs through the adapter protocol** in `PORTING.md`: a command that takes snapshot bytes on stdin and answers by exit code (0 assembled or refused, 2 rejected, 3 unsupported tokenizer or renderer) with `{"payload": base64 | null, "trace": {...}}` on stdout. The TypeScript assembler could be imported in-process, but running it the same way as the others keeps the comparison honest: same bytes in, same bytes out, no in-process shortcut. The Go adapter already exists (`cmd/adapter`); the Python and TypeScript adapters are a dozen lines each in `adapters/`.
 3. **The contract is vendored and pinned**, as in the assembler repos: `vendor/cwa/` with `vendor/cwa.lock.json`. The inspector reads reason texts and slot defaults from it, tests validate scenarios against its schemas, and `pnpm run conformance` runs its 61 cases and 25 rejections through every adapter as the harness's own self-check. A harness that cannot reproduce the published reports cannot be trusted with the demo's. The pin is website `04a36e9`, the draft dated 2026-10-04. Moving it to `65818af`, the draft dated 2026-09-30, changed the messages rendering of the two steps with a surfaced conflict, the providers (which no longer add a conflict mark of their own), the trace comparison (`recovery.detail` is no longer compared) and the glossary, and nothing else. Moving it to `20019de` brought in R-7's history order (prior turns render in the order they were said, by freshness and then by id), the optional renderer `cwa-message-blocks/v1`, which all three adapters provide, and the `cache-first-chat/v1` profile in the registry; no scenario's snapshot or expectation changed. Moving it to `04a36e9` brought in R-1's rule that unknown_slot and unknown_authority cover a value of any JSON type, with the `admission-reasons` case widened to match; no scenario's snapshot or expectation changed.
-4. **Scenarios are generated from one source and frozen.** `scenarios/basic/source/` holds the route policy, two profiles, the candidate items and each step's delta; `pnpm run scenarios:build` writes each step's `snapshot.json` (fixture tokenizer and renderer, for byte-exact comparison) and `snapshot.messages.json` (the same items rendered as `cwa-messages/v1`, for the live call). The generated files are committed, and a test fails when they are stale. Frozen inputs are the point of the brief: the same bytes go to all three assemblers.
+4. **Scenarios are generated from one source and frozen.** `scenarios/basic/source/` holds the route policy, two profiles, the candidate items and each step's delta; `pnpm run scenarios:build` writes each step's `snapshot.json` (fixture tokenizer and renderer, for byte-exact comparison) and `snapshot.messages.json` (the same items rendered as `cwa-messages/v1`, for the live call). The generated files are committed, and a test fails when they are stale. Frozen inputs are the point of the brief: the same bytes go to all four assemblers.
 5. **Expectations are generated, then reviewed.** `pnpm run expect --from python` writes `expected.payload.txt` and `expected.trace.json` from the reference assembler. `scenario.json` records `expectations.generated_by` and `expectations.reviewed: false` until a person has read them against the spec. The compare report shows unreviewed expectations as such. Three matching assemblers can share a mistake; a reviewed expectation is the independent check the brief asks for.
 6. **The basic stage uses no tools and does not require evidence.** The route's `requires_evidence` stays off so step 4 can show what a route that does not require evidence lets through; the intermediate stage turns it on. Capabilities and MCP wait for the advanced stage.
 7. **The live model call is optional and needs a provider.** Three are selectable in the inspector: a local model through any OpenAI-compatible endpoint, the Anthropic Messages API (or an Anthropic-compatible server through `ANTHROPIC_BASE_URL`), and OpenAI. Each runs only from a successful assembly, and the inspector shows the exact outbound request beside the answer. `.env` holds the settings; a local model makes the talk independent of the network.
@@ -52,7 +52,7 @@ flowchart LR
     H -->|stdin bytes| GO["go adapter"]
     PY & TS & GO -->|"exit code + payload + trace"| C["compare<br/>payload bytes, trace fields"]
     EX["expected.payload.txt<br/>expected.trace.json"] --> C
-    C --> R["report: first difference,<br/>three-way agreement"]
+    C --> R["report: first difference,<br/>four-way agreement"]
     SN --> I["inspector server<br/>src/inspector"]
     I --> UI["browser: candidates · decisions · request · answer"]
     UI -. "successful assembly only" .-> PA["provider adapter<br/>src/provider"]
@@ -78,7 +78,7 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 | 4 Budget | `budget.input` lowered | State dropped first (droppable), Enterprise and Pro chunks replaced by their summaries (`compressed[]`), history turns omitted, the lowest-ranked chunk omitted | `over_budget` | Tier order, supplied variants, route fitting order; every omission is a trace row |
 | 5 Refusal | `budget.input` lowered below the protected content | Refused, no payload, `result: null`; the inspector shows *no model request* | `protected_content_over_budget` | Protected content is never truncated; a refusal never reaches the model |
 
-**Pass criteria** (from the brief): expected payload bytes and trace match for all three assemblers on every step; protected content is intact or assembly refuses; a refusal never produces a model request.
+**Pass criteria** (from the brief): expected payload bytes and trace match for every assembler on every step; protected content is intact or assembly refuses; a refusal never produces a model request.
 
 **What it does not prove:** that the model is immune to injection, or that the answer is correct. Step 3 shows the injected text arriving escaped; what the model does with it is the live column's business, evaluated separately.
 
@@ -102,7 +102,7 @@ Each step adds to the one before it, so the audience watches one snapshot grow a
 
 - `src/inspector/server.mjs`: `GET /api/scenarios`, `GET /api/scenarios/:id`, `POST /api/assemble`, `GET /api/contract`, static files.
 - `src/inspector/public/`: the four-column screen. Candidates grouped by producer with each item's slot, authority, trust, tier, freshness, expiry, scope and score, colored by outcome. Decisions: included with tokens, compressed with from/to and variant, excluded with the reason and its registry text, conflicts, defaults filled, refusal and recovery, result tokens, hash and digest. Request: the payload as text, or a *no model request* panel. Answer: disabled until M4.
-- A budget field that derives a new snapshot from the step (labelled as derived, with its own digest) and reassembles, so steps 4 and 5 can be found live. An assembler switch: one, or all three with an agreement badge.
+- A budget field that derives a new snapshot from the step (labelled as derived, with its own digest) and reassembles, so steps 4 and 5 can be found live. An assembler switch: one, or all four with an agreement badge.
 
 ### M4 Live model
 

@@ -1,10 +1,10 @@
 # The inspector on OpenShift
 
-`deploy.sh` builds the image the root [Containerfile](../../Containerfile) describes and deploys it to the `oc` project you are logged into: one pod running the inspector with the three assemblers, a Service, and a public Route with edge TLS. The reference runs, the frozen scenarios and the producers are in the image, so the pages work without a model; a model is needed only for the live answer and for live agent runs.
+`deploy.sh` builds the image the root [Containerfile](../../Containerfile) describes and deploys it to the `oc` project you are logged into: one pod running the inspector with the four assemblers, a Service, and a public Route with edge TLS. The reference runs, the frozen scenarios and the producers are in the image, so the pages work without a model; a model is needed only for the live answer and for live agent runs.
 
 ```mermaid
 flowchart LR
-  T[this repo and the three<br>assembler checkouts] -->|stage-context.sh| C[staged context]
+  T[this repo and the four<br>assembler checkouts] -->|stage-context.sh| C[staged context]
   C -->|no IMAGE: oc start-build| I[ImageStream<br>cwa-demo-app:TAG]
   C -->|IMAGE set: podman build and push| R[registry<br>IMAGE:TAG]
   E[.env] -->|the inspector's own parser| S[Secret cwa-demo-env]
@@ -17,7 +17,7 @@ flowchart LR
 ## Before the first deploy
 
 - `oc` logged in, with the target project selected (`oc project <name>`).
-- The three assembler checkouts beside this repository, as [assemblers.json](../../assemblers.json) names them. The script stages their working trees, so what is on disk is what deploys.
+- The four assembler checkouts beside this repository, as [assemblers.json](../../assemblers.json) names them. The script stages their working trees, so what is on disk is what deploys.
 - Node 22 or later and git, as for the app itself. `pnpm install` and `pnpm run setup` are not needed: the image installs and builds everything.
 - For the podman path: podman, logged in to the registry (`podman login quay.io`).
 - Optionally `.env` (see [.env.example](../../.env.example)) with a provider. Any model URL in it must be reachable from the cluster; a server on this machine's `localhost` is not.

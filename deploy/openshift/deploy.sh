@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deploy the CWA demo inspector to the current oc project.
 #
-# The image holds this repository and the three assembler checkouts assemblers.json names (see the Containerfile),
+# The image holds this repository and the four assembler checkouts assemblers.json names (see the Containerfile),
 # so the build context is staged first by deploy/stage-context.sh: the four working trees as git lists them,
 # nothing ignored, never .env.
 #

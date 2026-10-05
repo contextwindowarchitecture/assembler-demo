@@ -78,7 +78,7 @@ function render() {
 
 /** The one line that stands for the instruments when talk mode folds them. */
 function renderInstruments() {
-  const assembler = state.assembler === 'all' ? 'all three' : state.assemblers.find(a => a.id === state.assembler)?.language ?? state.assembler;
+  const assembler = state.assembler === 'all' ? 'all four' : state.assemblers.find(a => a.id === state.assembler)?.language ?? state.assembler;
   setInstrumentsSummary(`${state.mode === 'live' ? 'producers live' : 'replay'} · ${assembler} · ${RENDERERS[state.variant]} · budget.input ${state.budget ?? frozenBudget() ?? '?'}${state.budget === null ? '' : ' (derived)'}`);
 }
 
@@ -174,7 +174,7 @@ async function init() {
   Object.assign(state, { scenarios: st.scenarios.filter(s => s.id.startsWith(`${STAGE}/`)), assemblers: st.assemblers, providers: st.providers, producers: st.producers, contract });
   page.reasonText = reasonTextFor(contract);
   if (!state.producers.available) $('#mode').querySelector('option[value="live"]').disabled = true;
-  $('#assembler').innerHTML = '<option value="all">all three</option>' + st.assemblers.map(a =>
+  $('#assembler').innerHTML = '<option value="all">all four</option>' + st.assemblers.map(a =>
     `<option value="${esc(a.id)}"${a.available ? '' : ' disabled'}>${esc(a.language)}${a.available ? '' : ' (not built)'}</option>`).join('');
   $('#steps').innerHTML = state.scenarios.map(s => `<button type="button" data-id="${esc(s.id)}" title="${esc(s.meta.title)}"><span class="num">${s.meta.step}</span>${esc(words(s.meta.id))}</button>`).join('');
   $('#steps').addEventListener('click', event => { const id = event.target.closest('button')?.dataset.id; if (id) selectScenario(id); });

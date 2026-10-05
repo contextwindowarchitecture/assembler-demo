@@ -1,5 +1,5 @@
 # A GitHub release for each tag, made once ci passes on the tagged commit against the same tag of
-# assembler-python, assembler-typescript and assembler-go. The notes name the website commit the contract is
+# assembler-python, assembler-typescript, assembler-go and assembler-rust. The notes name the website commit the contract is
 # vendored from and the assembler tag, then list the tag's own commits, written by git-cliff from cliff.toml. A
 # tag that is not vX.Y.Z, such as draft-release, is a prerelease. A tag pushed before this workflow existed is
 # released by hand: gh workflow run release.yml -f tag=<tag>
@@ -43,8 +43,8 @@ jobs:
           commit=$(python3 -c 'import json; print(json.load(open("vendor/cwa.lock.json"))["website_commit"])')
           printf 'Vendors the published contract at website [`%s`](https://github.com/contextwindowarchitecture/website/commit/%s).\n' "${commit::7}" "$commit" > notes.md
           org=https://github.com/contextwindowarchitecture
-          printf 'Tested against `%s` of [assembler-python](%s/assembler-python/tree/%s), [assembler-typescript](%s/assembler-typescript/tree/%s) and [assembler-go](%s/assembler-go/tree/%s).\n\n' \
-            "$TAG" "$org" "$TAG" "$org" "$TAG" "$org" "$TAG" >> notes.md
+          printf 'Tested against `%s` of [assembler-python](%s/assembler-python/tree/%s), [assembler-typescript](%s/assembler-typescript/tree/%s), [assembler-go](%s/assembler-go/tree/%s) and [assembler-rust](%s/assembler-rust/tree/%s).\n\n' \
+            "$TAG" "$org" "$TAG" "$org" "$TAG" "$org" "$TAG" "$org" "$TAG" >> notes.md
           uvx git-cliff@2.14.2 --current --strip all >> notes.md
       - env:
           GH_TOKEN: ${{ github.token }}

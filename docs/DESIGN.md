@@ -4,7 +4,7 @@ How the demo app is put together, and the rules that keep it honest. [PLAN.md](P
 
 ## One rule
 
-**The app never assembles.** No admission, conflict, fitting or rendering logic lives here. Every payload and trace the app shows came back from an assembler through the adapter protocol, unchanged. If a scenario needs a behavior the assemblers lack, the order is: the spec (website repo), then the assemblers, then this app.
+**The app never assembles.** No admission, conflict, fitting or rendering logic lives here. Every payload and trace the app shows came back from an assembler through the adapter protocol, unchanged. If a scenario needs a behavior the assemblers lack, the order is: the spec (the specification repository), then the assemblers, then this app.
 
 ## Pieces
 
@@ -192,7 +192,7 @@ The provider boundary takes a `cwa-messages/v1` payload and nothing else. A refu
 `pnpm test` runs, in about ten seconds:
 
 - `compare.test.mjs`: the judging rules on hand-built traces, including UTF-16 key order.
-- `contract-lock.test.mjs`: every vendored file matches its SHA-256; nothing unlocked.
+- `contract-lock.test.mjs`: every vendored file matches its SHA-256; nothing unlocked; the lock names the specification repository and the commit it came from.
 - `toolchain.test.mjs`: pnpm is pinned, its lockfile is the only one, and the installed TypeScript assembler is `../assembler-typescript` itself, not a copy.
 - `glossary.test.mjs`: every entry has a definition, cites only requirements the contract numbers and terms that exist, the vocabulary covers every plane, slot and outcome, and the panel renders each entry with its anchor, the spec's words before the demo's.
 - `conformance.test.mjs`: the 86 vendored snapshots through every available assembler, judged as the reference runner judges them, and four-way agreement on each. This is the harness's self-check; an adapter that is not built is skipped, not passed. `CWA_DEMO_QUICK=1` runs five.

@@ -1,5 +1,5 @@
 # A GitHub release for each tag, made once ci passes on the tagged commit against the same tag of
-# assembler-python, assembler-typescript, assembler-go and assembler-rust. The notes name the website commit the contract is
+# assembler-python, assembler-typescript, assembler-go and assembler-rust. The notes name the specification commit the contract is
 # vendored from and the assembler tag, then list the tag's own commits, written by git-cliff from cliff.toml. A
 # tag that is not vX.Y.Z, such as draft-release, is a prerelease. A tag pushed before this workflow existed is
 # released by hand: gh workflow run release.yml -f tag=<tag>
@@ -40,8 +40,9 @@ jobs:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
       - run: |
-          commit=$(python3 -c 'import json; print(json.load(open("vendor/cwa.lock.json"))["website_commit"])')
-          printf 'Vendors the published contract at website [`%s`](https://github.com/contextwindowarchitecture/website/commit/%s).\n' "${commit::7}" "$commit" > notes.md
+          repository=$(python3 -c 'import json; print(json.load(open("vendor/cwa.lock.json"))["repository"])')
+          commit=$(python3 -c 'import json; print(json.load(open("vendor/cwa.lock.json"))["spec_commit"])')
+          printf 'Vendors the published contract at spec [`%s`](https://github.com/%s/commit/%s).\n' "${commit::7}" "$repository" "$commit" > notes.md
           org=https://github.com/contextwindowarchitecture
           printf 'Tested against `%s` of [assembler-python](%s/assembler-python/tree/%s), [assembler-typescript](%s/assembler-typescript/tree/%s), [assembler-go](%s/assembler-go/tree/%s) and [assembler-rust](%s/assembler-rust/tree/%s).\n\n' \
             "$TAG" "$org" "$TAG" "$org" "$TAG" "$org" "$TAG" "$org" "$TAG" >> notes.md

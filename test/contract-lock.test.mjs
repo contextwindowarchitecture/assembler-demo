@@ -1,5 +1,5 @@
 // vendor/cwa/ is the pinned contract: every file matches its SHA-256 in vendor/cwa.lock.json, and nothing is
-// vendored that the lock does not name. Change it only with `pnpm run vendor <website checkout>`.
+// vendored that the lock does not name. Change it only with `pnpm run vendor <specification checkout>`.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -25,5 +25,7 @@ test('every vendored file matches its lock entry, and every lock entry is vendor
     const actual = createHash('sha256').update(readFileSync(path.join(VENDOR, file))).digest('hex');
     assert.equal(actual, digest, `${file} does not match its lock entry`);
   }
-  assert.match(lock.website_commit, /^[0-9a-f]{40}$/);
+  assert.equal(lock.repository, 'contextwindowarchitecture/contextwindowarchitecture', 'the contract comes from the specification repository');
+  assert.match(lock.spec_commit, /^[0-9a-f]{40}$/);
+  assert.equal(lock.website_commit, undefined, 'the lock names the specification commit, not a website commit');
 });

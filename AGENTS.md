@@ -16,14 +16,14 @@ Read [docs/PLAN.md](docs/PLAN.md) for the three-stage plan and where the work st
 
 ## What this app must never do
 
-- **Never assemble.** No admission, fitting or rendering logic lives here. If a scenario needs a behavior the assemblers lack, the spec changes first (in the website repo), then the assemblers, then this app.
+- **Never assemble.** No admission, fitting or rendering logic lives here. If a scenario needs a behavior the assemblers lack, the spec changes first (in the specification repository), then the assemblers, then this app.
 - **Never patch an assembler's output.** The harness compares what the adapters return, byte for byte for payloads and field for field for traces (minus `trace_id`, `timings` and `recovery.detail`). A difference is a finding, not something to normalize away.
 - **Never let a refusal reach a model.** The provider adapter takes a payload, and a refused assembly has none.
 - **Never read the assemblers' source to decide an expectation.** Expectations come from a named assembler's run, are committed, and are reviewed by a person. `scenario.json` records which and whether.
 
 ## The contract is vendored
 
-`vendor/cwa/` is a copy of the website repository's `schema/`, `contract/` and `conformance/`, pinned by SHA-256 in `vendor/cwa.lock.json`. Don't edit it here. Re-vendor from a committed website checkout with `pnpm run vendor ../website`, and commit the lock change as `build(contract): vendor website <short-sha>`.
+`vendor/cwa/` is a copy of the specification repository's (github.com/contextwindowarchitecture/contextwindowarchitecture) `schema/`, `contract/` and `conformance/`, pinned by SHA-256 in `vendor/cwa.lock.json`, which records the `repository` and `spec_commit` it came from. Don't edit it here. Re-vendor from a committed checkout with `pnpm run vendor ../contextwindowarchitecture`, and commit the lock change as `build(contract): vendor spec <short-sha>`.
 
 ## Commands
 

@@ -15,7 +15,7 @@
   "scripts": {
     "setup": "sh scripts/setup.sh",
     "test": "node --test test/*.test.mjs",
-    "vendor": "python3 scripts/vendor_contract.py --website",
+    "vendor": "python3 scripts/vendor_contract.py --spec",
     "vendor:verify": "python3 scripts/vendor_contract.py --verify",
     "scenarios:build": "node scripts/build-scenarios.mjs && pnpm run producers:write",
     "scenarios:check": "node scripts/build-scenarios.mjs --check && pnpm run producers:check",

@@ -117,7 +117,7 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 
 ## CI
 
-`.github/workflows/ci.yml` checks out the four assemblers beside this repository, as they sit locally, builds the TypeScript one, runs `pnpm run setup`, which fails unless all four adapters are available, then `pnpm test` on Node 24, the Containerfile's. Pushes and pull requests test against each assembler's `main`. Each tag gets a GitHub release (`.github/workflows/release.yml`) once that job passes with this repository and all four assemblers at the tag, so a demo tag is released only when every assembler carries the same tag and they work together. The notes name the website commit `vendor/cwa.lock.json` pins and the assembler tag, then list the tag's own commits, written by git-cliff (`cliff.toml`). A tag that is not `vX.Y.Z` is a prerelease, and a tag pushed before the workflow existed is released with `gh workflow run release.yml -f tag=<tag>`.
+`.github/workflows/ci.yml` checks out the four assemblers beside this repository, as they sit locally, builds the TypeScript one, runs `pnpm run setup`, which fails unless all four adapters are available, then `pnpm test` on Node 24, the Containerfile's. Pushes and pull requests test against each assembler's `main`. Each tag gets a GitHub release (`.github/workflows/release.yml`) once that job passes with this repository and all four assemblers at the tag, so a demo tag is released only when every assembler carries the same tag and they work together. The notes name the specification commit `vendor/cwa.lock.json` pins and the assembler tag, then list the tag's own commits, written by git-cliff (`cliff.toml`). A tag that is not `vX.Y.Z` is a prerelease, and a tag pushed before the workflow existed is released with `gh workflow run release.yml -f tag=<tag>`.
 
 ## Layout
 
@@ -135,7 +135,7 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 | `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `producers.mjs` (run the producers live), `cli.mjs` |
 | `src/inspector/` | The server; `public/` holds the landing page, a page per stage, the shared columns and the guided tours (`public/shared/tours/`) |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
-| `vendor/cwa/` | The published contract, pinned by `vendor/cwa.lock.json` |
+| `vendor/cwa/` | The published contract from the specification repository, pinned by `vendor/cwa.lock.json` at spec `a010650` |
 | `Containerfile`, `deploy/` | The image (inspector and four assemblers), `stage-context.sh` for its build context, and the OpenShift deployment |
 | `docs/` | [PLAN.md](docs/PLAN.md), [DESIGN.md](docs/DESIGN.md), [SCENARIOS.md](docs/SCENARIOS.md) |
 

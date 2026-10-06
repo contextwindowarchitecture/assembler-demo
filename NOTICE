@@ -4,8 +4,9 @@ Copyright 2026 Melvin Hillsman
 Licensed under the Apache License, Version 2.0. See LICENSE.
 
 vendor/cwa/ holds the published Context Window Architecture contract, copied from
-the website repository (https://github.com/contextwindowarchitecture/website) under
-the same license; see vendor/cwa/LICENSE and vendor/cwa/NOTICE.
+the specification repository
+(https://github.com/contextwindowarchitecture/contextwindowarchitecture) under the
+same license; see vendor/cwa/LICENSE and vendor/cwa/NOTICE.
 
 scripts/vendor_contract.py comes from the cwa-assembler-template repository
 (https://github.com/contextwindowarchitecture/assembler-template), Apache-2.0.

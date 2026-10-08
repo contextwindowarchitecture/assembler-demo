@@ -51,6 +51,8 @@ Every assembler is reached the same way, the protocol `PORTING.md` in the assemb
 | 2 | rejected before assembly (R-17) | not read; stderr lists the problems |
 | 3 | tokenizer or renderer not provided | not read; stderr names it |
 
+A snapshot is validated before its tokenizer and renderer are resolved (`conformance/README.md`, Running a case), so one that breaks its schema exits 2 even when it also names a component the assembler lacks; 3 is only for an otherwise valid snapshot. Each adapter takes that order from its assembler rather than checking components itself, and `test/conformance.test.mjs` holds every adapter to it.
+
 `runAdapter` classifies the result as `assembled`, `refused`, `rejected`, `unsupported` or `error`. Giving the adapter bytes rather than a parsed object matters: the I-JSON checks must see the text as written, and the TypeScript assembler could have been imported in-process, but that would give it a path the others do not have.
 
 ### Comparison

@@ -41,3 +41,37 @@ test(`every available assembler passes each vendored case and rejects each rejec
     await Promise.all(Array.from({ length: 4 }, next));
     assert.deepEqual(failures, []);
   });
+
+// The conformance README (Running a case) validates the snapshot first and resolves its components after, so a
+// snapshot that breaks its schema is rejected even when it also names a tokenizer or renderer the assembler lacks.
+// Answering "unsupported" there would let the conformance runner skip a snapshot it should judge.
+test('every available assembler rejects an invalid snapshot that also names a component it lacks',
+  { skip: Object.keys(available).length === 0 ? 'no assembler is available' : false }, async () => {
+    const fixture = JSON.parse(cases.find(item => item.id === 'fixture-three-slot').snapshot.toString('utf8'));
+    const withoutBudget = { ...fixture };
+    delete withoutBudget.budget;
+    const snapshots = {
+      'blank tokenizer': { ...fixture, tokenizer: '﻿' },
+      'missing budget, unknown tokenizer': { ...withoutBudget, tokenizer: 'my-tokenizer/v1' },
+      'missing budget, unknown renderer': { ...withoutBudget, renderer: 'my-renderer/v1' },
+    };
+    const failures = [];
+    for (const [name, snapshot] of Object.entries(snapshots)) {
+      for (const result of await runAll(available, Buffer.from(JSON.stringify(snapshot)))) {
+        if (result.outcome !== 'rejected') failures.push(`${name} (${result.assembler}): ${result.outcome}, ${result.detail}`);
+      }
+    }
+    assert.deepEqual(failures, []);
+  });
+
+test('every available assembler answers unsupported for a valid snapshot that names a component it lacks',
+  { skip: Object.keys(available).length === 0 ? 'no assembler is available' : false }, async () => {
+    const fixture = JSON.parse(cases.find(item => item.id === 'fixture-three-slot').snapshot.toString('utf8'));
+    const failures = [];
+    for (const [field, id] of [['tokenizer', 'my-tokenizer/v1'], ['renderer', 'my-renderer/v1']]) {
+      for (const result of await runAll(available, Buffer.from(JSON.stringify({ ...fixture, [field]: id })))) {
+        if (result.outcome !== 'unsupported') failures.push(`${field} ${id} (${result.assembler}): ${result.outcome}, ${result.detail}`);
+      }
+    }
+    assert.deepEqual(failures, []);
+  });

@@ -93,7 +93,7 @@ node src/harness/cli.mjs replay reference-01-investigate            # every reco
 
 ```sh
 pnpm run compare                     # every step, both renderings, every assembler: passed/failed vs expectation, and four-way agreement
-pnpm run conformance                 # the vendored 61 cases and 25 rejections through every adapter: 61/61 and 25/25 for all four
+pnpm run conformance                 # the vendored 65 cases and 25 rejections through every adapter: 65/65 and 25/25 for all four
 pnpm run expect --from python        # regenerate expectations from one assembler
 node src/harness/cli.mjs run scenarios/basic/04-budget/snapshot.json   # one snapshot, all assemblers, the payload printed
 node src/harness/cli.mjs answer scenarios/basic/03-authority/snapshot.messages.json --provider local   # assemble, then ask a real model
@@ -135,7 +135,7 @@ The image starts the inspector with `--host 0.0.0.0` (it listens on loopback oth
 | `src/harness/` | `adapters.mjs` (run and classify), `compare.mjs` (judge), `cases.mjs` (load), `schemas.mjs` (ajv), `producers.mjs` (run the producers live), `cli.mjs` |
 | `src/inspector/` | The server; `public/` holds the landing page, a page per stage, the shared columns and the guided tours (`public/shared/tours/`) |
 | `src/provider/` | `local` and `openai` through the OpenAI SDK, `anthropic` through the Anthropic SDK (or a compatible server), and `snippets.mjs`, the same requests as code |
-| `vendor/cwa/` | The published contract from the specification repository, pinned by `vendor/cwa.lock.json` at spec `a010650` |
+| `vendor/cwa/` | The published contract from the specification repository, pinned by `vendor/cwa.lock.json` at spec `c252494` |
 | `Containerfile`, `deploy/` | The image (inspector and four assemblers), `stage-context.sh` for its build context, and the OpenShift deployment |
 | `docs/` | [PLAN.md](docs/PLAN.md), [DESIGN.md](docs/DESIGN.md), [SCENARIOS.md](docs/SCENARIOS.md) |
 
